@@ -1,0 +1,201 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Dashboard - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Dashboard</h1>
+        <a href="{{ url_for('index') }}" class="btn btn-outline-primary" target="_blank">
+            <i class="fas fa-external-link-alt"></i> View Website
+        </a>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card stats-card news-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title">News</h5>
+                            <h2 class="mb-0">{{ news_count }}</h2>
+                        </div>
+                        <i class="fas fa-newspaper"></i>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a href="{{ url_for('admin_news') }}" class="text-decoration-none text-info">
+                        <small>Manage News <i class="fas fa-arrow-right ms-1"></i></small>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card stats-card events-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title">Events</h5>
+                            <h2 class="mb-0">{{ events_count }}</h2>
+                        </div>
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a href="{{ url_for('admin_events') }}" class="text-decoration-none text-success">
+                        <small>Manage Events <i class="fas fa-arrow-right ms-1"></i></small>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card stats-card gallery-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title">Gallery</h5>
+                            <h2 class="mb-0">{{ gallery_count }}</h2>
+                        </div>
+                        <i class="fas fa-images"></i>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a href="{{ url_for('admin_gallery') }}" class="text-decoration-none text-warning">
+                        <small>Manage Gallery <i class="fas fa-arrow-right ms-1"></i></small>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card stats-card contacts-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title">Messages</h5>
+                            <h2 class="mb-0">{{ contacts_count }}</h2>
+                        </div>
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a href="{{ url_for('admin_contacts') }}" class="text-decoration-none text-danger">
+                        <small>View Messages <i class="fas fa-arrow-right ms-1"></i></small>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Recent Updates</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="nav nav-tabs" id="recentTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="news-tab" data-bs-toggle="tab" data-bs-target="#news-tab-pane" type="button" role="tab" aria-controls="news-tab-pane" aria-selected="true">Latest News</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="events-tab" data-bs-toggle="tab" data-bs-target="#events-tab-pane" type="button" role="tab" aria-controls="events-tab-pane" aria-selected="false">Upcoming Events</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content p-3" id="recentTabsContent">
+                        <div class="tab-pane fade show active" id="news-tab-pane" role="tabpanel" aria-labelledby="news-tab" tabindex="0">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Title</th>
+                                            <th>Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- This would normally be populated with data from the backend -->
+                                        <tr>
+                                            <td>Welcome to the new website</td>
+                                            <td>May 15, 2025</td>
+                                            <td>
+                                                <a href="#" class="btn btn-sm btn-primary">Edit</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Annual Sports Day Announcement</td>
+                                            <td>May 10, 2025</td>
+                                            <td>
+                                                <a href="#" class="btn btn-sm btn-primary">Edit</a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="events-tab-pane" role="tabpanel" aria-labelledby="events-tab" tabindex="0">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Title</th>
+                                            <th>Date</th>
+                                            <th>Location</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- This would normally be populated with data from the backend -->
+                                        <tr>
+                                            <td>Parent-Teacher Meeting</td>
+                                            <td>Jun 25, 2025</td>
+                                            <td>School Auditorium</td>
+                                            <td>
+                                                <a href="#" class="btn btn-sm btn-primary">Edit</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Annual School Exhibition</td>
+                                            <td>Jun 30, 2025</td>
+                                            <td>School Campus</td>
+                                            <td>
+                                                <a href="#" class="btn btn-sm btn-primary">Edit</a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="{{ url_for('admin_add_news') }}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-plus-circle me-2 text-primary"></i> Add News
+                        </a>
+                        <a href="{{ url_for('admin_add_event') }}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-plus-circle me-2 text-success"></i> Create Event
+                        </a>
+                        <a href="{{ url_for('admin_upload_gallery') }}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-upload me-2 text-warning"></i> Upload to Gallery
+                        </a>
+                        <a href="{{ url_for('admin_settings') }}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-cog me-2 text-secondary"></i> Update School Info
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

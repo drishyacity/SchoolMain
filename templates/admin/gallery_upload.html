@@ -1,0 +1,56 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Upload to Gallery - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Upload Gallery Images</h1>
+        <a href="{{ url_for('admin_gallery') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Gallery
+        </a>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
+                
+                <div class="mb-3">
+                    <label for="title" class="form-label">Image Title (Optional)</label>
+                    {{ form.title(class="form-control", id="title", placeholder="Common title for all uploaded images") }}
+                    {% for error in form.title.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                
+                <div class="mb-3">
+                    <label for="caption" class="form-label">Image Caption (Optional)</label>
+                    {{ form.caption(class="form-control", id="caption", placeholder="Common caption for all uploaded images") }}
+                    {% for error in form.caption.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                
+                <div class="mb-3">
+                    <label for="images" class="form-label required">Select Images</label>
+                    {{ form.images(class="form-control", id="images", multiple=true) }}
+                    <div class="form-text">You can select multiple images at once. Allowed formats: jpg, jpeg, png, gif.</div>
+                    {% for error in form.images.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                
+                <div id="image-previews" class="mb-3">
+                    <!-- Image previews will be displayed here -->
+                </div>
+                
+                <div class="text-end">
+                    <a href="{{ url_for('admin_gallery') }}" class="btn btn-outline-secondary me-2">Cancel</a>
+                    {{ form.submit(class="btn btn-primary") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

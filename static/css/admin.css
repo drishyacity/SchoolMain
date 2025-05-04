@@ -1,0 +1,253 @@
+/* Admin Panel Styles */
+
+:root {
+    --primary-color: #0c2d57;
+    --secondary-color: #f8f9fa;
+    --accent-color: #007bff;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* Sidebar Styles */
+.admin-wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: var(--primary-color);
+    color: white;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    transition: all 0.3s;
+    z-index: 999;
+}
+
+.sidebar-header {
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-brand {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar-brand:hover {
+    color: white;
+    opacity: 0.9;
+}
+
+.sidebar-brand img {
+    width: 32px;
+    height: 32px;
+    margin-right: 10px;
+}
+
+.sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.8);
+    padding: 12px 20px;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar .nav-link i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+.sidebar .nav-link:hover {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar .nav-link.active {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-left: 4px solid white;
+}
+
+.content {
+    width: calc(100% - 250px);
+    margin-left: 250px;
+    padding: 20px;
+    transition: all 0.3s;
+}
+
+/* Card Styles */
+.card {
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    font-weight: bold;
+    background-color: rgba(0,0,0,0.03);
+}
+
+.card-title {
+    margin-bottom: 0;
+    font-weight: bold;
+}
+
+/* Dashboard Stats */
+.stats-card {
+    border-left: 4px solid var(--primary-color);
+    transition: all 0.3s;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.stats-card i {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    opacity: 0.8;
+}
+
+.stats-card.news-card {
+    border-color: var(--info-color);
+}
+
+.stats-card.events-card {
+    border-color: var(--success-color);
+}
+
+.stats-card.gallery-card {
+    border-color: var(--warning-color);
+}
+
+.stats-card.contacts-card {
+    border-color: var(--danger-color);
+}
+
+/* Forms */
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(12, 45, 87, 0.25);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: #0a2545;
+    border-color: #0a2545;
+}
+
+/* Table Styles */
+.table th {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.table-actions {
+    display: flex;
+    gap: 5px;
+}
+
+/* Image Previews */
+.img-preview {
+    max-width: 100px;
+    max-height: 100px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+#image-previews {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        transform: translateX(-100%);
+    }
+    
+    .sidebar.show {
+        transform: translateX(0);
+    }
+    
+    .content {
+        width: 100%;
+        margin-left: 0;
+    }
+    
+    .sidebar-toggle-btn {
+        display: block !important;
+    }
+}
+
+.sidebar-toggle-btn {
+    display: none;
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1000;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+}
+
+/* CKEditor Styling */
+.ck-editor__editable {
+    min-height: 300px;
+}
+
+/* Login Page */
+.login-page {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-form {
+    width: 100%;
+    max-width: 400px;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    background-color: white;
+}
+
+.login-logo {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.login-logo img {
+    max-width: 80px;
+}
+
+/* Utilities */
+.required::after {
+    content: " *";
+    color: red;
+}

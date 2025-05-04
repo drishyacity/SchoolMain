@@ -1,0 +1,77 @@
+<footer class="footer" id="contact">
+  <div class="container">
+    <div class="footer-grid">
+      
+      <!-- School Info & Social Links -->
+      <div class="footer-col">
+        <div class="logo" style="display: flex; align-items: center; gap: 10px;">
+          {% if settings and settings.school_logo_path %}
+            <img src="{{ url_for('static', filename='uploads/logo/' + settings.school_logo_path) if 'uploads' in settings.school_logo_path else settings.school_logo_path }}" alt="School Logo" style="height: 50px; width: auto; object-fit: contain; vertical-align: middle;">
+          {% else %}
+            <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" alt="School Logo" style="height: 50px; width: auto; object-fit: contain; vertical-align: middle;">
+          {% endif %}
+          <span><strong>{{ settings.school_name if settings else 'Shree Gyan Bharti High School' }}</strong></span>
+        </div>
+        <p>Empowering young minds with knowledge, values, and a vision for a brighter future.</p>
+        
+        <div class="social-links">
+          <a href="https://facebook.com" target="_blank">
+            <img src="https://cdn-icons-png.flaticon.com/512/124/124010.png" alt="Facebook">
+          </a>
+          <a href="https://twitter.com" target="_blank">
+            <img src="https://cdn-icons-png.flaticon.com/512/733/733579.png" alt="Twitter">
+          </a>
+          <a href="https://instagram.com" target="_blank">
+            <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="Instagram">
+          </a>
+          <a href="https://linkedin.com" target="_blank">
+            <i class="fab fa-linkedin" style="color: white; font-size: 24px;"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="footer-col">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="#">Admission</a></li>
+          <li><a href="{{ url_for('news') }}">News</a></li>
+          <li><a href="{{ url_for('events') }}">Events</a></li>
+          <li><a href="{{ url_for('achievements') }}">Achievements</a></li>
+        </ul>
+      </div>
+
+      <!-- Resources -->
+      <div class="footer-col">
+        <h4>Resources</h4>
+        <ul>
+          <li><a href="#">Documentation</a></li>
+          <li><a href="#">Tutorials</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Syllabus</a></li>
+        </ul>
+      </div>
+
+      <!-- Contact Info -->
+      <div class="footer-col">
+        <h4>Contact Us</h4>
+        <ul>
+          <li><i class="fas fa-envelope"></i> {{ settings.school_email if settings else 'support@multitools.com' }}</li>
+          <li><i class="fas fa-phone"></i> {{ settings.school_phone if settings else '+91 7970655058' }}</li>
+          <li><i class="fas fa-map-marker-alt"></i> {{ settings.school_address if settings and settings.school_address else 'Location X' }}</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- Bottom Section -->
+    <div class="footer-bottom">
+      <p>&copy; {{ current_year if current_year else '2025' }} {{ settings.school_name if settings else 'Shree Gyan Bharti' }}. All rights reserved.</p>
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Cookies</a>
+      </div>
+    </div>
+  </div>
+</footer>

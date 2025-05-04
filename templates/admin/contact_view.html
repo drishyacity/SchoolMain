@@ -1,0 +1,65 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}View Message - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">View Message</h1>
+        <a href="{{ url_for('admin_contacts') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Messages
+        </a>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Message Details</h5>
+        </div>
+        <div class="card-body">
+            <div class="mb-4">
+                <div class="d-flex justify-content-between mb-3">
+                    <h4>{{ contact.subject or 'No Subject' }}</h4>
+                    <span class="text-muted">{{ contact.date.strftime('%B %d, %Y at %I:%M %p') }}</span>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="mb-2">
+                            <strong>From:</strong> {{ contact.name }}
+                        </div>
+                        <div>
+                            <strong>Email:</strong> <a href="mailto:{{ contact.email }}">{{ contact.email }}</a>
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <div>
+                            <span class="badge {% if contact.is_read %}bg-success{% else %}bg-warning{% endif %}">
+                                {{ 'Read' if contact.is_read else 'Unread' }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="message-content my-4">
+                    <p>{{ contact.message }}</p>
+                </div>
+                
+                <hr>
+                
+                <div class="d-flex justify-content-between">
+                    <a href="mailto:{{ contact.email }}" class="btn btn-primary">
+                        <i class="fas fa-reply me-1"></i> Reply via Email
+                    </a>
+                    <form action="{{ url_for('admin_delete_contact', id=contact.id) }}" method="POST" class="d-inline">
+                        <button type="submit" class="btn btn-danger delete-btn">
+                            <i class="fas fa-trash me-1"></i> Delete Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

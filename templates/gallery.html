@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+
+{% block title %}Gallery - {{ settings.school_name if settings else 'Shree Gyan Bharti High School' }}{% endblock %}
+
+{% block inline_css %}
+/* Lightbox styles */
+.lightbox {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    padding: 40px;
+}
+
+.lightbox-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.lightbox-img {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+}
+
+.lightbox-caption {
+    position: absolute;
+    bottom: 60px;
+    width: 100%;
+    text-align: center;
+    color: white;
+    font-size: 1.2rem;
+    padding: 10px;
+}
+
+.close-lightbox {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    color: white;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+.prev-btn, .next-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: white;
+    font-size: 30px;
+    cursor: pointer;
+    z-index: 1010;
+}
+
+.prev-btn {
+    left: 30px;
+}
+
+.next-btn {
+    right: 30px;
+}
+
+/* Loading indicator */
+.loading {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1020;
+    color: white;
+    font-size: 24px;
+}
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+    SCHOOL GALLERY
+</section>
+
+<section class="gallery-container">
+    {% if images %}
+        {% for image in images %}
+        <div class="gallery-item">
+            <img src="{{ url_for('static', filename='uploads/' + image.image_path) }}" alt="{{ image.title }}" data-id="{{ loop.index0 }}" data-caption="{{ image.caption or image.title or '' }}" class="gallery-image">
+        </div>
+        {% endfor %}
+    {% else %}
+        <!-- Default gallery items as placeholders -->
+        {% for i in range(1, 31) %}
+        <div class="gallery-item">
+            <img src="https://via.placeholder.com/300x200.png?text=School+Gallery+Image+{{ i }}" alt="Gallery Image {{ i }}" class="gallery-image" data-id="{{ i-1 }}">
+        </div>
+        {% endfor %}
+    {% endif %}
+</section>
+
+<div class="lightbox" id="lightbox">
+    <span class="close-lightbox" id="close-lightbox">&times;</span>
+    <span class="prev-btn" id="prev-btn">&#10094;</span>
+    <span class="next-btn" id="next-btn">&#10095;</span>
+    <div class="lightbox-content">
+        <img src="" alt="" class="lightbox-img" id="lightbox-img">
+    </div>
+    <div class="lightbox-caption" id="lightbox-caption"></div>
+    <div class="loading" id="loading">Loading...</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const galleryImages = document.querySelectorAll('.gallery-image');
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const closeLightbox = document.getElementById('close-lightbox');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const lightboxCaption = document.getElementById('lightbox-caption');
+        const loading = document.getElementById('loading');
+        
+        let currentIndex = 0;
+        
+        // Open lightbox on image click
+        galleryImages.forEach(img => {
+            img.addEventListener('click', function() {
+                currentIndex = parseInt(this.getAttribute('data-id'));
+                const imgSrc = this.src;
+                const caption = this.getAttribute('data-caption') || '';
+                
+                lightboxImg.src = imgSrc;
+                lightboxCaption.textContent = caption;
+                lightbox.style.display = 'block';
+                
+                // Disable scrolling on body
+                document.body.style.overflow = 'hidden';
+            });
+        });
+        
+        // Close lightbox
+        closeLightbox.addEventListener('click', function() {
+            lightbox.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        });
+        
+        // Close lightbox with escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && lightbox.style.display === 'block') {
+                lightbox.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        });
+        
+        // Navigate to previous image
+        prevBtn.addEventListener('click', function() {
+            loading.style.display = 'block';
+            currentIndex = (currentIndex - 1 + galleryImages.length) % galleryImages.length;
+            updateLightbox();
+        });
+        
+        // Navigate to next image
+        nextBtn.addEventListener('click', function() {
+            loading.style.display = 'block';
+            currentIndex = (currentIndex + 1) % galleryImages.length;
+            updateLightbox();
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (lightbox.style.display === 'block') {
+                if (e.key === 'ArrowLeft') {
+                    loading.style.display = 'block';
+                    currentIndex = (currentIndex - 1 + galleryImages.length) % galleryImages.length;
+                    updateLightbox();
+                } else if (e.key === 'ArrowRight') {
+                    loading.style.display = 'block';
+                    currentIndex = (currentIndex + 1) % galleryImages.length;
+                    updateLightbox();
+                }
+            }
+        });
+        
+        // Update lightbox with current image
+        function updateLightbox() {
+            const img = galleryImages[currentIndex];
+            const imgSrc = img.src;
+            const caption = img.getAttribute('data-caption') || '';
+            
+            lightboxImg.onload = function() {
+                loading.style.display = 'none';
+            };
+            
+            lightboxImg.src = imgSrc;
+            lightboxCaption.textContent = caption;
+        }
+        
+        // Close lightbox when clicking outside of image
+        lightbox.addEventListener('click', function(e) {
+            if (e.target === lightbox) {
+                lightbox.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        });
+    });
+</script>
+{% endblock %}

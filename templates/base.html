@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Shree Gyan Bharti High School{% endblock %}</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+    <style>
+        {% block inline_css %}{% endblock %}
+    </style>
+</head>
+<body>
+    {% include 'includes/header.html' %}
+    
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    
+    {% block content %}{% endblock %}
+    
+    {% include 'includes/footer.html' %}
+    
+    <script>
+        // Base JS for navigation
+        const menuToggle = document.getElementById("menu-toggle");
+        const nav = document.getElementById("nav");
+        const loginDropdown = document.getElementById("login-dropdown");
+        const loginBtn = document.getElementById("login-btn");
+
+        menuToggle.addEventListener("click", () => {
+            nav.classList.toggle("active");
+        });
+
+        loginBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            loginDropdown.classList.toggle("active");
+        });
+
+        document.addEventListener("click", (e) => {
+            if (!loginDropdown.contains(e.target) && !loginBtn.contains(e.target)) {
+                loginDropdown.classList.remove("active");
+            }
+        });
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

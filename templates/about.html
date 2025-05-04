@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}About Us - {{ settings.school_name if settings else 'Shree Gyan Bharti High School' }}{% endblock %}
+
+{% block content %}
+<div class="page-content">
+    <h1>About Our School</h1>
+    
+    {% if about_sections %}
+        {% for section in about_sections %}
+        <div class="about-section">
+            <h2>{{ section.title }}</h2>
+            <p>{{ section.content|safe }}</p>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="about-section">
+            <h2>Our History</h2>
+            <p>Founded in 1995, Shree Gyan Bharti High School has been providing quality education to students in our community for over 25 years. We started with just 50 students and have grown to become one of the most respected institutions in the region.</p>
+        </div>
+        
+        <div class="about-section">
+            <h2>Our Mission</h2>
+            <p>To provide a nurturing environment that fosters academic excellence, character development, and lifelong learning. We aim to develop well-rounded individuals who will contribute positively to society.</p>
+        </div>
+        
+        <div class="about-section">
+            <h2>Our Facilities</h2>
+            <p>Our campus features modern classrooms, well-equipped science and computer labs, a spacious library, and excellent sports facilities to support holistic development of our students.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

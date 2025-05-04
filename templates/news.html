@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %}News - {{ settings.school_name if settings else 'Shree Gyan Bharti High School' }}{% endblock %}
+
+{% block inline_css %}
+.news-header {
+    background-color: #0c2d57;
+    color: white;
+    text-align: center;
+    padding: 30px 20px;
+}
+
+.news-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 20px;
+}
+
+.news-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.news-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.news-card:hover {
+    transform: translateY(-5px);
+}
+
+.news-img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.news-content {
+    padding: 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.news-date {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+
+.news-title {
+    color: #0c2d57;
+    margin-bottom: 10px;
+}
+
+.news-excerpt {
+    margin-bottom: 15px;
+    flex-grow: 1;
+}
+
+.news-link {
+    color: #0c2d57;
+    text-decoration: none;
+    font-weight: bold;
+    margin-top: auto;
+    align-self: flex-start;
+}
+
+.news-link:hover {
+    text-decoration: underline;
+}
+
+.empty-message {
+    grid-column: 1 / -1;
+    background: #f8f9fa;
+    padding: 30px;
+    text-align: center;
+    border-radius: 10px;
+    color: #555;
+}
+{% endblock %}
+
+{% block content %}
+<div class="news-header">
+    <h1>School News</h1>
+</div>
+
+<div class="news-container">
+    <div class="news-grid">
+        {% if news_items %}
+            {% for news in news_items %}
+            <div class="news-card">
+                {% if news.image_path %}
+                <img src="{{ url_for('static', filename='uploads/' + news.image_path) }}" alt="{{ news.title }}" class="news-img">
+                {% else %}
+                <img src="https://images.unsplash.com/photo-1516979187457-637abb4f9353?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60" alt="{{ news.title }}" class="news-img">
+                {% endif %}
+                <div class="news-content">
+                    <div class="news-date">{{ news.date.strftime('%B %d, %Y') }}</div>
+                    <h3 class="news-title">{{ news.title }}</h3>
+                    <div class="news-excerpt">{{ news.content|striptags|truncate(150) }}</div>
+                    <a href="{{ url_for('news_detail', news_id=news.id) }}" class="news-link">Read More →</a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-message">
+                <p>No news articles available at the moment. Please check back later.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

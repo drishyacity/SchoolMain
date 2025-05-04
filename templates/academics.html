@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Academics - {{ settings.school_name if settings else 'Shree Gyan Bharti High School' }}{% endblock %}
+
+{% block content %}
+<div class="page-content">
+    <h1>Academic Programs</h1>
+    
+    <div class="academic-programs">
+        {% if programs %}
+            {% for program in programs %}
+            <div class="program">
+                <h2>{{ program.title }}</h2>
+                <p>{{ program.description|safe }}</p>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="program">
+                <h2>Primary School (Grades 1-5)</h2>
+                <p>Our primary program focuses on foundational skills in literacy, numeracy, and social development through engaging, activity-based learning.</p>
+            </div>
+            
+            <div class="program">
+                <h2>Middle School (Grades 6-8)</h2>
+                <p>We offer a comprehensive curriculum that builds on core subjects while introducing students to new disciplines and critical thinking skills.</p>
+            </div>
+            
+            <div class="program">
+                <h2>High School (Grades 9-12)</h2>
+                <p>Our secondary program prepares students for board examinations and higher education with specialized streams in Science, Commerce and Arts.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

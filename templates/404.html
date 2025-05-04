@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Page Not Found - {{ settings.school_name if settings else 'Shree Gyan Bharti High School' }}{% endblock %}
+
+{% block inline_css %}
+.error-container {
+    text-align: center;
+    padding: 100px 20px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.error-code {
+    font-size: 120px;
+    font-weight: bold;
+    color: #0c2d57;
+    line-height: 1;
+    margin-bottom: 20px;
+}
+
+.error-message {
+    font-size: 24px;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.error-description {
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.home-btn {
+    display: inline-block;
+    padding: 12px 30px;
+    background-color: #0c2d57;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.home-btn:hover {
+    background-color: #081d3a;
+}
+{% endblock %}
+
+{% block content %}
+<div class="error-container">
+    <div class="error-code">404</div>
+    <h1 class="error-message">Page Not Found</h1>
+    <p class="error-description">
+        The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.
+    </p>
+    <a href="{{ url_for('index') }}" class="home-btn">
+        <i class="fas fa-home"></i> Go Home
+    </a>
+</div>
+{% endblock %}

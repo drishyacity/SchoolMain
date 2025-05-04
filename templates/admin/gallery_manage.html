@@ -1,0 +1,72 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Manage Gallery - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Gallery Management</h1>
+        <a href="{{ url_for('admin_upload_gallery') }}" class="btn btn-primary">
+            <i class="fas fa-upload"></i> Upload Images
+        </a>
+    </div>
+    
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">All Gallery Images</h5>
+            {% if images %}
+            <form action="{{ url_for('admin_delete_gallery', id=0) }}" method="POST" class="d-inline">
+                <button type="submit" id="delete-selected" class="btn btn-danger btn-sm">
+                    <i class="fas fa-trash"></i> Delete Selected
+                </button>
+            </form>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            {% if images %}
+            <div class="mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="select-all">
+                    <label class="form-check-label" for="select-all">
+                        Select All
+                    </label>
+                </div>
+            </div>
+            
+            <div class="row">
+                {% for image in images %}
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <div class="card h-100">
+                        <img src="{{ url_for('static', filename='uploads/' + image.image_path) }}" alt="{{ image.title }}" class="card-img-top" style="height: 180px; object-fit: cover;">
+                        <div class="card-body">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" name="selected_images" value="{{ image.id }}" id="image-{{ image.id }}">
+                                <label class="form-check-label" for="image-{{ image.id }}">
+                                    {{ image.title or 'Untitled Image' }}
+                                </label>
+                            </div>
+                            <p class="card-text small text-muted">
+                                {{ image.caption or 'No caption' }}
+                            </p>
+                            <p class="card-text small text-muted">
+                                <i class="far fa-calendar-alt me-1"></i> {{ image.upload_date.strftime('%b %d, %Y') }}
+                            </p>
+                            <form action="{{ url_for('admin_delete_gallery', id=image.id) }}" method="POST" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-danger delete-btn w-100">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> No gallery images found. Click the "Upload Images" button to add images to the gallery.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

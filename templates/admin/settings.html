@@ -1,0 +1,77 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}School Settings - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">School Settings</h1>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Basic Information</h5>
+        </div>
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
+                
+                <div class="mb-4">
+                    <label for="school_name" class="form-label required">School Name</label>
+                    {{ form.school_name(class="form-control", id="school_name") }}
+                    {% for error in form.school_name.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                
+                <div class="mb-4">
+                    <label for="school_address" class="form-label required">Address</label>
+                    {{ form.school_address(class="form-control", id="school_address") }}
+                    {% for error in form.school_address.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <label for="school_phone" class="form-label required">Phone Number</label>
+                        {{ form.school_phone(class="form-control", id="school_phone") }}
+                        {% for error in form.school_phone.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="col-md-6 mb-4">
+                        <label for="school_email" class="form-label required">Email Address</label>
+                        {{ form.school_email(class="form-control", id="school_email", type="email") }}
+                        {% for error in form.school_email.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="school_logo" class="form-label">School Logo</label>
+                    {{ form.school_logo(class="form-control image-upload", id="school_logo") }}
+                    <div class="form-text">Upload a new logo image. Recommended size: 200x200 pixels.</div>
+                    {% for error in form.school_logo.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                    {% endfor %}
+                    
+                    <div class="mt-2">
+                        {% if form.school_logo.object_data and form.school_logo.object_data.school_logo_path %}
+                            <img src="{{ url_for('static', filename='uploads/logo/' + form.school_logo.object_data.school_logo_path) if 'uploads' in form.school_logo.object_data.school_logo_path else form.school_logo.object_data.school_logo_path }}" id="school_logo-preview" class="img-thumbnail" style="max-height: 100px;">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" id="school_logo-preview" class="img-thumbnail" style="max-height: 100px;">
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="text-end">
+                    {{ form.submit(class="btn btn-primary") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

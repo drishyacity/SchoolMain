@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+
+{% block title %}Events - {{ settings.school_name if settings else 'Shree Gyan Bharti High School' }}{% endblock %}
+
+{% block inline_css %}
+.events-header {
+    background-color: #0c2d57;
+    color: white;
+    text-align: center;
+    padding: 30px 20px;
+}
+
+.events-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 30px 20px;
+}
+
+.event-category {
+    margin-bottom: 40px;
+}
+
+.event-category h2 {
+    color: #0c2d57;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #0c2d57;
+}
+
+.events-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.event-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.event-img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.event-details {
+    padding: 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.event-meta {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.event-meta > div {
+    display: flex;
+    align-items: center;
+}
+
+.event-meta i {
+    margin-right: 5px;
+    color: #0c2d57;
+}
+
+.event-title {
+    color: #0c2d57;
+    margin-bottom: 10px;
+    font-size: 1.3rem;
+}
+
+.event-description {
+    margin-bottom: 15px;
+    flex-grow: 1;
+}
+
+.empty-message {
+    background: #f8f9fa;
+    padding: 30px;
+    text-align: center;
+    border-radius: 10px;
+    color: #555;
+}
+
+@media (min-width: 768px) {
+    .events-list {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+}
+{% endblock %}
+
+{% block content %}
+<div class="events-header">
+    <h1>School Events</h1>
+</div>
+
+<div class="events-container">
+    <div class="event-category">
+        <h2>Upcoming Events</h2>
+        
+        {% if upcoming_events %}
+        <div class="events-list">
+            {% for event in upcoming_events %}
+            <div class="event-card">
+                {% if event.image_path %}
+                <img src="{{ url_for('static', filename='uploads/' + event.image_path) }}" alt="{{ event.title }}" class="event-img">
+                {% else %}
+                <img src="https://images.unsplash.com/photo-1577896851231-70ef18881754?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60" alt="{{ event.title }}" class="event-img">
+                {% endif %}
+                
+                <div class="event-details">
+                    <div class="event-meta">
+                        <div>
+                            <i class="far fa-calendar"></i>
+                            {{ event.date.strftime('%B %d, %Y') }}
+                        </div>
+                        
+                        {% if event.time %}
+                        <div>
+                            <i class="far fa-clock"></i>
+                            {{ event.time.strftime('%I:%M %p') }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <h3 class="event-title">{{ event.title }}</h3>
+                    
+                    <div class="event-meta">
+                        <div>
+                            <i class="fas fa-map-marker-alt"></i>
+                            {{ event.location }}
+                        </div>
+                    </div>
+                    
+                    <div class="event-description">
+                        {{ event.description|safe }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-message">
+            <p>No upcoming events scheduled at the moment. Please check back later.</p>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="event-category">
+        <h2>Past Events</h2>
+        
+        {% if past_events %}
+        <div class="events-list">
+            {% for event in past_events %}
+            <div class="event-card">
+                {% if event.image_path %}
+                <img src="{{ url_for('static', filename='uploads/' + event.image_path) }}" alt="{{ event.title }}" class="event-img">
+                {% else %}
+                <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60" alt="{{ event.title }}" class="event-img">
+                {% endif %}
+                
+                <div class="event-details">
+                    <div class="event-meta">
+                        <div>
+                            <i class="far fa-calendar"></i>
+                            {{ event.date.strftime('%B %d, %Y') }}
+                        </div>
+                        
+                        {% if event.time %}
+                        <div>
+                            <i class="far fa-clock"></i>
+                            {{ event.time.strftime('%I:%M %p') }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <h3 class="event-title">{{ event.title }}</h3>
+                    
+                    <div class="event-meta">
+                        <div>
+                            <i class="fas fa-map-marker-alt"></i>
+                            {{ event.location }}
+                        </div>
+                    </div>
+                    
+                    <div class="event-description">
+                        {{ event.description|safe }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-message">
+            <p>No past events to display.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
