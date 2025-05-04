@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admission Form with OTP and Captcha</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+    }
+    header {
+      background: #fff;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      position: relative;
+      z-index: 1000;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo img {
+      width: 40px;
+      height: 40px;
+    }
+    .logo h2 {
+      font-size: 18px;
+      color: #0c2d57;
+    }
+    nav ul {
+      display: flex;
+      list-style: none;
+      align-items: center;
+    }
+    nav ul li {
+      margin-left: 20px;
+      position: relative;
+    }
+    nav ul li a {
+      text-decoration: none;
+      color: #0c2d57;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .menu-toggle {
+      display: none;
+      font-size: 24px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      margin-right: 10px;
+      color: #0c2d57;
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      min-width: 180px;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      border-radius: 5px;
+      z-index: 999;
+    }
+    .dropdown-content a {
+      display: block;
+      padding: 10px;
+      color: #0c2d57;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .dropdown-content a:hover {
+      background: #f1f1f1;
+    }
+
+    .dropdown.active .dropdown-content {
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .menu-toggle {
+        display: block;
+      }
+      nav {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: white;
+        display: none;
+        flex-direction: column;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      nav.active {
+        display: flex;
+      }
+      nav ul {
+        flex-direction: column;
+        width: 100%;
+        text-align: center;
+      }
+      nav ul li {
+        margin: 10px 0;
+      }
+      nav ul li a {
+        display: block;
+        width: 100%;
+        padding: 10px 0;
+      }
+      .dropdown-content {
+        top: 45px;
+        right: 10px;
+        left: auto;
+        transform: none;
+      }
+    }
+    .form-container {
+      background: #fff;
+      max-width: 600px;
+      margin: 30px auto;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .school-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .school-header img {
+      max-height: 80px;
+    }
+
+    .school-header h1 {
+      margin: 10px 0 0;
+      font-size: 22px;
+      color: #333;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+
+    input[type="text"],
+    input[type="tel"],
+    input[type="email"],
+    input[type="file"],
+    textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
+    .verify-btn {
+      margin-top: 10px;
+      padding: 8px 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .verify-btn:disabled {
+      background-color: #999;
+      cursor: not-allowed;
+    }
+
+    .verify-btn:hover:not(:disabled) {
+      background-color: #0056b3;
+    }
+
+    .otp-section {
+      margin-top: 10px;
+    }
+
+    .otp-section input {
+      margin-top: 10px;
+    }
+
+    .resend-link {
+      margin-top: 5px;
+      display: block;
+      color: #007bff;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .resend-link.disabled {
+      color: grey;
+      pointer-events: none;
+      text-decoration: none;
+    }
+
+    .verified-label {
+      color: green;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #0056b3;
+    }
+
+    .captcha-img {
+      font-size: 22px;
+      font-weight: bold;
+      letter-spacing: 3px;
+      background-color: #e4e4e4;
+      padding: 10px;
+      text-align: center;
+      margin-bottom: 10px;
+      user-select: none;
+    }
+    /* Footer Base */
+    footer {
+      background: #0c2d57;
+      color: white;
+      padding: 30px 20px;
+      text-align: center;
+    }
+
+    .footer a {
+      color: white;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .footer a:hover {
+      color: var(--accent-color);
+    }
+
+    /* Grid Layout */
+    .footer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 40px;
+      margin-bottom: 60px;
+      text-align: left;
+      max-width: 1200px;
+      margin: 0 auto 60px;
+    }
+
+    /* Footer Column */
+    .footer-col {
+      margin-bottom: 20px;
+    }
+
+    .footer-col h4 {
+      margin-bottom: 20px;
+      font-size: 1.2rem;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+      display: inline-block;
+      padding-bottom: 5px;
+    }
+
+    .footer-col ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .footer-col ul li {
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+    }
+
+    .footer-col ul li i {
+      margin-right: 10px;
+      width: 20px;
+      text-align: center;
+    }
+
+    /* Logo Style */
+    .footer .logo img {
+      height: 50px;
+      margin-right: 10px;
+    }
+
+    .footer .logo span {
+      font-size: 1.1rem;
+    }
+
+    /* Social Links */
+    .social-links {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+      justify-content: flex-start;
+      align-items: center;
+    }
+
+    .social-links a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s ease, background-color 0.3s ease;
+    }
+
+    footer .social-links img {
+      width: 25px;
+      height: 25px;
+      transition: transform 0.3s ease;
+    }
+
+    footer .social-links img:hover {
+      transform: scale(1.2);
+    }
+
+    .social-links i {
+      font-size: 24px;
+      transition: transform 0.3s ease;
+    }
+
+    .social-links i:hover {
+      transform: scale(1.2);
+    }
+
+    /* Footer Bottom */
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 20px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+      font-size: 0.9rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* Container for footer content */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Animations */
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    .admission-process { 
+        background: white; 
+        padding: 30px; 
+        border-radius: 10px; 
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+        max-width: 800px; margin: 0 auto; 
+    }
+     .process-step { 
+        margin-bottom: 20px; 
+        padding-bottom: 20px; 
+        border-bottom: 1px solid #eee; 
+    }
+     .process-step:last-child { 
+        border-bottom: none; 
+    }
+    .process-step h2 {
+        color: #0c2d57; /* यह ब्लू कलर का कोड है */
+    }
+  </style>
+</head>
+<body>
+    <header>
+        <button class="menu-toggle" id="menu-toggle">&#9776;</button>
+    
+        <div class="logo">
+          <img src="IMG-20250425-WA0004.jpg" alt="Logo" />
+          <h2>SHREE GYAN BHARTI HIGH SCHOOL</h2>
+        </div>
+    
+        <nav id="nav">
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="academics.html">Academics</a></li>
+            <li><a href="events.html">Events</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+            <li class="dropdown" id="login-dropdown">
+              <a id="login-btn">Login</a>
+              <div class="dropdown-content" id="dropdown-menu">
+                <a href="adminlogin.html">Admin Login</a>
+                <a href="teacherlogin.html">Teacher Login</a>
+                <a href="studentlogin.html">Student Login</a>
+              </div>
+            </li>
+          </ul>
+        </nav>
+      </header>
+
+  <div class="form-container">
+    <div class="school-header">
+      <img src="IMG-20250425-WA0004.jpg" alt="School Logo" />
+      <h1>Shree Gyan Bharti High School</h1>
+    </div>
+
+    <h2>Admission Form</h2>
+    <form id="admissionForm">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" name="name" required />
+      </div>
+
+      <div class="form-group">
+        <label>Father's Name</label>
+        <input type="text" name="father_name" required />
+      </div>
+
+      <div class="form-group">
+        <label>Mother's Name</label>
+        <input type="text" name="mother_name" required />
+      </div>
+
+      <div class="form-group">
+        <label>Mobile Number</label>
+        <input type="tel" id="mobile" name="mobile" pattern="[0-9]{10}" required />
+        <button type="button" class="verify-btn" id="sendMobileBtn" onclick="sendMobileOTP()">Send OTP</button>
+        <div class="otp-section" id="mobile-otp-section" style="display: none;">
+          <input type="text" id="mobile-otp" placeholder="Enter OTP" />
+          <button type="button" class="verify-btn" id="submitMobileOTP" onclick="verifyMobileOTP()">Submit OTP</button>
+          <span class="resend-link" id="resendMobileOTP" onclick="resendMobileOTP()">Resend OTP</span>
+          <span class="verified-label" id="mobileVerified" style="display: none;">✔ Verified</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="email" name="email" required />
+        <button type="button" class="verify-btn" id="sendEmailBtn" onclick="sendEmailOTP()">Send OTP</button>
+        <div class="otp-section" id="email-otp-section" style="display: none;">
+          <input type="text" id="email-otp" placeholder="Enter OTP" />
+          <button type="button" class="verify-btn" id="submitEmailOTP" onclick="verifyEmailOTP()">Submit OTP</button>
+          <span class="resend-link" id="resendEmailOTP" onclick="resendEmailOTP()">Resend OTP</span>
+          <span class="verified-label" id="emailVerified" style="display: none;">✔ Verified</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Aadhar Number</label>
+        <input type="text" name="aadhar" pattern="\d{12}" required />
+      </div>
+
+      <div class="form-group">
+        <label>Address</label>
+        <textarea name="address" rows="3" required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Class</label>
+        <input type="text" name="class" required />
+      </div>
+
+      <div class="form-group">
+        <label>Upload Passport Size Photo (20KB - 1MB)</label>
+        <input type="file" name="photo" id="photoUpload" accept="image/*" required />
+      </div>
+
+      <div class="form-group">
+        <label>Enter Captcha</label>
+        <div class="captcha-img" id="captchaText"></div>
+        <input type="text" id="captchaInput" required placeholder="Enter the text above" />
+      </div>
+
+      <button type="submit">Submit Application</button>
+    </form>
+  </div>
+</div>
+ <h1>Admission Process</h1> 
+ <div class="admission-process"> 
+    <div class="process-step">
+         <h2>1. Application</h2>
+          <p>Submit the completed application form along with required documents.</p> 
+    </div>
+    <div class="process-step">
+        <h2>2. Entrance Test</h2>
+        <p>Students may be required to take an assessment to determine appropriate class placement.</p> 
+    </div>
+    <div class="process-step">
+        <h2>2. Interview</h2>
+        <p>Parents and students will meet with our admission committee for an orientation interview.</p> 
+    </div>
+    <div class="process-step">
+        <h2>2. Final Documentation</h2>
+        <p>Successful applicants complete registration by submitting fees and final documentation.</p> 
+    </div>
+             
+ </div>
+
+  <!-- Font Awesome (required for icons) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <footer class="footer" id="contact">
+    <div class="container">
+      <div class="footer-grid">
+        
+        <!-- School Info & Social Links -->
+        <div class="footer-col">
+          <div class="logo" style="display: flex; align-items: center; gap: 10px;">
+            <img src="IMG-20250425-WA0004.jpg" alt="School Logo" style="height: 50px; width: auto; object-fit: contain; vertical-align: middle;">
+            <span><strong>Shree Gyan Bharti High School</strong></span>
+          </div>
+          <p>Empowering young minds with knowledge, values, and a vision for a brighter future.</p>
+          
+          <div class="social-links">
+            <a href="https://facebook.com" target="_blank">
+              <img src="https://cdn-icons-png.flaticon.com/512/124/124010.png" alt="Facebook">
+            </a>
+            <a href="https://twitter.com" target="_blank">
+              <img src="https://cdn-icons-png.flaticon.com/512/733/733579.png" alt="Twitter">
+            </a>
+            <a href="https://instagram.com" target="_blank">
+              <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="Instagram">
+            </a>
+            <a href="https://linkedin.com" target="_blank">
+              <i class="fab fa-linkedin" style="color: white; font-size: 24px;"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="admission.html">Admission</a></li>
+            <li><a href="news.html">News</a></li>
+            <li><a href="events.html">Events</a></li>
+            <li><a href="achievements.html">Achievements</a></li>
+          </ul>
+        </div>
+
+        <!-- Resources -->
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="#">Documentation</a></li>
+            <li><a href="#">Tutorials</a></li>
+            <li><a href="#">Blog</a></li>
+            <li><a href="#">Syllabus</a></li>
+          </ul>
+        </div>
+
+        <!-- Contact Info -->
+        <div class="footer-col">
+          <h4>Contact Us</h4>
+          <ul>
+            <li><i class="fas fa-envelope"></i> support@multitools.com</li>
+            <li><i class="fas fa-phone"></i> +91 7970655058</li>
+            <li><i class="fas fa-map-marker-alt"></i> Location X</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Bottom Section -->
+      <div class="footer-bottom">
+        <p>&copy; 2025 Shree Gyan Bharti. All rights reserved.</p>
+        <div class="footer-links">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+          <a href="#">Cookies</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    function generateCaptcha() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let captcha = '';
+      for (let i = 0; i < 6; i++) {
+        captcha += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      document.getElementById("captchaText").textContent = captcha;
+    }
+
+    function sendMobileOTP() {
+      document.getElementById("mobile-otp-section").style.display = "block";
+      document.getElementById("sendMobileBtn").style.display = "none";
+    }
+
+    function verifyMobileOTP() {
+      const otp = document.getElementById("mobile-otp").value;
+      if (otp.trim() === '') {
+        alert("Please enter mobile OTP");
+      } else {
+        document.getElementById("submitMobileOTP").disabled = true;
+        document.getElementById("resendMobileOTP").classList.add("disabled");
+        document.getElementById("mobileVerified").style.display = "inline";
+      }
+    }
+
+    function resendMobileOTP() {
+      alert("Mobile OTP Resent");
+    }
+
+    function sendEmailOTP() {
+      document.getElementById("email-otp-section").style.display = "block";
+      document.getElementById("sendEmailBtn").style.display = "none";
+    }
+
+    function verifyEmailOTP() {
+      const otp = document.getElementById("email-otp").value;
+      if (otp.trim() === '') {
+        alert("Please enter email OTP");
+      } else {
+        document.getElementById("submitEmailOTP").disabled = true;
+        document.getElementById("resendEmailOTP").classList.add("disabled");
+        document.getElementById("emailVerified").style.display = "inline";
+      }
+    }
+
+    function resendEmailOTP() {
+      alert("Email OTP Resent");
+    }
+
+    document.getElementById("admissionForm").addEventListener("submit", function(e) {
+      const userCaptcha = document.getElementById("captchaInput").value;
+      const actualCaptcha = document.getElementById("captchaText").textContent;
+      const fileInput = document.getElementById("photoUpload");
+      const file = fileInput.files[0];
+
+      if (!file || file.size < 20000 || file.size > 1048576) {
+        alert("Photo must be between 20KB and 1MB");
+        e.preventDefault();
+        return;
+      }
+
+      if (userCaptcha !== actualCaptcha) {
+        alert("Incorrect captcha");
+        e.preventDefault();
+        generateCaptcha();
+        return;
+      }
+    });
+
+    // Header menu toggle functionality
+    const menuToggle = document.getElementById("menu-toggle");
+    const nav = document.getElementById("nav");
+    const loginDropdown = document.getElementById("login-dropdown");
+    const loginBtn = document.getElementById("login-btn");
+
+    menuToggle.addEventListener("click", () => {
+      nav.classList.toggle("active");
+    });
+
+    loginBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      loginDropdown.classList.toggle("active");
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!loginDropdown.contains(e.target) && !loginBtn.contains(e.target)) {
+        loginDropdown.classList.remove("active");
+      }
+    });
+
+    generateCaptcha();
+  </script>
+</body>
+</html>
