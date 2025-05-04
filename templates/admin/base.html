@@ -18,7 +18,7 @@
         <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <a href="{{ url_for('admin_dashboard') }}" class="sidebar-brand">
-                    <img src="{{ url_for('static', filename='uploads/logo/' + settings.school_logo_path) if settings and settings.school_logo_path else url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" alt="Logo">
+                    <img src="{{ url_for('static', filename='uploads/' + settings.school_logo_path) if settings and settings.school_logo_path and 'uploads' not in settings.school_logo_path else url_for('static', filename=settings.school_logo_path) if settings and settings.school_logo_path else url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" alt="Logo">
                     <span>Admin Panel</span>
                 </a>
             </div>

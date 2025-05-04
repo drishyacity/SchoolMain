@@ -77,10 +77,10 @@ with app.app_context():
         # Add default school settings
         settings = SchoolSetting(
             school_name='Shree Gyan Bharti High School',
-            school_address='123 Education Street, City, State 123456, India',
+            school_address='Bakhari Chowk Sitamarhi, Bihar 843302, India',
             school_phone='+91 1234567890',
             school_email='info@sgbhs.edu',
-            school_logo_path='IMG-20250425-WA0004.jpg'  # Default logo path from existing files
+            school_logo_path='IMG-20250425-WA0004.jpg'  # Logo file from uploaded assets
         )
         db.session.add(settings)
         db.session.commit()
