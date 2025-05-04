@@ -3,7 +3,7 @@
 
     <div class="logo">
         {% if settings and settings.school_logo_path %}
-            <img src="{{ url_for('static', filename='uploads/logo/' + settings.school_logo_path) if 'uploads' in settings.school_logo_path else settings.school_logo_path }}" alt="Logo" />
+            <img src="{{ url_for('static', filename='uploads/' + settings.school_logo_path) if 'uploads' not in settings.school_logo_path else url_for('static', filename=settings.school_logo_path) }}" alt="Logo" />
         {% else %}
             <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" alt="Logo" />
         {% endif %}

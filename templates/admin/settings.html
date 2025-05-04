@@ -60,7 +60,7 @@
                     
                     <div class="mt-2">
                         {% if form.school_logo.object_data and form.school_logo.object_data.school_logo_path %}
-                            <img src="{{ url_for('static', filename='uploads/logo/' + form.school_logo.object_data.school_logo_path) if 'uploads' in form.school_logo.object_data.school_logo_path else form.school_logo.object_data.school_logo_path }}" id="school_logo-preview" class="img-thumbnail" style="max-height: 100px;">
+                            <img src="{{ url_for('static', filename='uploads/' + form.school_logo.object_data.school_logo_path) if 'uploads' not in form.school_logo.object_data.school_logo_path else url_for('static', filename=form.school_logo.object_data.school_logo_path) }}" id="school_logo-preview" class="img-thumbnail" style="max-height: 100px;">
                         {% else %}
                             <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" id="school_logo-preview" class="img-thumbnail" style="max-height: 100px;">
                         {% endif %}

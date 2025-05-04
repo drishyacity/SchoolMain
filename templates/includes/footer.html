@@ -6,7 +6,7 @@
       <div class="footer-col">
         <div class="logo" style="display: flex; align-items: center; gap: 10px;">
           {% if settings and settings.school_logo_path %}
-            <img src="{{ url_for('static', filename='uploads/logo/' + settings.school_logo_path) if 'uploads' in settings.school_logo_path else settings.school_logo_path }}" alt="School Logo" style="height: 50px; width: auto; object-fit: contain; vertical-align: middle;">
+            <img src="{{ url_for('static', filename='uploads/' + settings.school_logo_path) if 'uploads' not in settings.school_logo_path else url_for('static', filename=settings.school_logo_path) }}" alt="School Logo" style="height: 50px; width: auto; object-fit: contain; vertical-align: middle;">
           {% else %}
             <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" alt="School Logo" style="height: 50px; width: auto; object-fit: contain; vertical-align: middle;">
           {% endif %}
