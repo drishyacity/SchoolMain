@@ -249,6 +249,8 @@
       width: 100%;
       height: auto;
       overflow: hidden;
+      background-color: #f0f0f0;
+      padding: 10px 0;
     }
     
     .slider {
@@ -264,13 +266,16 @@
     
     .slide img {
       width: 100%;
-      height: 400px; /* Fixed height for desktop */
+      height: 350px; /* Fixed height for desktop */
       object-fit: cover;
+      border: 3px solid #fff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
     
     @media (max-width: 768px) {
       .slide img {
-        height: 250px; /* Smaller height for mobile */
+        height: 200px; /* Smaller height for mobile */
+        border-width: 2px;
       }
     }
     
@@ -377,9 +382,10 @@
 
     .card p {
       font-size: 14px;
-      color: #555;
+      color: #333;
       margin-bottom: 10px;
-      font-weight: bold;
+      font-weight: 900;
+      text-transform: uppercase;
     }
 
     .card a {
@@ -394,10 +400,12 @@
       background-color: #0c2d57;
       color: white;
       text-align: center;
-      padding: 30px 20px;
-      font-size: 1.8rem;
+      padding: 15px 10px;
+      font-size: 1.5rem;
       font-weight: bold;
       text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 0;
     }
     </style>
     {% block head_extras %}{% endblock %}
