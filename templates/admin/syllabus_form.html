@@ -1,0 +1,125 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">{{ title }}</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('admin_syllabus') }}">Syllabus</a></li>
+        <li class="breadcrumb-item active">{{ title }}</li>
+    </ol>
+    
+    {% include 'admin/includes/flash_messages.html' %}
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-book me-1"></i>
+            Syllabus Information
+        </div>
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="class_name">Class Name</label>
+                            {{ form.class_name(class="form-control", placeholder="e.g. Class 10") }}
+                            {% if form.class_name.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.class_name.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="subject">Subject</label>
+                            {{ form.subject(class="form-control", placeholder="e.g. Mathematics") }}
+                            {% if form.subject.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.subject.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            {{ form.description(class="form-control", rows=5, placeholder="Description of the syllabus") }}
+                            {% if form.description.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.description.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="file">Syllabus PDF File</label>
+                            {{ form.file(class="form-control") }}
+                            <small class="text-muted">Only PDF files are allowed</small>
+                            {% if form.file.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.file.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="order">Display Order</label>
+                            {{ form.order(class="form-control", type="number") }}
+                            <small class="text-muted">Lower numbers appear first</small>
+                            {% if form.order.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.order.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                {% if form.obj and form.obj.file_path %}
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label>Current File</label>
+                            <div>
+                                <a href="{{ url_for('static', filename='uploads/' + form.obj.file_path) }}" target="_blank" class="btn btn-outline-primary">
+                                    <i class="fas fa-file-pdf"></i> View Current PDF
+                                </a>
+                            </div>
+                            <small class="text-muted">Uploading a new file will replace the current one.</small>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="d-flex justify-content-between">
+                    <a href="{{ url_for('admin_syllabus') }}" class="btn btn-secondary">Cancel</a>
+                    {{ form.submit(class="btn btn-primary") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
