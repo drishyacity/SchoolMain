@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Syllabus - {{ settings.school_name }}{% endblock %}
+
+{% block content %}
+<!-- Page Header Start -->
+<div class="container-fluid page-header mb-5 p-0" style="background-image: url({{ url_for('static', filename='img/carousel-1.jpg') }});">
+    <div class="container-fluid page-header-inner py-5">
+        <div class="container text-center">
+            <h1 class="display-3 text-white mb-3 animated slideInDown">Syllabus</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb justify-content-center text-uppercase">
+                    <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                    <li class="breadcrumb-item text-white active" aria-current="page">Syllabus</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+<!-- Page Header End -->
+
+<!-- Syllabus Start -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+            <h6 class="text-primary text-uppercase">// Our Curriculum //</h6>
+            <h1 class="mb-5">Academic Syllabus</h1>
+        </div>
+        <div class="row g-4">
+            {% if syllabus_list %}
+            {% for syllabus in syllabus_list %}
+            <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.{{ loop.index }}s">
+                <div class="course-item bg-light">
+                    <div class="position-relative overflow-hidden">
+                        <div class="w-100 d-flex justify-content-center align-items-center bg-light py-5" style="height: 150px;">
+                            <i class="fas fa-book-open fa-4x text-primary"></i>
+                        </div>
+                    </div>
+                    <div class="text-center p-4 pb-0">
+                        <h5 class="mb-2">{{ syllabus.class_name }} - {{ syllabus.subject }}</h5>
+                    </div>
+                    <div class="p-4">
+                        <p>{{ syllabus.description }}</p>
+                        {% if syllabus.file_path %}
+                        <div class="d-flex justify-content-center">
+                            <a href="{{ url_for('static', filename='uploads/' + syllabus.file_path) }}" class="btn btn-primary py-2 px-4" target="_blank">
+                                <i class="fas fa-file-pdf me-2"></i> Download PDF
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="col-12 text-center">
+                <p>No syllabus information available at the moment. Please check back later.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<!-- Syllabus End -->
+{% endblock %}

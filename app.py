@@ -135,7 +135,26 @@ def syllabus():
 @app.route('/admission', methods=['GET', 'POST'])
 def admission():
     settings = SchoolSetting.query.first()
-    form = None  # We'll create an admission form later
+    form = AdmissionForm()
+    
+    if form.validate_on_submit():
+        application = AdmissionForm(
+            student_name=form.student_name.data,
+            parent_name=form.parent_name.data,
+            email=form.email.data,
+            phone=form.phone.data,
+            address=form.address.data,
+            class_applying=form.class_applying.data,
+            previous_school=form.previous_school.data,
+            date_of_birth=form.date_of_birth.data,
+            submission_date=datetime.now(),
+            status='Pending'
+        )
+        db.session.add(application)
+        db.session.commit()
+        flash('Your admission application has been submitted successfully!', 'success')
+        return redirect(url_for('admission'))
+    
     return render_template('admission.html', settings=settings, form=form)
 
 @app.route('/events')

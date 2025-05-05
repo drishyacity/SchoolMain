@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}Admission - {{ settings.school_name }}{% endblock %}
+
+{% block content %}
+<!-- Page Header Start -->
+<div class="container-fluid page-header mb-5 p-0" style="background-image: url({{ url_for('static', filename='img/carousel-1.jpg') }});">
+    <div class="container-fluid page-header-inner py-5">
+        <div class="container text-center">
+            <h1 class="display-3 text-white mb-3 animated slideInDown">Admission</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb justify-content-center text-uppercase">
+                    <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                    <li class="breadcrumb-item text-white active" aria-current="page">Admission</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+<!-- Page Header End -->
+
+<!-- Admission Form Start -->
+<div class="container-fluid py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="bg-light rounded p-4 p-sm-5 wow fadeInUp" data-wow-delay="0.2s">
+                    <h1 class="mb-4 text-center">Admission Form</h1>
+                    <p class="mb-4 text-center">Please fill out the form below to apply for admission to {{ settings.school_name }}.</p>
+                    
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <div class="form-floating">
+                                    {{ form.student_name(class="form-control border-0", id="studentName", placeholder="Student Name") }}
+                                    <label for="studentName">{{ form.student_name.label.text }}</label>
+                                    {% if form.student_name.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.student_name.errors %}
+                                                <span>{{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-floating">
+                                    {{ form.parent_name(class="form-control border-0", id="parentName", placeholder="Parent/Guardian Name") }}
+                                    <label for="parentName">{{ form.parent_name.label.text }}</label>
+                                    {% if form.parent_name.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.parent_name.errors %}
+                                                <span>{{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-floating">
+                                    {{ form.email(class="form-control border-0", id="email", placeholder="Email Address") }}
+                                    <label for="email">{{ form.email.label.text }}</label>
+                                    {% if form.email.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.email.errors %}
+                                                <span>{{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-floating">
+                                    {{ form.phone(class="form-control border-0", id="phone", placeholder="Phone Number") }}
+                                    <label for="phone">{{ form.phone.label.text }}</label>
+                                    {% if form.phone.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.phone.errors %}
+                                                <span>{{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    {{ form.address(class="form-control border-0", id="address", placeholder="Address", style="height: 100px") }}
+                                    <label for="address">{{ form.address.label.text }}</label>
+                                    {% if form.address.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.address.errors %}
+                                                <span>{{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-floating">
+                                    {{ form.class_applying(class="form-control border-0", id="class", placeholder="Class Applying For") }}
+                                    <label for="class">{{ form.class_applying.label.text }}</label>
+                                    {% if form.class_applying.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.class_applying.errors %}
+                                                <span>{{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-floating">
+                                    {{ form.previous_school(class="form-control border-0", id="previousSchool", placeholder="Previous School (if any)") }}
+                                    <label for="previousSchool">{{ form.previous_school.label.text }}</label>
+                                    {% if form.previous_school.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.previous_school.errors %}
+                                                <span>{{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    {{ form.date_of_birth(class="form-control border-0", id="dob", type="date") }}
+                                    <label for="dob">{{ form.date_of_birth.label.text }}</label>
+                                    {% if form.date_of_birth.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.date_of_birth.errors %}
+                                                <span>{{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-12 text-center">
+                                {{ form.submit(class="btn btn-primary py-3 px-5") }}
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Admission Form End -->
+{% endblock %}
