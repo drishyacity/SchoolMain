@@ -1,25 +1,19 @@
 import os
 import logging
+import uuid
 from datetime import datetime
 from flask import Flask, render_template, redirect, url_for, flash, request, jsonify, abort
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import DeclarativeBase
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
 from werkzeug.middleware.proxy_fix import ProxyFix
-import uuid
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-# Initialize SQLAlchemy with a base class
-class Base(DeclarativeBase):
-    pass
-
-# Create a db instance
-db = SQLAlchemy(model_class=Base)
+# Import db from database.py
+from database import db
 
 # Create the app
 app = Flask(__name__)
@@ -45,21 +39,32 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 # Initialize the database
 db.init_app(app)
 
+# Import models
+import models
+
+# Import forms and utils
+import forms
+from utils import allowed_file, save_file
+
 # Initialize login manager
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'admin_login'
 login_manager.login_message = 'Please log in to access the admin panel.'
 
+# Import models and forms after everything is set up
 from models import User, News, Event, GalleryImage, Contact, AboutSection, AcademicProgram, SchoolSetting, \
     Teacher, Facility, Syllabus, AdmissionForm, HomeSlider
 from forms import LoginForm, NewsForm, EventForm, GalleryUploadForm, ContactForm, AboutSectionForm, AcademicProgramForm, \
     SchoolSettingsForm, UserForm, ProfileForm, TeacherForm, FacilityForm, SyllabusForm, AdmissionForm, HomeSliderForm, AdmissionResponseForm
-from utils import allowed_file, save_file
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+@app.context_processor
+def inject_current_year():
+    return {'current_year': datetime.now().year}
 
 # Create database tables
 with app.app_context():

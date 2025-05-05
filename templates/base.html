@@ -4,58 +4,142 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Shree Gyan Bharti High School{% endblock %}</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    {% block extra_css %}{% endblock %}
-    <style>
-        {% block inline_css %}{% endblock %}
-    </style>
+    {% block head_extras %}{% endblock %}
 </head>
 <body>
-    {% include 'includes/header.html' %}
-    
+    <!-- Header -->
+    <header class="bg-primary text-white">
+        <div class="container py-3">
+            <div class="row align-items-center">
+                <div class="col-md-3 text-center text-md-start mb-3 mb-md-0">
+                    <a href="{{ url_for('index') }}">
+                        <img src="{{ url_for('static', filename='uploads/' + settings.school_logo_path) }}" alt="{{ settings.school_name }}" class="img-fluid" style="max-height: 80px;">
+                    </a>
+                </div>
+                <div class="col-md-9 text-center text-md-end">
+                    <h2>{{ settings.school_name }}</h2>
+                    <p class="mb-0"><i class="fas fa-map-marker-alt me-2"></i>{{ settings.school_address }}</p>
+                    <p class="mb-0"><i class="fas fa-phone me-2"></i>{{ settings.school_phone }} | <i class="fas fa-envelope me-2"></i>{{ settings.school_email }}</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{{ url_for('index') }}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/about' %}active{% endif %}" href="{{ url_for('about') }}">About Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/academics' %}active{% endif %}" href="{{ url_for('academics') }}">Academics</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/teachers' %}active{% endif %}" href="{{ url_for('teachers') }}">Our Teachers</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/facilities' %}active{% endif %}" href="{{ url_for('facilities') }}">Facilities</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/syllabus' %}active{% endif %}" href="{{ url_for('syllabus') }}">Syllabus</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/admission' %}active{% endif %}" href="{{ url_for('admission') }}">Admission</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/events' %}active{% endif %}" href="{{ url_for('events') }}">Events</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/gallery' %}active{% endif %}" href="{{ url_for('gallery') }}">Gallery</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/news' %}active{% endif %}" href="{{ url_for('news') }}">News</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/achievements' %}active{% endif %}" href="{{ url_for('achievements') }}">Achievements</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/contact' %}active{% endif %}" href="{{ url_for('contact') }}">Contact</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
     <!-- Flash Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div class="flash-messages">
+    <div class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
                         {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <h5>Contact Us</h5>
+                    <p><i class="fas fa-map-marker-alt me-2"></i>{{ settings.school_address }}</p>
+                    <p><i class="fas fa-phone me-2"></i>{{ settings.school_phone }}</p>
+                    <p><i class="fas fa-envelope me-2"></i>{{ settings.school_email }}</p>
+                </div>
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{{ url_for('index') }}" class="text-white">Home</a></li>
+                        <li><a href="{{ url_for('about') }}" class="text-white">About Us</a></li>
+                        <li><a href="{{ url_for('academics') }}" class="text-white">Academics</a></li>
+                        <li><a href="{{ url_for('admission') }}" class="text-white">Admission</a></li>
+                        <li><a href="{{ url_for('contact') }}" class="text-white">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Follow Us</h5>
+                    <div class="social-links">
+                        <a href="#" class="text-white me-2"><i class="fab fa-facebook-f fa-lg"></i></a>
+                        <a href="#" class="text-white me-2"><i class="fab fa-twitter fa-lg"></i></a>
+                        <a href="#" class="text-white me-2"><i class="fab fa-instagram fa-lg"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-youtube fa-lg"></i></a>
+                    </div>
+                </div>
             </div>
-        {% endif %}
-    {% endwith %}
-    
-    {% block content %}{% endblock %}
-    
-    {% include 'includes/footer.html' %}
-    
-    <script>
-        // Base JS for navigation
-        const menuToggle = document.getElementById("menu-toggle");
-        const nav = document.getElementById("nav");
-        const loginDropdown = document.getElementById("login-dropdown");
-        const loginBtn = document.getElementById("login-btn");
+            <hr class="my-4">
+            <div class="text-center">
+                <p>&copy; {{ current_year }} {{ settings.school_name }}. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
 
-        menuToggle.addEventListener("click", () => {
-            nav.classList.toggle("active");
-        });
-
-        loginBtn.addEventListener("click", (e) => {
-            e.preventDefault();
-            loginDropdown.classList.toggle("active");
-        });
-
-        document.addEventListener("click", (e) => {
-            if (!loginDropdown.contains(e.target) && !loginBtn.contains(e.target)) {
-                loginDropdown.classList.remove("active");
-            }
-        });
-    </script>
-    
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>
