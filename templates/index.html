@@ -4,391 +4,312 @@
 
 {% block inline_css %}
 /* Hero Section */
-.hero-section {
-    position: relative;
-    background-image: linear-gradient(rgba(12, 45, 87, 0.8), rgba(12, 45, 87, 0.8)), url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1500&q=80');
-    background-size: cover;
-    background-position: center;
+.hero {
+    background-color: #0c2d57;
     color: white;
-    padding: 80px 20px;
     text-align: center;
-}
-
-.hero-section h1 {
-    font-size: 2.5rem;
-    margin-bottom: 20px;
-}
-
-.hero-section p {
-    font-size: 1.2rem;
-    max-width: 700px;
-    margin: 0 auto 30px;
-}
-
-.hero-btn {
-    display: inline-block;
-    padding: 12px 30px;
-    background-color: white;
-    color: #0c2d57;
-    text-decoration: none;
-    border-radius: 5px;
+    padding: 20px;
+    font-size: 22px;
     font-weight: bold;
-    transition: all 0.3s;
 }
 
-.hero-btn:hover {
-    background-color: #f1f1f1;
-    transform: translateY(-2px);
-}
-
-/* Features Section */
-.features {
-    padding: 60px 20px;
-    text-align: center;
-}
-
-.features h2 {
-    color: #0c2d57;
-    margin-bottom: 40px;
-}
-
-.features-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 30px;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.feature-item {
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-    padding: 30px 20px;
-    transition: transform 0.3s;
-}
-
-.feature-item:hover {
-    transform: translateY(-5px);
-}
-
-.feature-icon {
-    font-size: 2.5rem;
-    color: #0c2d57;
-    margin-bottom: 20px;
-}
-
-.feature-item h3 {
-    margin-bottom: 15px;
-    color: #0c2d57;
-}
-
-/* News Section */
-.news-section {
-    background-color: #f1f5f9;
-    padding: 60px 20px;
-}
-
-.news-section h2 {
-    text-align: center;
-    color: #0c2d57;
-    margin-bottom: 40px;
-}
-
-.news-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.news-card {
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+/* Slider Styles */
+.slider-container {
+    position: relative;
+    width: 100%;
+    height: auto;
     overflow: hidden;
 }
 
-.news-img {
+.slider {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+    height: 100%;
+}
+
+.slide {
+    min-width: 100%;
+    height: 100%;
+}
+
+.slide img {
     width: 100%;
-    height: 180px;
+    height: 100%;
     object-fit: cover;
 }
 
-.news-content {
-    padding: 20px;
+.slider-nav {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 10;
 }
 
-.news-date {
-    color: #666;
-    font-size: 0.9rem;
-    margin-bottom: 10px;
-}
-
-.news-title {
-    color: #0c2d57;
-    margin-bottom: 10px;
-}
-
-.news-excerpt {
-    margin-bottom: 15px;
-}
-
-.news-link {
-    color: #0c2d57;
-    text-decoration: none;
-    font-weight: bold;
-}
-
-.view-all {
-    display: block;
-    text-align: center;
-    margin-top: 30px;
-}
-
-.view-all a {
-    display: inline-block;
-    padding: 10px 25px;
-    background-color: #0c2d57;
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-    font-weight: bold;
+.slider-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
     transition: background-color 0.3s;
 }
 
-.view-all a:hover {
-    background-color: #081d3a;
+.slider-dot.active {
+    background-color: white;
 }
 
-/* Events Section */
-.events-section {
-    padding: 60px 20px;
-}
-
-.events-section h2 {
-    text-align: center;
-    color: #0c2d57;
-    margin-bottom: 40px;
-}
-
-.events-list {
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.event-item {
+.slider-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 10;
     display: flex;
     align-items: center;
+    justify-content: center;
+}
+
+.slider-arrow:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.slider-arrow.prev {
+    left: 20px;
+}
+
+.slider-arrow.next {
+    right: 20px;
+}
+
+/* Cards Section */
+.cards {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    padding: 30px 10px;
+    background: #f9f9f9;
+    gap: 15px;
+}
+
+.card {
     background: white;
     border-radius: 10px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
-    overflow: hidden;
-}
-
-.event-date {
-    background-color: #0c2d57;
-    color: white;
-    padding: 15px;
-    min-width: 100px;
-    text-align: center;
-    font-weight: bold;
-}
-
-.event-date .day {
-    font-size: 1.8rem;
-    line-height: 1;
-}
-
-.event-date .month {
-    font-size: 1rem;
-}
-
-.event-info {
     padding: 20px;
-    flex-grow: 1;
+    margin: 10px;
+    flex: 1 1 250px;
+    max-width: 300px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer;
 }
 
-.event-info h3 {
-    color: #0c2d57;
-    margin-bottom: 5px;
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
 
-.event-location {
+.card img {
+    width: 50px;
     margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    color: #666;
 }
 
-.event-location i {
-    margin-right: 5px;
+.card h3 {
+    color: #0c2d57;
+    margin-bottom: 10px;
+}
+
+.card p {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.card a {
+    text-decoration: none;
+    color: #0c2d57;
+    font-weight: bold;
+    display: block;
 }
 {% endblock %}
 
 {% block content %}
-<section class="hero-section">
-    <h1>Welcome to {{ settings.school_name if settings else 'Shree Gyan Bharti High School' }}</h1>
-    <p>Empowering young minds with knowledge, values, and a vision for a brighter future. Join us on a journey of academic excellence and holistic development.</p>
-    <a href="#" class="hero-btn">Learn More</a>
+<section class="hero">
+    WELCOME TO SHREE GYAN BHARTI HIGH SCHOOL
 </section>
 
-<section class="features">
-    <h2>Why Choose Our School?</h2>
-    <div class="features-grid">
-        <div class="feature-item">
-            <div class="feature-icon">
-                <i class="fas fa-graduation-cap"></i>
-            </div>
-            <h3>Academic Excellence</h3>
-            <p>Our dedicated faculty ensures that students achieve their full academic potential through personalized attention and innovative teaching methods.</p>
-        </div>
-        
-        <div class="feature-item">
-            <div class="feature-icon">
-                <i class="fas fa-microscope"></i>
-            </div>
-            <h3>Modern Facilities</h3>
-            <p>State-of-the-art classrooms, laboratories, and sports facilities create an environment conducive to holistic learning and development.</p>
-        </div>
-        
-        <div class="feature-item">
-            <div class="feature-icon">
-                <i class="fas fa-users"></i>
-            </div>
-            <h3>Character Building</h3>
-            <p>We emphasize values, ethics, and character development alongside academic curriculum to shape responsible citizens of tomorrow.</p>
-        </div>
-    </div>
-</section>
-
-<section class="news-section">
-    <h2>Latest News</h2>
-    
-    <div class="news-grid">
-        {% if news_items %}
-            {% for news in news_items %}
-            <div class="news-card">
-                {% if news.image_path %}
-                <img src="{{ url_for('static', filename='uploads/' + news.image_path) }}" alt="{{ news.title }}" class="news-img">
-                {% else %}
-                <img src="https://images.unsplash.com/photo-1516979187457-637abb4f9353?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60" alt="{{ news.title }}" class="news-img">
-                {% endif %}
-                <div class="news-content">
-                    <div class="news-date">{{ news.date.strftime('%B %d, %Y') }}</div>
-                    <h3 class="news-title">{{ news.title }}</h3>
-                    <p class="news-excerpt">{{ news.content|striptags|truncate(100) }}</p>
-                    <a href="{{ url_for('news_detail', news_id=news.id) }}" class="news-link">Read More →</a>
-                </div>
+<!-- Photo Slider Section -->
+<section class="slider-container">
+    <div class="slider">
+        {% if home_sliders %}
+            {% for slider in home_sliders %}
+            <div class="slide">
+                <img src="{{ url_for('static', filename='uploads/' + slider.image_path) }}" alt="School Image {{ loop.index }}">
             </div>
             {% endfor %}
         {% else %}
-            <div class="news-card">
-                <img src="https://images.unsplash.com/photo-1516979187457-637abb4f9353?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60" alt="School News" class="news-img">
-                <div class="news-content">
-                    <div class="news-date">May 15, 2025</div>
-                    <h3 class="news-title">Annual Science Exhibition</h3>
-                    <p class="news-excerpt">Students displayed their innovative science projects at our annual exhibition, impressing judges and visitors alike.</p>
-                    <a href="#" class="news-link">Read More →</a>
-                </div>
+            <div class="slide">
+                <img src="{{ url_for('static', filename='uploads/IMG-20250426-WA0175.jpg') if 'IMG-20250426-WA0175.jpg' in images_list else url_for('static', filename='uploads/slide1.jpg') }}" alt="School Image 1">
             </div>
-            
-            <div class="news-card">
-                <img src="https://images.unsplash.com/photo-1520466809213-7b9a56adcd45?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60" alt="School News" class="news-img">
-                <div class="news-content">
-                    <div class="news-date">May 10, 2025</div>
-                    <h3 class="news-title">Sports Day Celebration</h3>
-                    <p class="news-excerpt">Our annual sports day was a grand success with enthusiastic participation from students across all grades.</p>
-                    <a href="#" class="news-link">Read More →</a>
-                </div>
+            <div class="slide">
+                <img src="{{ url_for('static', filename='uploads/IMG-20250426-WA0111.jpg') if 'IMG-20250426-WA0111.jpg' in images_list else url_for('static', filename='uploads/slide2.jpg') }}" alt="School Image 2">
             </div>
-            
-            <div class="news-card">
-                <img src="https://images.unsplash.com/photo-1568792923760-d70635a89fdd?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60" alt="School News" class="news-img">
-                <div class="news-content">
-                    <div class="news-date">May 5, 2025</div>
-                    <h3 class="news-title">Cultural Fest 2025</h3>
-                    <p class="news-excerpt">Students showcased their talents through music, dance, drama, and art at our vibrant cultural festival.</p>
-                    <a href="#" class="news-link">Read More →</a>
-                </div>
+            <div class="slide">
+                <img src="{{ url_for('static', filename='uploads/IMG-20250426-WA0117.jpg') if 'IMG-20250426-WA0117.jpg' in images_list else url_for('static', filename='uploads/slide3.jpg') }}" alt="School Image 3">
+            </div>
+            <div class="slide">
+                <img src="{{ url_for('static', filename='uploads/IMG-20250426-WA0121.jpg') if 'IMG-20250426-WA0121.jpg' in images_list else url_for('static', filename='uploads/slide4.jpg') }}" alt="School Image 4">
+            </div>
+            <div class="slide">
+                <img src="{{ url_for('static', filename='uploads/IMG-20250426-WA0034.jpg') if 'IMG-20250426-WA0034.jpg' in images_list else url_for('static', filename='uploads/slide5.jpg') }}" alt="School Image 5">
             </div>
         {% endif %}
     </div>
     
-    <div class="view-all">
-        <a href="{{ url_for('news') }}">View All News</a>
+    <button class="slider-arrow prev">&#10094;</button>
+    <button class="slider-arrow next">&#10095;</button>
+    
+    <div class="slider-nav">
+        {% if home_sliders %}
+            {% for slider in home_sliders %}
+            <div class="slider-dot {{ 'active' if loop.first else '' }}" data-index="{{ loop.index0 }}"></div>
+            {% endfor %}
+        {% else %}
+            <div class="slider-dot active" data-index="0"></div>
+            <div class="slider-dot" data-index="1"></div>
+            <div class="slider-dot" data-index="2"></div>
+            <div class="slider-dot" data-index="3"></div>
+            <div class="slider-dot" data-index="4"></div>
+        {% endif %}
     </div>
 </section>
 
-<section class="events-section">
-    <h2>Upcoming Events</h2>
-    
-    <div class="events-list">
-        {% if events %}
-            {% for event in events %}
-            <div class="event-item">
-                <div class="event-date">
-                    <div class="day">{{ event.date.strftime('%d') }}</div>
-                    <div class="month">{{ event.date.strftime('%b') }}</div>
-                </div>
-                <div class="event-info">
-                    <h3>{{ event.title }}</h3>
-                    <div class="event-location">
-                        <i class="fas fa-map-marker-alt"></i> {{ event.location }}
-                    </div>
-                    <p>{{ event.description|striptags|truncate(100) }}</p>
-                </div>
-            </div>
-            {% endfor %}
-        {% else %}
-            <div class="event-item">
-                <div class="event-date">
-                    <div class="day">25</div>
-                    <div class="month">Jun</div>
-                </div>
-                <div class="event-info">
-                    <h3>Parent-Teacher Meeting</h3>
-                    <div class="event-location">
-                        <i class="fas fa-map-marker-alt"></i> School Auditorium
-                    </div>
-                    <p>Discussing student progress and upcoming curriculum changes for the new academic year.</p>
-                </div>
-            </div>
-            
-            <div class="event-item">
-                <div class="event-date">
-                    <div class="day">30</div>
-                    <div class="month">Jun</div>
-                </div>
-                <div class="event-info">
-                    <h3>Annual School Exhibition</h3>
-                    <div class="event-location">
-                        <i class="fas fa-map-marker-alt"></i> School Campus
-                    </div>
-                    <p>Showcasing student projects, artworks, and achievements from the academic year.</p>
-                </div>
-            </div>
-            
-            <div class="event-item">
-                <div class="event-date">
-                    <div class="day">15</div>
-                    <div class="month">Jul</div>
-                </div>
-                <div class="event-info">
-                    <h3>Sports Day</h3>
-                    <div class="event-location">
-                        <i class="fas fa-map-marker-alt"></i> School Playground
-                    </div>
-                    <p>Annual sports competition featuring track and field events, team sports, and more.</p>
-                </div>
-            </div>
-        {% endif %}
+<section class="cards">
+    <div class="card" onclick="window.location.href='{{ url_for("news") }}'">
+        <h3>LATEST NEWS</h3>
+        <p>Stay updated with our school's latest announcements and achievements.</p>
+        <a href="{{ url_for('news') }}">READ MORE</a>
+    </div>
+
+    <div class="card" onclick="window.location.href='{{ url_for("events") }}'">
+        <h3>UPCOMING EVENTS</h3>
+        <p>Check out our calendar for sports days, annual functions, and more.</p>
+        <a href="{{ url_for('events') }}">READ MORE</a>
     </div>
     
-    <div class="view-all">
-        <a href="{{ url_for('events') }}">View All Events</a>
+    <div class="card" onclick="window.location.href='{{ url_for("achievements") }}'">
+        <h3>OUR ACHIEVEMENTS</h3>
+        <p>Celebrating our students' excellence in academics and extracurriculars.</p>
+        <a href="{{ url_for('achievements') }}">READ MORE</a>
+    </div>
+
+    <div class="card" onclick="window.location.href='{{ url_for("admission") }}'">
+        <h3>ADMISSIONS</h3>
+        <p>Learn about our admission process, requirements and important dates.</p>
+        <a href="{{ url_for('admission') }}">READ MORE</a>
+    </div>
+
+    <div class="card" onclick="window.location.href='{{ url_for("syllabus") }}'">
+        <h3>SYLLABUS</h3>
+        <p>Explore our comprehensive curriculum for all classes and subjects.</p>
+        <a href="{{ url_for('syllabus') }}">READ MORE</a>
+    </div>
+
+    <div class="card" onclick="window.location.href='{{ url_for("gallery") }}'">
+        <h3>GALLERY</h3>
+        <p>Explore our school through photos of events, activities and facilities.</p>
+        <a href="{{ url_for('gallery') }}">READ MORE</a>
+    </div>
+
+    <div class="card" onclick="window.location.href='{{ url_for("teachers") }}'">
+        <h3>TEACHERS</h3>
+        <p>Meet our dedicated faculty and learn about their qualifications.</p>
+        <a href="{{ url_for('teachers') }}">READ MORE</a>
+    </div>
+
+    <div class="card" onclick="window.location.href='{{ url_for("facilities") }}'">
+        <h3>FACILITIES</h3>
+        <p>Discover our state-of-the-art infrastructure and learning resources.</p>
+        <a href="{{ url_for('facilities') }}">READ MORE</a>
     </div>
 </section>
+
+<script>
+// Slider functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const slider = document.querySelector('.slider');
+    const slides = document.querySelectorAll('.slide');
+    const dots = document.querySelectorAll('.slider-dot');
+    const prevBtn = document.querySelector('.prev');
+    const nextBtn = document.querySelector('.next');
+    
+    let currentIndex = 0;
+    let slideInterval;
+    const slideDuration = 5000; // 5 seconds
+    
+    function goToSlide(index) {
+        if (index < 0) {
+            index = slides.length - 1;
+        } else if (index >= slides.length) {
+            index = 0;
+        }
+        
+        currentIndex = index;
+        slider.style.transform = `translateX(-${currentIndex * 100}%)`;
+        
+        // Update dots
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === currentIndex);
+        });
+    }
+    
+    function nextSlide() {
+        goToSlide(currentIndex + 1);
+    }
+    
+    function prevSlide() {
+        goToSlide(currentIndex - 1);
+    }
+    
+    function startSlider() {
+        slideInterval = setInterval(nextSlide, slideDuration);
+    }
+    
+    function resetInterval() {
+        clearInterval(slideInterval);
+        startSlider();
+    }
+    
+    // Event listeners
+    nextBtn.addEventListener('click', () => {
+        nextSlide();
+        resetInterval();
+    });
+    
+    prevBtn.addEventListener('click', () => {
+        prevSlide();
+        resetInterval();
+    });
+    
+    dots.forEach((dot, i) => {
+        dot.addEventListener('click', () => {
+            goToSlide(i);
+            resetInterval();
+        });
+    });
+    
+    // Start the slider
+    startSlider();
+});
+</script>
 {% endblock %}

@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileAllowed
-from wtforms import StringField, PasswordField, TextAreaField, DateField, TimeField, IntegerField, BooleanField, MultipleFileField, SubmitField
-from wtforms.validators import DataRequired, Email, Length, EqualTo, Optional
+from flask_wtf.file import FileField, FileAllowed, FileRequired
+from wtforms import StringField, PasswordField, TextAreaField, DateField, TimeField, IntegerField, BooleanField, MultipleFileField, SubmitField, SelectField
+from wtforms.validators import DataRequired, Email, Length, EqualTo, Optional, NumberRange
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -88,3 +88,63 @@ class ProfileForm(FlaskForm):
         EqualTo('new_password', message='Passwords must match')
     ])
     submit = SubmitField('Update Profile')
+
+class TeacherForm(FlaskForm):
+    name = StringField('Name', validators=[DataRequired(), Length(max=100)])
+    position = StringField('Position', validators=[DataRequired(), Length(max=100)])
+    qualification = StringField('Qualification', validators=[DataRequired(), Length(max=200)])
+    bio = TextAreaField('Biography', validators=[Optional()])
+    image = FileField('Image', validators=[
+        FileAllowed(['jpg', 'jpeg', 'png', 'gif'], 'Images only!')
+    ])
+    order = IntegerField('Display Order', default=0)
+    submit = SubmitField('Save')
+
+class FacilityForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired(), Length(max=100)])
+    description = TextAreaField('Description', validators=[DataRequired()])
+    image = FileField('Image', validators=[
+        FileAllowed(['jpg', 'jpeg', 'png', 'gif'], 'Images only!')
+    ])
+    order = IntegerField('Display Order', default=0)
+    submit = SubmitField('Save')
+
+class SyllabusForm(FlaskForm):
+    class_name = StringField('Class Name', validators=[DataRequired(), Length(max=50)])
+    subject = StringField('Subject', validators=[DataRequired(), Length(max=100)])
+    description = TextAreaField('Description', validators=[DataRequired()])
+    file = FileField('Syllabus File (PDF)', validators=[
+        Optional(),
+        FileAllowed(['pdf'], 'PDF files only!')
+    ])
+    order = IntegerField('Display Order', default=0)
+    submit = SubmitField('Save')
+
+class AdmissionForm(FlaskForm):
+    student_name = StringField('Student Name', validators=[DataRequired(), Length(max=100)])
+    parent_name = StringField('Parent/Guardian Name', validators=[DataRequired(), Length(max=100)])
+    email = StringField('Email', validators=[DataRequired(), Email(), Length(max=120)])
+    phone = StringField('Phone Number', validators=[DataRequired(), Length(max=20)])
+    address = TextAreaField('Address', validators=[DataRequired()])
+    class_applying = StringField('Class Applying For', validators=[DataRequired(), Length(max=50)])
+    previous_school = StringField('Previous School (if any)', validators=[Optional(), Length(max=200)])
+    date_of_birth = DateField('Date of Birth', validators=[DataRequired()])
+    submit = SubmitField('Submit Application')
+
+class HomeSliderForm(FlaskForm):
+    title = StringField('Title (optional)', validators=[Optional(), Length(max=200)])
+    image = FileField('Image', validators=[
+        FileAllowed(['jpg', 'jpeg', 'png', 'gif'], 'Images only!')
+    ])
+    order = IntegerField('Display Order', default=0, validators=[NumberRange(min=0)])
+    active = BooleanField('Active', default=True)
+    submit = SubmitField('Save')
+    
+class AdmissionResponseForm(FlaskForm):
+    status = SelectField('Status', choices=[
+        ('Pending', 'Pending'),
+        ('Approved', 'Approved'),
+        ('Rejected', 'Rejected')
+    ], validators=[DataRequired()])
+    comments = TextAreaField('Comments', validators=[Optional()])
+    submit = SubmitField('Update Status')

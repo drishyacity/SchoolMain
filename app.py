@@ -51,8 +51,10 @@ login_manager.init_app(app)
 login_manager.login_view = 'admin_login'
 login_manager.login_message = 'Please log in to access the admin panel.'
 
-from models import User, News, Event, GalleryImage, Contact, AboutSection, AcademicProgram, SchoolSetting
-from forms import LoginForm, NewsForm, EventForm, GalleryUploadForm, ContactForm, AboutSectionForm, AcademicProgramForm, SchoolSettingsForm, UserForm, ProfileForm
+from models import User, News, Event, GalleryImage, Contact, AboutSection, AcademicProgram, SchoolSetting, \
+    Teacher, Facility, Syllabus, AdmissionForm, HomeSlider
+from forms import LoginForm, NewsForm, EventForm, GalleryUploadForm, ContactForm, AboutSectionForm, AcademicProgramForm, \
+    SchoolSettingsForm, UserForm, ProfileForm, TeacherForm, FacilityForm, SyllabusForm, AdmissionForm, HomeSliderForm, AdmissionResponseForm
 from utils import allowed_file, save_file
 
 @login_manager.user_loader
@@ -91,7 +93,14 @@ def index():
     settings = SchoolSetting.query.first()
     news_items = News.query.order_by(News.date.desc()).limit(3).all()
     events = Event.query.filter(Event.date >= datetime.now()).order_by(Event.date).limit(3).all()
-    return render_template('index.html', settings=settings, news_items=news_items, events=events)
+    home_sliders = HomeSlider.query.filter_by(active=True).order_by(HomeSlider.order).all()
+    # Getting a list of available slider images in the static folder
+    image_paths = []
+    for file in os.listdir(app.config['UPLOAD_FOLDER']):
+        if file.startswith('IMG-') and file.endswith(('.jpg', '.jpeg', '.png', '.gif')):
+            image_paths.append(file)
+    return render_template('index.html', settings=settings, news_items=news_items, events=events, 
+                           home_sliders=home_sliders, images_list=image_paths)
 
 @app.route('/about')
 def about():
@@ -104,6 +113,30 @@ def academics():
     settings = SchoolSetting.query.first()
     programs = AcademicProgram.query.order_by(AcademicProgram.order).all()
     return render_template('academics.html', settings=settings, programs=programs)
+    
+@app.route('/teachers')
+def teachers():
+    settings = SchoolSetting.query.first()
+    teachers_list = Teacher.query.order_by(Teacher.order).all()
+    return render_template('teachers.html', settings=settings, teachers=teachers_list)
+
+@app.route('/facilities')
+def facilities():
+    settings = SchoolSetting.query.first()
+    facilities_list = Facility.query.order_by(Facility.order).all()
+    return render_template('facilities.html', settings=settings, facilities=facilities_list)
+
+@app.route('/syllabus')
+def syllabus():
+    settings = SchoolSetting.query.first()
+    syllabus_list = Syllabus.query.order_by(Syllabus.class_name, Syllabus.subject).all()
+    return render_template('syllabus.html', settings=settings, syllabus_list=syllabus_list)
+
+@app.route('/admission', methods=['GET', 'POST'])
+def admission():
+    settings = SchoolSetting.query.first()
+    form = None  # We'll create an admission form later
+    return render_template('admission.html', settings=settings, form=form)
 
 @app.route('/events')
 def events():

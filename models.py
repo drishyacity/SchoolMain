@@ -92,6 +92,76 @@ class AcademicProgram(db.Model):
     def __repr__(self):
         return f'<AcademicProgram {self.title}>'
 
+class Teacher(db.Model):
+    __tablename__ = 'teachers'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False)
+    position = Column(String(100), nullable=False)
+    qualification = Column(String(200), nullable=False)
+    bio = Column(Text, nullable=True)
+    image_path = Column(String(255))
+    order = Column(Integer, default=0)
+    
+    def __repr__(self):
+        return f'<Teacher {self.name}>'
+
+class Facility(db.Model):
+    __tablename__ = 'facilities'
+
+    id = Column(Integer, primary_key=True)
+    title = Column(String(100), nullable=False)
+    description = Column(Text, nullable=False)
+    image_path = Column(String(255))
+    order = Column(Integer, default=0)
+    
+    def __repr__(self):
+        return f'<Facility {self.title}>'
+
+class Syllabus(db.Model):
+    __tablename__ = 'syllabus'
+
+    id = Column(Integer, primary_key=True)
+    class_name = Column(String(50), nullable=False)
+    subject = Column(String(100), nullable=False)
+    description = Column(Text, nullable=False)
+    file_path = Column(String(255), nullable=True)
+    order = Column(Integer, default=0)
+    
+    def __repr__(self):
+        return f'<Syllabus {self.class_name}-{self.subject}>'
+
+class AdmissionForm(db.Model):
+    __tablename__ = 'admission_forms'
+
+    id = Column(Integer, primary_key=True)
+    student_name = Column(String(100), nullable=False)
+    parent_name = Column(String(100), nullable=False)
+    email = Column(String(120), nullable=False)
+    phone = Column(String(20), nullable=False)
+    address = Column(Text, nullable=False)
+    class_applying = Column(String(50), nullable=False)
+    previous_school = Column(String(200), nullable=True)
+    date_of_birth = Column(Date, nullable=False)
+    submission_date = Column(DateTime, default=datetime.now)
+    status = Column(String(50), default='Pending') # Pending, Approved, Rejected
+    comments = Column(Text, nullable=True)
+    
+    def __repr__(self):
+        return f'<AdmissionForm {self.student_name}>'
+
+class HomeSlider(db.Model):
+    __tablename__ = 'home_sliders'
+
+    id = Column(Integer, primary_key=True)
+    title = Column(String(200), nullable=True)
+    image_path = Column(String(255), nullable=False)
+    order = Column(Integer, default=0)
+    active = Column(Boolean, default=True)
+    
+    def __repr__(self):
+        return f'<HomeSlider {self.id}>'
+
 class SchoolSetting(db.Model):
     __tablename__ = 'school_settings'
     
