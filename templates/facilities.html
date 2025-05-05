@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}Facilities - {{ settings.school_name if settings else 'Shree Gyan Bharti High School' }}{% endblock %}
+
+{% block inline_css %}
+.page-header {
+    background-color: #0c2d57;
+    color: white;
+    padding: 30px 20px;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+}
+
+.facilities-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+}
+
+.facility-item {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 50px;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+}
+
+@media (min-width: 768px) {
+    .facility-item {
+        flex-direction: row;
+    }
+    
+    .facility-item:nth-child(odd) {
+        flex-direction: row-reverse;
+    }
+}
+
+.facility-image {
+    flex: 1;
+    min-height: 300px;
+    background-size: cover;
+    background-position: center;
+}
+
+.facility-info {
+    flex: 1;
+    padding: 30px;
+}
+
+.facility-title {
+    color: #0c2d57;
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+}
+
+.facility-description {
+    color: #555;
+    line-height: 1.6;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    margin: 40px auto;
+    max-width: 600px;
+}
+
+.empty-state h3 {
+    color: #0c2d57;
+    margin-bottom: 15px;
+}
+
+.empty-state p {
+    color: #666;
+    margin-bottom: 0;
+}
+{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <h1>Our Facilities</h1>
+</section>
+
+<section class="facilities-container">
+    {% if facilities %}
+        {% for facility in facilities %}
+            <div class="facility-item">
+                <div class="facility-image" style="background-image: url('{{ url_for('static', filename='uploads/' + facility.image_path) if facility.image_path else url_for('static', filename='img/facility-placeholder.jpg') }}');"></div>
+                <div class="facility-info">
+                    <h2 class="facility-title">{{ facility.title }}</h2>
+                    <div class="facility-description">{{ facility.description }}</div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <h3>School Facilities</h3>
+            <p>Our school offers a variety of modern facilities to enhance the learning experience of our students. Information about our facilities will be updated soon.</p>
+            
+            <div class="default-facilities" style="text-align: left; margin-top: 20px;">
+                <h4>Our facilities include:</h4>
+                <ul>
+                    <li>Spacious Classrooms with modern teaching aids</li>
+                    <li>Well-equipped Science Laboratories</li>
+                    <li>Computer Lab with internet connectivity</li>
+                    <li>Large Library with a diverse collection of books</li>
+                    <li>Sports Facilities including playground and indoor games</li>
+                    <li>Smart Classrooms with interactive teaching technology</li>
+                </ul>
+            </div>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

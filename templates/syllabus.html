@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+
+{% block title %}Syllabus - {{ settings.school_name if settings else 'Shree Gyan Bharti High School' }}{% endblock %}
+
+{% block inline_css %}
+.page-header {
+    background-color: #0c2d57;
+    color: white;
+    padding: 30px 20px;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+}
+
+.syllabus-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+}
+
+.syllabus-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+.syllabus-tab {
+    padding: 12px 20px;
+    background: #f1f1f1;
+    cursor: pointer;
+    margin-right: 5px;
+    margin-bottom: -1px;
+    border: 1px solid #ddd;
+    border-bottom: none;
+    border-radius: 5px 5px 0 0;
+    font-weight: bold;
+    color: #555;
+}
+
+.syllabus-tab.active {
+    background: white;
+    color: #0c2d57;
+    border-bottom: 2px solid white;
+}
+
+.syllabus-content {
+    background: white;
+    padding: 30px;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 5px 5px;
+}
+
+.class-container {
+    display: none;
+}
+
+.class-container.active {
+    display: block;
+}
+
+.subject-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.subject-item {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.subject-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.subject-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.subject-title {
+    color: #0c2d57;
+    font-size: 1.3rem;
+    margin: 0;
+}
+
+.download-btn {
+    padding: 8px 15px;
+    background: #0c2d57;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    transition: background-color 0.3s;
+}
+
+.download-btn:hover {
+    background: #081d3a;
+}
+
+.subject-description {
+    color: #666;
+    line-height: 1.5;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    margin: 40px auto;
+    max-width: 600px;
+}
+
+.empty-state h3 {
+    color: #0c2d57;
+    margin-bottom: 15px;
+}
+
+.empty-state p {
+    color: #666;
+    margin-bottom: 0;
+}
+{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <h1>Syllabus</h1>
+</section>
+
+<section class="syllabus-container">
+    {% if syllabus_list %}
+        {% set classes = [] %}
+        {% for item in syllabus_list %}
+            {% if item.class_name not in classes %}
+                {% set classes = classes + [item.class_name] %}
+            {% endif %}
+        {% endfor %}
+        
+        <div class="syllabus-tabs">
+            {% for class_name in classes %}
+                <div class="syllabus-tab {% if loop.first %}active{% endif %}" data-class="{{ class_name }}">{{ class_name }}</div>
+            {% endfor %}
+        </div>
+        
+        <div class="syllabus-content">
+            {% for class_name in classes %}
+                <div class="class-container {% if loop.first %}active{% endif %}" id="class-{{ class_name }}">
+                    <h2>{{ class_name }} Syllabus</h2>
+                    
+                    <ul class="subject-list">
+                        {% for item in syllabus_list if item.class_name == class_name %}
+                            <li class="subject-item">
+                                <div class="subject-header">
+                                    <h3 class="subject-title">{{ item.subject }}</h3>
+                                    {% if item.file_path %}
+                                        <a href="{{ url_for('static', filename='uploads/' + item.file_path) }}" class="download-btn" target="_blank">
+                                            <i class="fas fa-download"></i> Download PDF
+                                        </a>
+                                    {% endif %}
+                                </div>
+                                <div class="subject-description">{{ item.description }}</div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <h3>Syllabus Information</h3>
+            <p>The detailed syllabus for each class will be updated soon. Our curriculum follows the standards set by the education board and is designed to provide a comprehensive learning experience.</p>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabs = document.querySelectorAll('.syllabus-tab');
+        const classContainers = document.querySelectorAll('.class-container');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs
+                tabs.forEach(t => t.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                this.classList.add('active');
+                
+                // Hide all class containers
+                classContainers.forEach(container => container.classList.remove('active'));
+                
+                // Show the selected class container
+                const className = this.getAttribute('data-class');
+                document.getElementById(`class-${className}`).classList.add('active');
+            });
+        });
+    });
+</script>
+{% endblock %}

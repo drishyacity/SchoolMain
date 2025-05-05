@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+
+{% block title %}Admission - {{ settings.school_name if settings else 'Shree Gyan Bharti High School' }}{% endblock %}
+
+{% block inline_css %}
+.page-header {
+    background-color: #0c2d57;
+    color: white;
+    padding: 30px 20px;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+}
+
+.admission-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+}
+
+.admission-info {
+    flex: 1;
+    min-width: 300px;
+}
+
+.admission-form {
+    flex: 1;
+    min-width: 300px;
+}
+
+.info-card {
+    background: white;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+}
+
+.info-card h3 {
+    color: #0c2d57;
+    margin-top: 0;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.info-card p {
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.info-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.info-list li {
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+    color: #555;
+}
+
+.info-list li:last-child {
+    border-bottom: none;
+}
+
+.info-list li strong {
+    color: #0c2d57;
+    display: inline-block;
+    width: 40%;
+}
+
+.form-card {
+    background: white;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+.form-card h3 {
+    color: #0c2d57;
+    margin-top: 0;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 5px;
+    color: #0c2d57;
+    font-weight: bold;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+textarea.form-control {
+    min-height: 100px;
+}
+
+.form-submit {
+    background: #0c2d57;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    margin-top: 10px;
+    transition: background-color 0.3s;
+}
+
+.form-submit:hover {
+    background: #081d3a;
+}
+
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.required:after {
+    content: "*";
+    color: red;
+    margin-left: 3px;
+}
+
+.empty-state {
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 10px;
+    text-align: center;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.empty-state h3 {
+    color: #0c2d57;
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.empty-state p {
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 0;
+}
+{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <h1>Admission</h1>
+</section>
+
+<section class="admission-container">
+    <div class="admission-info">
+        <div class="info-card">
+            <h3>Admission Information</h3>
+            <p>Thank you for your interest in Shree Gyan Bharti High School. We strive to provide quality education and holistic development for all our students.</p>
+            <p>Please read through our admission process and requirements before submitting your application form.</p>
+        </div>
+        
+        <div class="info-card">
+            <h3>Eligibility & Documents</h3>
+            <ul class="info-list">
+                <li><strong>Age Requirement:</strong> As per board norms</li>
+                <li><strong>Birth Certificate:</strong> Original and photocopy</li>
+                <li><strong>Transfer Certificate:</strong> From previous school (if applicable)</li>
+                <li><strong>Report Card:</strong> From previous school</li>
+                <li><strong>Passport Photos:</strong> 4 recent passport size photographs</li>
+                <li><strong>Aadhar Card:</strong> Photocopy of student and parents</li>
+                <li><strong>Address Proof:</strong> Any valid government document</li>
+            </ul>
+        </div>
+        
+        <div class="info-card">
+            <h3>Important Dates</h3>
+            <ul class="info-list">
+                <li><strong>Form Submission:</strong> Throughout the year</li>
+                <li><strong>Entrance Test:</strong> As per schedule</li>
+                <li><strong>Interview:</strong> After entrance test</li>
+                <li><strong>Results:</strong> Within one week of interview</li>
+                <li><strong>Fee Payment:</strong> Within 7 days of selection</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="admission-form">
+        {% if form %}
+            <div class="form-card">
+                <h3>Online Application Form</h3>
+                
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="form-group">
+                        <label class="form-label required">Student's Name</label>
+                        {{ form.student_name(class="form-control", placeholder="Full Name") }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label required">Parent/Guardian Name</label>
+                        {{ form.parent_name(class="form-control", placeholder="Parent/Guardian Full Name") }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label required">Email Address</label>
+                        {{ form.email(class="form-control", placeholder="email@example.com") }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label required">Phone Number</label>
+                        {{ form.phone(class="form-control", placeholder="Contact Number") }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label required">Home Address</label>
+                        {{ form.address(class="form-control", placeholder="Complete Address") }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label required">Class Applying For</label>
+                        {{ form.class_applying(class="form-control", placeholder="e.g. Class 6") }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Previous School (if any)</label>
+                        {{ form.previous_school(class="form-control", placeholder="Name of Previous School") }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label required">Date of Birth</label>
+                        {{ form.date_of_birth(class="form-control", type="date") }}
+                    </div>
+                    
+                    <button type="submit" class="form-submit">Submit Application</button>
+                </form>
+            </div>
+        {% else %}
+            <div class="form-card">
+                <h3>Admission Form</h3>
+                <div class="empty-state">
+                    <h3>Thank you for your interest</h3>
+                    <p>Our online application form is currently being updated. Please contact our school's admission office for applying directly or check back later.</p>
+                    <p style="margin-top: 20px;"><strong>Contact:</strong> {{ settings.school_phone if settings else '+91 1234567890' }}</p>
+                    <p><strong>Email:</strong> {{ settings.school_email if settings else 'info@sgbhs.edu' }}</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

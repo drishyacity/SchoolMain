@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}Teachers - {{ settings.school_name if settings else 'Shree Gyan Bharti High School' }}{% endblock %}
+
+{% block inline_css %}
+.page-header {
+    background-color: #0c2d57;
+    color: white;
+    padding: 30px 20px;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+}
+
+.teachers-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+}
+
+.teachers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.teacher-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.teacher-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+}
+
+.teacher-image {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+}
+
+.teacher-info {
+    padding: 20px;
+}
+
+.teacher-name {
+    color: #0c2d57;
+    font-size: 1.3rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.teacher-position {
+    color: #555;
+    font-style: italic;
+    margin-bottom: 10px;
+}
+
+.teacher-qualification {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.teacher-bio {
+    color: #666;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    margin: 40px auto;
+    max-width: 600px;
+}
+
+.empty-state h3 {
+    color: #0c2d57;
+    margin-bottom: 15px;
+}
+
+.empty-state p {
+    color: #666;
+    margin-bottom: 0;
+}
+{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <h1>Our Teachers</h1>
+</section>
+
+<section class="teachers-container">
+    {% if teachers %}
+        <div class="teachers-grid">
+            {% for teacher in teachers %}
+                <div class="teacher-card">
+                    {% if teacher.image_path %}
+                        <img src="{{ url_for('static', filename='uploads/' + teacher.image_path) }}" alt="{{ teacher.name }}" class="teacher-image">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='img/teacher-placeholder.jpg') }}" alt="{{ teacher.name }}" class="teacher-image">
+                    {% endif %}
+                    <div class="teacher-info">
+                        <h3 class="teacher-name">{{ teacher.name }}</h3>
+                        <div class="teacher-position">{{ teacher.position }}</div>
+                        <div class="teacher-qualification">
+                            <strong>Qualification:</strong> {{ teacher.qualification }}
+                        </div>
+                        {% if teacher.bio %}
+                            <div class="teacher-bio">{{ teacher.bio }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <h3>Meet Our Faculty</h3>
+            <p>Our dedicated teachers information will be updated soon. Our faculty consists of highly qualified professionals committed to providing quality education.</p>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}
