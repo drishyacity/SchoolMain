@@ -54,7 +54,7 @@ login_manager.login_message = 'Please log in to access the admin panel.'
 from models import User, News, Event, GalleryImage, Contact, AboutSection, AcademicProgram, SchoolSetting, \
     Teacher, Facility, Syllabus, AdmissionForm, HomeSlider
 from forms import LoginForm, NewsForm, EventForm, GalleryUploadForm, ContactForm, AboutSectionForm, AcademicProgramForm, \
-    SchoolSettingsForm, UserForm, ProfileForm, TeacherForm, FacilityForm, SyllabusForm, AdmissionForm, HomeSliderForm, AdmissionResponseForm
+    SchoolSettingsForm, UserForm, ProfileForm, TeacherForm, FacilityForm, SyllabusForm, AdmissionApplicationForm, HomeSliderForm, AdmissionResponseForm
 from utils import allowed_file, save_file
 
 @login_manager.user_loader
@@ -135,7 +135,7 @@ def syllabus():
 @app.route('/admission', methods=['GET', 'POST'])
 def admission():
     settings = SchoolSetting.query.first()
-    form = AdmissionForm()
+    form = AdmissionApplicationForm()
     
     if form.validate_on_submit():
         admission_application = AdmissionForm(

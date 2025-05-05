@@ -120,7 +120,7 @@ class SyllabusForm(FlaskForm):
     order = IntegerField('Display Order', default=0)
     submit = SubmitField('Save')
 
-class AdmissionForm(FlaskForm):
+class AdmissionApplicationForm(FlaskForm):
     student_name = StringField('Student Name', validators=[DataRequired(), Length(max=100)])
     parent_name = StringField('Parent/Guardian Name', validators=[DataRequired(), Length(max=100)])
     email = StringField('Email', validators=[DataRequired(), Email(), Length(max=120)])
