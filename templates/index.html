@@ -159,19 +159,7 @@
             {% endfor %}
         {% else %}
             <div class="slide">
-                <img src="{{ url_for('static', filename='uploads/IMG-20250426-WA0175.jpg') if 'IMG-20250426-WA0175.jpg' in images_list else url_for('static', filename='uploads/slide1.jpg') }}" alt="School Image 1">
-            </div>
-            <div class="slide">
-                <img src="{{ url_for('static', filename='uploads/IMG-20250426-WA0111.jpg') if 'IMG-20250426-WA0111.jpg' in images_list else url_for('static', filename='uploads/slide2.jpg') }}" alt="School Image 2">
-            </div>
-            <div class="slide">
-                <img src="{{ url_for('static', filename='uploads/IMG-20250426-WA0117.jpg') if 'IMG-20250426-WA0117.jpg' in images_list else url_for('static', filename='uploads/slide3.jpg') }}" alt="School Image 3">
-            </div>
-            <div class="slide">
-                <img src="{{ url_for('static', filename='uploads/IMG-20250426-WA0121.jpg') if 'IMG-20250426-WA0121.jpg' in images_list else url_for('static', filename='uploads/slide4.jpg') }}" alt="School Image 4">
-            </div>
-            <div class="slide">
-                <img src="{{ url_for('static', filename='uploads/IMG-20250426-WA0034.jpg') if 'IMG-20250426-WA0034.jpg' in images_list else url_for('static', filename='uploads/slide5.jpg') }}" alt="School Image 5">
+                <img src="{{ url_for('static', filename='uploads/logo/img-20250425-wa0004.jpg') }}" alt="School Image 1">
             </div>
         {% endif %}
     </div>
@@ -186,10 +174,6 @@
             {% endfor %}
         {% else %}
             <div class="slider-dot active" data-index="0"></div>
-            <div class="slider-dot" data-index="1"></div>
-            <div class="slider-dot" data-index="2"></div>
-            <div class="slider-dot" data-index="3"></div>
-            <div class="slider-dot" data-index="4"></div>
         {% endif %}
     </div>
 </section>

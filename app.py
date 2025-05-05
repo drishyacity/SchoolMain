@@ -138,7 +138,7 @@ def admission():
     form = AdmissionForm()
     
     if form.validate_on_submit():
-        admission_application = models.AdmissionForm(
+        admission_application = AdmissionForm(
             student_name=form.student_name.data,
             parent_name=form.parent_name.data,
             email=form.email.data,
