@@ -3,210 +3,98 @@
 {% block title %}Home - {{ settings.school_name }}{% endblock %}
 
 {% block content %}
-<!-- Carousel Start -->
-<div id="home-carousel" class="carousel slide" data-bs-ride="carousel">
-    <div class="carousel-indicators">
+<!-- Hero Section Start -->
+<section class="hero">
+    WELCOME TO SHREE GYAN BHARTI HIGH SCHOOL
+</section>
+
+<!-- Photo Slider Section Start -->
+<section class="slider-container">
+    <div class="slider">
         {% for slider in home_sliders %}
-        <button type="button" data-bs-target="#home-carousel" data-bs-slide-to="{{ loop.index0 }}" {% if loop.first %}class="active"{% endif %}></button>
-        {% endfor %}
-    </div>
-    <div class="carousel-inner">
-        {% for slider in home_sliders %}
-        <div class="carousel-item {% if loop.first %}active{% endif %}">
-            <img src="{{ url_for('static', filename='uploads/' + slider.image_path) }}" class="d-block w-100" alt="{{ slider.title or 'School Slider Image' }}" style="height: 500px; object-fit: cover;">
-            {% if slider.title %}
-            <div class="carousel-caption d-none d-md-block">
-                <h5>{{ slider.title }}</h5>
-            </div>
-            {% endif %}
+        <div class="slide">
+            <img src="{{ url_for('static', filename='uploads/' + slider.image_path) }}" alt="School Image {{ loop.index }}">
         </div>
         {% endfor %}
-    </div>
-    <button class="carousel-control-prev" type="button" data-bs-target="#home-carousel" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Previous</span>
-    </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#home-carousel" data-bs-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Next</span>
-    </button>
-</div>
-<!-- Carousel End -->
-
-<!-- Welcome Section Start -->
-<div class="container py-5">
-    <div class="row">
-        <div class="col-lg-6">
-            <h1 class="display-5 mb-4">Welcome to <span class="text-primary">{{ settings.school_name }}</span></h1>
-            <p class="lead">Our mission is to provide quality education to students in a safe and nurturing environment that promotes academic excellence, character development, and lifelong learning.</p>
-            <p>We believe in the holistic development of our students, focusing not only on academics but also on extracurricular activities, sports, and value education. Our dedicated faculty is committed to helping each student realize their full potential.</p>
-            <div class="d-flex gap-3">
-                <a href="{{ url_for('about') }}" class="btn btn-primary">Learn More</a>
-                <a href="{{ url_for('admission') }}" class="btn btn-outline-primary">Apply Now</a>
-            </div>
+        <!-- Fallback slides if no dynamic content -->
+        {% if not home_sliders or home_sliders|length < 1 %}
+        <div class="slide">
+            <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" alt="School Image 1">
         </div>
-        <div class="col-lg-6 mt-4 mt-lg-0">
-            <div class="row g-4">
-                <div class="col-6">
-                    <div class="feature-box">
-                        <i class="fas fa-graduation-cap"></i>
-                        <h5>Quality Education</h5>
-                        <p>Comprehensive curriculum focused on academic excellence</p>
-                    </div>
-                </div>
-                <div class="col-6">
-                    <div class="feature-box">
-                        <i class="fas fa-users"></i>
-                        <h5>Expert Teachers</h5>
-                        <p>Highly qualified and dedicated teaching staff</p>
-                    </div>
-                </div>
-                <div class="col-6">
-                    <div class="feature-box">
-                        <i class="fas fa-building"></i>
-                        <h5>Modern Facilities</h5>
-                        <p>Well-equipped classrooms and laboratories</p>
-                    </div>
-                </div>
-                <div class="col-6">
-                    <div class="feature-box">
-                        <i class="fas fa-futbol"></i>
-                        <h5>Sports & Activities</h5>
-                        <p>Balanced focus on academics and extracurriculars</p>
-                    </div>
-                </div>
-            </div>
+        <div class="slide">
+            <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" alt="School Image 2">
         </div>
-    </div>
-</div>
-<!-- Welcome Section End -->
-
-<!-- Latest News Section Start -->
-<div class="container-fluid bg-light py-5">
-    <div class="container">
-        <div class="text-center mb-5">
-            <h6 class="text-primary text-uppercase section-title">Latest News</h6>
-            <h2>Stay Updated With School News</h2>
-        </div>
-        <div class="row g-4">
-            {% if news_items %}
-            {% for news in news_items %}
-            <div class="col-lg-4 col-md-6">
-                <div class="card h-100">
-                    {% if news.image_path %}
-                    <img src="{{ url_for('static', filename='uploads/' + news.image_path) }}" class="card-img-top" alt="{{ news.title }}" style="height: 200px; object-fit: cover;">
-                    {% endif %}
-                    <div class="card-body">
-                        <div class="d-flex mb-3">
-                            <div class="news-date me-3">
-                                <div class="date-day">{{ news.date.strftime('%d') }}</div>
-                                <div class="date-month">{{ news.date.strftime('%b') }}</div>
-                            </div>
-                            <h5 class="card-title">{{ news.title }}</h5>
-                        </div>
-                        <p class="card-text">{{ news.content|truncate(100) }}</p>
-                        <a href="{{ url_for('news_detail', news_id=news.id) }}" class="btn btn-primary">Read More</a>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-            {% else %}
-            <div class="col-12 text-center">
-                <p>No news articles available at the moment.</p>
-            </div>
-            {% endif %}
-        </div>
-        <div class="text-center mt-4">
-            <a href="{{ url_for('news') }}" class="btn btn-outline-primary">View All News</a>
-        </div>
-    </div>
-</div>
-<!-- Latest News Section End -->
-
-<!-- Events Section Start -->
-<div class="container py-5">
-    <div class="text-center mb-5">
-        <h6 class="text-primary text-uppercase section-title">Upcoming Events</h6>
-        <h2>Join Our School Events</h2>
-    </div>
-    <div class="row g-4">
-        {% if events %}
-        {% for event in events %}
-        <div class="col-lg-4 col-md-6">
-            <div class="card h-100">
-                {% if event.image_path %}
-                <img src="{{ url_for('static', filename='uploads/' + event.image_path) }}" class="card-img-top" alt="{{ event.title }}" style="height: 200px; object-fit: cover;">
-                {% endif %}
-                <div class="card-body">
-                    <div class="d-flex mb-3">
-                        <div class="news-date me-3">
-                            <div class="date-day">{{ event.date.strftime('%d') }}</div>
-                            <div class="date-month">{{ event.date.strftime('%b') }}</div>
-                        </div>
-                        <h5 class="card-title">{{ event.title }}</h5>
-                    </div>
-                    <p><i class="fas fa-map-marker-alt text-primary me-2"></i>{{ event.location }}</p>
-                    {% if event.time %}
-                    <p><i class="fas fa-clock text-primary me-2"></i>{{ event.time.strftime('%I:%M %p') }}</p>
-                    {% endif %}
-                    <p class="card-text">{{ event.description|truncate(100) }}</p>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
-        {% else %}
-        <div class="col-12 text-center">
-            <p>No upcoming events scheduled at the moment.</p>
+        <div class="slide">
+            <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" alt="School Image 3">
         </div>
         {% endif %}
     </div>
-    <div class="text-center mt-4">
-        <a href="{{ url_for('events') }}" class="btn btn-outline-primary">View All Events</a>
+    
+    <button class="slider-arrow prev">&#10094;</button>
+    <button class="slider-arrow next">&#10095;</button>
+    
+    <div class="slider-nav">
+        {% for slider in home_sliders %}
+        <div class="slider-dot {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}"></div>
+        {% endfor %}
+        {% if not home_sliders or home_sliders|length < 1 %}
+        <div class="slider-dot active" data-index="0"></div>
+        <div class="slider-dot" data-index="1"></div>
+        <div class="slider-dot" data-index="2"></div>
+        {% endif %}
     </div>
-</div>
-<!-- Events Section End -->
+</section>
+<!-- Photo Slider Section End -->
 
-<!-- Gallery Preview Start -->
-<div class="container-fluid bg-light py-5">
-    <div class="container">
-        <div class="text-center mb-5">
-            <h6 class="text-primary text-uppercase section-title">Gallery</h6>
-            <h2>Explore Our School Life</h2>
-        </div>
-        <div class="row g-4">
-            {% for image in images_list[:6] %}
-            <div class="col-lg-4 col-md-6">
-                <div class="gallery-item">
-                    <img src="{{ url_for('static', filename='uploads/' + image) }}" alt="Gallery Image" class="img-fluid">
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        <div class="text-center mt-4">
-            <a href="{{ url_for('gallery') }}" class="btn btn-outline-primary">View Gallery</a>
-        </div>
+<!-- Cards Section Start -->
+<section class="cards">
+    <div class="card" onclick="window.location.href='{{ url_for('news') }}'">
+        <h3>LATEST NEWS</h3>
+        <p>Stay updated with our school's latest announcements and achievements.</p>
+        <a href="{{ url_for('news') }}">READ MORE</a>
     </div>
-</div>
-<!-- Gallery Preview End -->
 
-<!-- Call to Action Start -->
-<div class="container-fluid py-5" style="background-color: var(--bs-primary);">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-8">
-                <h2 class="text-white mb-3">Apply for Admission</h2>
-                <p class="text-white opacity-75">We're now accepting applications for the new academic year. Join our school family and experience quality education in a nurturing environment.</p>
-            </div>
-            <div class="col-lg-4 text-center text-lg-end mt-4 mt-lg-0">
-                <a href="{{ url_for('admission') }}" class="btn btn-light btn-lg">Apply Now</a>
-            </div>
-        </div>
+    <div class="card" onclick="window.location.href='{{ url_for('events') }}'">
+        <h3>UPCOMING EVENTS</h3>
+        <p>Check out our calendar for sports days, annual functions, and more.</p>
+        <a href="{{ url_for('events') }}">READ MORE</a>
     </div>
-</div>
-<!-- Call to Action End -->
 
-<!-- Scroll to Top Button -->
-<button id="scroll-top-btn" title="Go to top">
-    <i class="fas fa-arrow-up"></i>
-</button>
+    <div class="card" onclick="window.location.href='{{ url_for('achievements') }}'">
+        <h3>OUR ACHIEVEMENTS</h3>
+        <p>Celebrating our students' excellence in academics and extracurriculars.</p>
+        <a href="{{ url_for('achievements') }}">READ MORE</a>
+    </div>
+
+    <div class="card" onclick="window.location.href='{{ url_for('admission') }}'">
+        <h3>ADMISSIONS</h3>
+        <p>Learn about our admission process, requirements and important dates.</p>
+        <a href="{{ url_for('admission') }}">READ MORE</a>
+    </div>
+
+    <div class="card" onclick="window.location.href='{{ url_for('syllabus') }}'">
+        <h3>SYLLABUS</h3>
+        <p>Explore our comprehensive curriculum for all classes and subjects.</p>
+        <a href="{{ url_for('syllabus') }}">READ MORE</a>
+    </div>
+
+    <div class="card" onclick="window.location.href='{{ url_for('gallery') }}'">
+        <h3>GALLERY</h3>
+        <p>Explore our school campus, events, and student activities.</p>
+        <a href="{{ url_for('gallery') }}">READ MORE</a>
+    </div>
+
+    <div class="card" onclick="window.location.href='{{ url_for('teachers') }}'">
+        <h3>TEACHERS</h3>
+        <p>Meet our dedicated faculty members and their qualifications.</p>
+        <a href="{{ url_for('teachers') }}">READ MORE</a>
+    </div>
+
+    <div class="card" onclick="window.location.href='{{ url_for('facilities') }}'">
+        <h3>FACILITIES</h3>
+        <p>Discover our state-of-the-art infrastructure and learning resources.</p>
+        <a href="{{ url_for('facilities') }}">READ MORE</a>
+    </div>
+</section>
+<!-- Cards Section End -->
 {% endblock %}
