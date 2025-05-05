@@ -1,35 +1,244 @@
 {% extends 'base.html' %}
 
-{% block title %}Academics - {{ settings.school_name if settings else 'Shree Gyan Bharti High School' }}{% endblock %}
+{% block title %}Academics - {{ settings.school_name }}{% endblock %}
 
 {% block content %}
-<div class="page-content">
-    <h1>Academic Programs</h1>
-    
-    <div class="academic-programs">
-        {% if programs %}
-            {% for program in programs %}
-            <div class="program">
-                <h2>{{ program.title }}</h2>
-                <p>{{ program.description|safe }}</p>
+<!-- Page Header Start -->
+<div class="container-fluid bg-primary py-5 mb-5">
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h1 class="text-white display-4 mt-5 mb-2">Academics</h1>
+                <div class="d-inline-block text-white">
+                    <p class="m-0"><a class="text-white" href="{{ url_for('index') }}">Home</a></p>
+                    <p class="m-0 px-2">-</p>
+                    <p class="m-0">Academics</p>
+                </div>
             </div>
-            {% endfor %}
-        {% else %}
-            <div class="program">
-                <h2>Primary School (Grades 1-5)</h2>
-                <p>Our primary program focuses on foundational skills in literacy, numeracy, and social development through engaging, activity-based learning.</p>
-            </div>
-            
-            <div class="program">
-                <h2>Middle School (Grades 6-8)</h2>
-                <p>We offer a comprehensive curriculum that builds on core subjects while introducing students to new disciplines and critical thinking skills.</p>
-            </div>
-            
-            <div class="program">
-                <h2>High School (Grades 9-12)</h2>
-                <p>Our secondary program prepares students for board examinations and higher education with specialized streams in Science, Commerce and Arts.</p>
-            </div>
-        {% endif %}
+        </div>
     </div>
 </div>
+<!-- Page Header End -->
+
+<!-- Academic Programs Start -->
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h6 class="text-primary text-uppercase section-title">Our Programs</h6>
+        <h2>Comprehensive Academic Programs</h2>
+        <p class="lead">We offer a well-rounded curriculum designed to develop both academic excellence and character.</p>
+    </div>
+    
+    {% if programs %}
+        {% for program in programs %}
+            <div class="row mb-5 p-4 bg-light rounded shadow-sm">
+                <div class="col-lg-{% if loop.index is divisibleby 2 %}6 order-lg-2{% else %}6{% endif %}">
+                    <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" alt="{{ program.title }}" class="img-fluid rounded shadow-sm" style="object-fit: cover; height: 350px; width: 100%;">
+                </div>
+                <div class="col-lg-{% if loop.index is divisibleby 2 %}6 order-lg-1{% else %}6{% endif %} d-flex align-items-center">
+                    <div class="p-3">
+                        <h3 class="mb-4">{{ program.title }}</h3>
+                        <p>{{ program.description }}</p>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <!-- Default programs if no dynamic content is available -->
+        <div class="row mb-5 p-4 bg-light rounded shadow-sm">
+            <div class="col-lg-6">
+                <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" alt="Primary Education" class="img-fluid rounded shadow-sm" style="object-fit: cover; height: 350px; width: 100%;">
+            </div>
+            <div class="col-lg-6 d-flex align-items-center">
+                <div class="p-3">
+                    <h3 class="mb-4">Primary Education (Classes I-V)</h3>
+                    <p>Our primary education program focuses on building a strong foundation in core subjects like language, mathematics, and environmental science. We employ activity-based learning methodologies to make learning fun and engaging for young minds. Children at this level are introduced to computers, arts, music, and physical education to ensure holistic development.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mb-5 p-4 bg-light rounded shadow-sm">
+            <div class="col-lg-6 order-lg-2">
+                <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" alt="Middle School" class="img-fluid rounded shadow-sm" style="object-fit: cover; height: 350px; width: 100%;">
+            </div>
+            <div class="col-lg-6 order-lg-1 d-flex align-items-center">
+                <div class="p-3">
+                    <h3 class="mb-4">Middle School (Classes VI-VIII)</h3>
+                    <p>The middle school curriculum builds upon the foundation laid during primary education. Students are introduced to more advanced concepts in science, mathematics, language arts, and social studies. This phase focuses on developing critical thinking, problem-solving skills, and research abilities. Students are encouraged to participate in projects, debates, and group discussions to enhance their communication skills.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mb-5 p-4 bg-light rounded shadow-sm">
+            <div class="col-lg-6">
+                <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" alt="Secondary Education" class="img-fluid rounded shadow-sm" style="object-fit: cover; height: 350px; width: 100%;">
+            </div>
+            <div class="col-lg-6 d-flex align-items-center">
+                <div class="p-3">
+                    <h3 class="mb-4">Secondary Education (Classes IX-X)</h3>
+                    <p>Our secondary education program prepares students for the board examinations while ensuring a deep understanding of concepts. The curriculum follows the guidelines of the Central Board of Secondary Education (CBSE) with a focus on practical applications. Students receive specialized guidance through career counseling sessions to help them make informed decisions about their future academic paths.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mb-5 p-4 bg-light rounded shadow-sm">
+            <div class="col-lg-6 order-lg-2">
+                <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" alt="Senior Secondary" class="img-fluid rounded shadow-sm" style="object-fit: cover; height: 350px; width: 100%;">
+            </div>
+            <div class="col-lg-6 order-lg-1 d-flex align-items-center">
+                <div class="p-3">
+                    <h3 class="mb-4">Senior Secondary (Classes XI-XII)</h3>
+                    <p>The senior secondary program offers specialized streams in Science, Commerce, and Humanities. Students receive rigorous training in their chosen fields to prepare them for competitive examinations and higher education. Our experienced faculty members provide individualized attention and mentoring to help students achieve their academic goals. Regular workshops, seminars, and expert talks are organized to keep students updated with the latest developments in their respective fields.</p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+<!-- Academic Programs End -->
+
+<!-- Teaching Methodology Start -->
+<div class="container-fluid py-5" style="background-color: var(--bs-light);">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h6 class="text-primary text-uppercase section-title">Our Approach</h6>
+            <h2>Teaching Methodology</h2>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="card border-0 h-100 shadow-sm">
+                    <div class="card-body p-4 text-center">
+                        <i class="fas fa-hands-on fa-3x text-primary mb-3"></i>
+                        <h4 class="card-title">Hands-on Learning</h4>
+                        <p class="card-text">We believe in learning by doing. Our classrooms are equipped with materials that encourage experimentation and exploration, allowing students to gain practical knowledge alongside theoretical concepts.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="card border-0 h-100 shadow-sm">
+                    <div class="card-body p-4 text-center">
+                        <i class="fas fa-chalkboard-teacher fa-3x text-primary mb-3"></i>
+                        <h4 class="card-title">Interactive Teaching</h4>
+                        <p class="card-text">Our teachers use interactive methods to engage students in the learning process. Through discussions, debates, and group activities, we ensure that students are active participants rather than passive recipients of knowledge.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="card border-0 h-100 shadow-sm">
+                    <div class="card-body p-4 text-center">
+                        <i class="fas fa-laptop fa-3x text-primary mb-3"></i>
+                        <h4 class="card-title">Technology Integration</h4>
+                        <p class="card-text">We integrate modern technology in our teaching methods to enhance learning experiences. Smart classrooms, digital resources, and educational software help students understand complex concepts more effectively.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="card border-0 h-100 shadow-sm">
+                    <div class="card-body p-4 text-center">
+                        <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                        <h4 class="card-title">Collaborative Learning</h4>
+                        <p class="card-text">Working together builds important life skills. Our collaborative learning approach encourages students to work in teams, share ideas, and learn from each other while developing communication and leadership skills.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="card border-0 h-100 shadow-sm">
+                    <div class="card-body p-4 text-center">
+                        <i class="fas fa-book-reader fa-3x text-primary mb-3"></i>
+                        <h4 class="card-title">Value-Based Education</h4>
+                        <p class="card-text">Academic excellence goes hand in hand with character development. Our curriculum incorporates moral values, ethics, and social responsibility to nurture compassionate and responsible citizens.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="card border-0 h-100 shadow-sm">
+                    <div class="card-body p-4 text-center">
+                        <i class="fas fa-user-graduate fa-3x text-primary mb-3"></i>
+                        <h4 class="card-title">Personalized Attention</h4>
+                        <p class="card-text">We recognize that each student is unique. Our teachers provide individualized attention to address specific learning needs, ensuring that every student reaches their full potential.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Teaching Methodology End -->
+
+<!-- Assessment System Start -->
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h6 class="text-primary text-uppercase section-title">Evaluation</h6>
+        <h2>Assessment System</h2>
+        <p class="lead">Our comprehensive assessment system is designed to evaluate not just academic knowledge but overall development.</p>
+    </div>
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h4 class="card-title mb-4">Continuous and Comprehensive Evaluation (CCE)</h4>
+                    <p>We follow a Continuous and Comprehensive Evaluation (CCE) system that assesses students throughout the academic year rather than just through final examinations. This approach reduces exam stress and provides a more accurate picture of a student's progress and abilities.</p>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6 mb-4">
+                            <h5><i class="fas fa-clipboard-check text-primary me-2"></i> Formative Assessments</h5>
+                            <ul class="list-unstyled ps-4">
+                                <li><i class="fas fa-check text-primary me-2"></i> Regular class tests</li>
+                                <li><i class="fas fa-check text-primary me-2"></i> Project work</li>
+                                <li><i class="fas fa-check text-primary me-2"></i> Class participation</li>
+                                <li><i class="fas fa-check text-primary me-2"></i> Homework assignments</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <h5><i class="fas fa-file-alt text-primary me-2"></i> Summative Assessments</h5>
+                            <ul class="list-unstyled ps-4">
+                                <li><i class="fas fa-check text-primary me-2"></i> Term examinations</li>
+                                <li><i class="fas fa-check text-primary me-2"></i> Annual examinations</li>
+                                <li><i class="fas fa-check text-primary me-2"></i> Practical examinations</li>
+                                <li><i class="fas fa-check text-primary me-2"></i> Oral evaluations</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-2">
+                        <div class="col-md-6 mb-4">
+                            <h5><i class="fas fa-brain text-primary me-2"></i> Scholastic Assessment</h5>
+                            <ul class="list-unstyled ps-4">
+                                <li><i class="fas fa-check text-primary me-2"></i> Subject knowledge</li>
+                                <li><i class="fas fa-check text-primary me-2"></i> Understanding of concepts</li>
+                                <li><i class="fas fa-check text-primary me-2"></i> Application of knowledge</li>
+                                <li><i class="fas fa-check text-primary me-2"></i> Analytical skills</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <h5><i class="fas fa-heart text-primary me-2"></i> Co-Scholastic Assessment</h5>
+                            <ul class="list-unstyled ps-4">
+                                <li><i class="fas fa-check text-primary me-2"></i> Life skills</li>
+                                <li><i class="fas fa-check text-primary me-2"></i> Attitudes & values</li>
+                                <li><i class="fas fa-check text-primary me-2"></i> Co-curricular activities</li>
+                                <li><i class="fas fa-check text-primary me-2"></i> Health & physical education</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <p class="mt-4">Parents receive detailed progress reports after each term, highlighting their child's strengths and areas for improvement. Parent-teacher meetings are regularly scheduled to discuss student progress and collaborate on strategies for improvement.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Assessment System End -->
+
+<!-- Call to Action Start -->
+<div class="container-fluid py-5" style="background-color: var(--bs-primary);">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h2 class="text-white mb-3">Want to know more about our academic programs?</h2>
+                <p class="text-white opacity-75">Download our detailed academic brochure or visit our campus for a guided tour of our facilities.</p>
+            </div>
+            <div class="col-lg-4 text-center text-lg-end mt-4 mt-lg-0">
+                <a href="{{ url_for('contact') }}" class="btn btn-light btn-lg">Contact Us</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Call to Action End -->
 {% endblock %}
