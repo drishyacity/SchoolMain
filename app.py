@@ -66,6 +66,25 @@ def load_user(user_id):
 def inject_current_year():
     return {'current_year': datetime.now().year}
 
+@app.context_processor
+def inject_settings():
+    try:
+        settings = SchoolSetting.query.first()
+        if not settings:
+            settings = SchoolSetting(
+                school_name='Shree Gyan Bharti High School',
+                school_address='Bakhari Chowk Sitamarhi, Bihar 843302, India',
+                school_phone='+91 1234567890',
+                school_email='info@sgbhs.edu',
+                school_logo_path='IMG-20250425-WA0004.jpg'
+            )
+            db.session.add(settings)
+            db.session.commit()
+        return {'settings': settings}
+    except Exception as e:
+        # If table doesn't exist yet or other error
+        return {'settings': None}
+
 # Create database tables
 with app.app_context():
     db.create_all()
