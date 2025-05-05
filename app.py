@@ -123,8 +123,8 @@ def index():
     for file in os.listdir(app.config['UPLOAD_FOLDER']):
         if file.startswith('IMG-') and file.endswith(('.jpg', '.jpeg', '.png', '.gif')):
             image_paths.append(file)
-    return render_template('index.html', settings=settings, news_items=news_items, events=events, 
-                           home_sliders=home_sliders, images_list=image_paths)
+    return render_template('home_single.html', settings=settings, news_items=news_items, events=events, 
+                           home_sliders=home_sliders, images_list=image_paths, current_year=datetime.now().year)
 
 @app.route('/about')
 def about():
