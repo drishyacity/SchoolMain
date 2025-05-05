@@ -3,100 +3,96 @@
 {% block title %}Home - {{ settings.school_name }}{% endblock %}
 
 {% block content %}
-<!-- Hero Section Start -->
 <section class="hero">
-    WELCOME TO SHREE GYAN BHARTI HIGH SCHOOL
+  WELCOME TO SHREE GYAN BHARTI HIGH SCHOOL
 </section>
 
-<!-- Photo Slider Section Start -->
+<!-- Photo Slider Section -->
 <section class="slider-container">
-    <div class="slider">
-        {% for slider in home_sliders %}
-        <div class="slide">
-            <img src="{{ url_for('static', filename='uploads/' + slider.image_path) }}" alt="School Image {{ loop.index }}">
-        </div>
-        {% endfor %}
-        <!-- Fallback slides if no dynamic content -->
-        {% if not home_sliders or home_sliders|length < 1 %}
-        <div class="slide">
-            <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" alt="School Image 1">
-        </div>
-        <div class="slide">
-            <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" alt="School Image 2">
-        </div>
-        <div class="slide">
-            <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" alt="School Image 3">
-        </div>
-        {% endif %}
+  <div class="slider">
+    {% for slider in home_sliders %}
+    <div class="slide">
+      <img src="{{ url_for('static', filename='uploads/' + slider.image_path) }}" alt="School Image {{ loop.index }}">
     </div>
-    
-    <button class="slider-arrow prev">&#10094;</button>
-    <button class="slider-arrow next">&#10095;</button>
-    
-    <div class="slider-nav">
-        {% for slider in home_sliders %}
-        <div class="slider-dot {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}"></div>
-        {% endfor %}
-        {% if not home_sliders or home_sliders|length < 1 %}
-        <div class="slider-dot active" data-index="0"></div>
-        <div class="slider-dot" data-index="1"></div>
-        <div class="slider-dot" data-index="2"></div>
-        {% endif %}
+    {% endfor %}
+    <!-- Fallback slides if no dynamic content -->
+    {% if not home_sliders or home_sliders|length < 1 %}
+    <div class="slide">
+      <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" alt="School Image 1">
     </div>
+    <div class="slide">
+      <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" alt="School Image 2">
+    </div>
+    <div class="slide">
+      <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" alt="School Image 3">
+    </div>
+    {% endif %}
+  </div>
+  
+  <button class="slider-arrow prev">&#10094;</button>
+  <button class="slider-arrow next">&#10095;</button>
+  
+  <div class="slider-nav">
+    {% for slider in home_sliders %}
+    <div class="slider-dot {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}"></div>
+    {% endfor %}
+    {% if not home_sliders or home_sliders|length < 1 %}
+    <div class="slider-dot active" data-index="0"></div>
+    <div class="slider-dot" data-index="1"></div>
+    <div class="slider-dot" data-index="2"></div>
+    {% endif %}
+  </div>
 </section>
-<!-- Photo Slider Section End -->
 
-<!-- Cards Section Start -->
 <section class="cards">
-    <div class="card" onclick="window.location.href='{{ url_for('news') }}'">
-        <h3>LATEST NEWS</h3>
-        <p>Stay updated with our school's latest announcements and achievements.</p>
-        <a href="{{ url_for('news') }}">READ MORE</a>
-    </div>
+  <div class="card" onclick="window.location.href='{{ url_for('news') }}'">
+      <h3>LATEST NEWS</h3>
+      <p>Stay updated with our school's latest announcements and achievements.</p>
+      <a href="{{ url_for('news') }}">READ MORE</a>
+  </div>
 
-    <div class="card" onclick="window.location.href='{{ url_for('events') }}'">
-        <h3>UPCOMING EVENTS</h3>
-        <p>Check out our calendar for sports days, annual functions, and more.</p>
-        <a href="{{ url_for('events') }}">READ MORE</a>
-    </div>
+  <div class="card" onclick="window.location.href='{{ url_for('events') }}'">
+      <h3>UPCOMING EVENTS</h3>
+      <p>Check out our calendar for sports days, annual functions, and more.</p>
+      <a href="{{ url_for('events') }}">READ MORE</a>
+  </div>
 
-    <div class="card" onclick="window.location.href='{{ url_for('achievements') }}'">
-        <h3>OUR ACHIEVEMENTS</h3>
-        <p>Celebrating our students' excellence in academics and extracurriculars.</p>
-        <a href="{{ url_for('achievements') }}">READ MORE</a>
-    </div>
+  <div class="card" onclick="window.location.href='{{ url_for('achievements') }}'">
+      <h3>OUR ACHIEVEMENTS</h3>
+      <p>Celebrating our students' excellence in academics and extracurriculars.</p>
+      <a href="{{ url_for('achievements') }}">READ MORE</a>
+  </div>
 
-    <div class="card" onclick="window.location.href='{{ url_for('admission') }}'">
-        <h3>ADMISSIONS</h3>
-        <p>Learn about our admission process, requirements and important dates.</p>
-        <a href="{{ url_for('admission') }}">READ MORE</a>
-    </div>
+  <div class="card" onclick="window.location.href='{{ url_for('admission') }}'">
+      <h3>ADMISSIONS</h3>
+      <p>Learn about our admission process, requirements and important dates.</p>
+      <a href="{{ url_for('admission') }}">READ MORE</a>
+  </div>
 
-    <div class="card" onclick="window.location.href='{{ url_for('syllabus') }}'">
-        <h3>SYLLABUS</h3>
-        <p>Explore our comprehensive curriculum for all classes and subjects.</p>
-        <a href="{{ url_for('syllabus') }}">READ MORE</a>
-    </div>
+  <div class="card" onclick="window.location.href='{{ url_for('syllabus') }}'">
+      <h3>SYLLABUS</h3>
+      <p>Explore our comprehensive curriculum for all classes and subjects.</p>
+      <a href="{{ url_for('syllabus') }}">READ MORE</a>
+  </div>
 
-    <div class="card" onclick="window.location.href='{{ url_for('gallery') }}'">
-        <h3>GALLERY</h3>
-        <p>Explore our school campus, events, and student activities.</p>
-        <a href="{{ url_for('gallery') }}">READ MORE</a>
-    </div>
+  <div class="card" onclick="window.location.href='{{ url_for('gallery') }}'">
+      <h3>GALLERY</h3>
+      <p>Expore our school .</p>
+      <a href="{{ url_for('gallery') }}">READ MORE</a>
+  </div>
 
-    <div class="card" onclick="window.location.href='{{ url_for('teachers') }}'">
-        <h3>TEACHERS</h3>
-        <p>Meet our dedicated faculty members and their qualifications.</p>
-        <a href="{{ url_for('teachers') }}">READ MORE</a>
-    </div>
+  <div class="card" onclick="window.location.href='{{ url_for('teachers') }}'">
+      <h3>TEACHERS</h3>
+      <p>know our teachers and their qualification .</p>
+      <a href="{{ url_for('teachers') }}">READ MORE</a>
+  </div>
 
-    <div class="card" onclick="window.location.href='{{ url_for('facilities') }}'">
-        <h3>FACILITIES</h3>
-        <p>Discover our state-of-the-art infrastructure and learning resources.</p>
-        <a href="{{ url_for('facilities') }}">READ MORE</a>
-    </div>
+  <div class="card" onclick="window.location.href='{{ url_for('facilities') }}'">
+      <h3>FACILITIES</h3>
+      <p>Discover our state-of-the-art infrastructure and learning resources.</p>
+      <a href="{{ url_for('facilities') }}">READ MORE</a>
+  </div>
 </section>
-<!-- Cards Section End -->
 {% endblock %}
 
 {% block scripts %}
