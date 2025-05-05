@@ -1,0 +1,159 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Admission Application - {{ application.student_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Admission Application</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('admin_admission_applications') }}">Admission Applications</a></li>
+        <li class="breadcrumb-item active">{{ application.student_name }}</li>
+    </ol>
+    
+    {% include 'admin/includes/flash_messages.html' %}
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-user-graduate me-1"></i>
+                    Application Details
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h5>Student Information</h5>
+                            <table class="table table-sm">
+                                <tr>
+                                    <th style="width: 150px;">Student Name:</th>
+                                    <td>{{ application.student_name }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Date of Birth:</th>
+                                    <td>{{ application.date_of_birth.strftime('%d %B, %Y') }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Class Applying:</th>
+                                    <td>{{ application.class_applying }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Previous School:</th>
+                                    <td>{{ application.previous_school or 'N/A' }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Parent/Guardian Information</h5>
+                            <table class="table table-sm">
+                                <tr>
+                                    <th style="width: 150px;">Parent Name:</th>
+                                    <td>{{ application.parent_name }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Email:</th>
+                                    <td>{{ application.email }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Phone:</th>
+                                    <td>{{ application.phone }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Address:</th>
+                                    <td>{{ application.address }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <h5>Application Timeline</h5>
+                            <table class="table table-sm">
+                                <tr>
+                                    <th style="width: 150px;">Submission Date:</th>
+                                    <td>{{ application.submission_date.strftime('%d %B, %Y at %H:%M') }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Current Status:</th>
+                                    <td>
+                                        {% if application.status == 'Pending' %}
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                        {% elif application.status == 'Approved' %}
+                                            <span class="badge bg-success">Approved</span>
+                                        {% elif application.status == 'Rejected' %}
+                                            <span class="badge bg-danger">Rejected</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ application.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-clipboard-check me-1"></i>
+                    Update Status
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="form-group mb-3">
+                            <label for="status">Application Status</label>
+                            {{ form.status(class="form-select") }}
+                            {% if form.status.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.status.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="comments">Comments/Notes</label>
+                            {{ form.comments(class="form-control", rows=5, placeholder="Add comments about this application") }}
+                            {% if form.comments.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.comments.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-grid">
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            {% if application.comments %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-comments me-1"></i>
+                    Comments
+                </div>
+                <div class="card-body">
+                    <p>{{ application.comments|nl2br }}</p>
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="d-grid">
+                <a href="{{ url_for('admin_admission_applications') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Back to Applications
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

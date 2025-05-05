@@ -60,6 +60,31 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a href="{{ url_for('admin_teachers') }}" class="nav-link {% if 'admin_teachers' in request.endpoint %}active{% endif %}">
+                        <i class="fas fa-user-tie"></i> Teachers
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('admin_facilities') }}" class="nav-link {% if 'admin_facilities' in request.endpoint %}active{% endif %}">
+                        <i class="fas fa-building"></i> Facilities
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('admin_syllabus') }}" class="nav-link {% if 'admin_syllabus' in request.endpoint %}active{% endif %}">
+                        <i class="fas fa-book"></i> Syllabus
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('admin_admission_applications') }}" class="nav-link {% if 'admin_admission_applications' in request.endpoint %}active{% endif %}">
+                        <i class="fas fa-graduation-cap"></i> Admissions
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('admin_home_slider') }}" class="nav-link {% if 'admin_home_slider' in request.endpoint %}active{% endif %}">
+                        <i class="fas fa-sliders-h"></i> Sliders
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a href="{{ url_for('admin_settings') }}" class="nav-link {% if request.endpoint == 'admin_settings' %}active{% endif %}">
                         <i class="fas fa-cog"></i> Settings
                     </a>
