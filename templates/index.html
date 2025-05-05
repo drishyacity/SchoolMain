@@ -1,165 +1,315 @@
 {% extends 'base.html' %}
 
-{% block title %}Home - {{ settings.school_name }}{% endblock %}
+{% block title %}Home - {{ settings.school_name if settings else 'Shree Gyan Bharti High School' }}{% endblock %}
+
+{% block inline_css %}
+/* Hero Section */
+.hero {
+    background-color: #0c2d57;
+    color: white;
+    text-align: center;
+    padding: 20px;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+/* Slider Styles */
+.slider-container {
+    position: relative;
+    width: 100%;
+    height: auto;
+    overflow: hidden;
+}
+
+.slider {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+    height: 100%;
+}
+
+.slide {
+    min-width: 100%;
+    height: 100%;
+}
+
+.slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.slider-nav {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 10;
+}
+
+.slider-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.slider-dot.active {
+    background-color: white;
+}
+
+.slider-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.slider-arrow:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.slider-arrow.prev {
+    left: 20px;
+}
+
+.slider-arrow.next {
+    right: 20px;
+}
+
+/* Cards Section */
+.cards {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    padding: 30px 10px;
+    background: #f9f9f9;
+    gap: 15px;
+}
+
+.card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 10px;
+    flex: 1 1 250px;
+    max-width: 300px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.card img {
+    width: 50px;
+    margin-bottom: 10px;
+}
+
+.card h3 {
+    color: #0c2d57;
+    margin-bottom: 10px;
+}
+
+.card p {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.card a {
+    text-decoration: none;
+    color: #0c2d57;
+    font-weight: bold;
+    display: block;
+}
+{% endblock %}
 
 {% block content %}
 <section class="hero">
-  WELCOME TO SHREE GYAN BHARTI HIGH SCHOOL
+    WELCOME TO SHREE GYAN BHARTI HIGH SCHOOL
 </section>
 
 <!-- Photo Slider Section -->
 <section class="slider-container">
-  <div class="slider">
-    {% for slider in home_sliders %}
-    <div class="slide">
-      <img src="{{ url_for('static', filename='uploads/' + slider.image_path) }}" alt="School Image {{ loop.index }}">
+    <div class="slider">
+        {% if home_sliders %}
+            {% for slider in home_sliders %}
+            <div class="slide">
+                <img src="{{ url_for('static', filename='uploads/' + slider.image_path) }}" alt="School Image {{ loop.index }}">
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="slide">
+                <img src="{{ url_for('static', filename='uploads/IMG-20250426-WA0175.jpg') if 'IMG-20250426-WA0175.jpg' in images_list else url_for('static', filename='uploads/slide1.jpg') }}" alt="School Image 1">
+            </div>
+            <div class="slide">
+                <img src="{{ url_for('static', filename='uploads/IMG-20250426-WA0111.jpg') if 'IMG-20250426-WA0111.jpg' in images_list else url_for('static', filename='uploads/slide2.jpg') }}" alt="School Image 2">
+            </div>
+            <div class="slide">
+                <img src="{{ url_for('static', filename='uploads/IMG-20250426-WA0117.jpg') if 'IMG-20250426-WA0117.jpg' in images_list else url_for('static', filename='uploads/slide3.jpg') }}" alt="School Image 3">
+            </div>
+            <div class="slide">
+                <img src="{{ url_for('static', filename='uploads/IMG-20250426-WA0121.jpg') if 'IMG-20250426-WA0121.jpg' in images_list else url_for('static', filename='uploads/slide4.jpg') }}" alt="School Image 4">
+            </div>
+            <div class="slide">
+                <img src="{{ url_for('static', filename='uploads/IMG-20250426-WA0034.jpg') if 'IMG-20250426-WA0034.jpg' in images_list else url_for('static', filename='uploads/slide5.jpg') }}" alt="School Image 5">
+            </div>
+        {% endif %}
     </div>
-    {% endfor %}
-    <!-- Fallback slides if no dynamic content -->
-    {% if not home_sliders or home_sliders|length < 1 %}
-    <div class="slide">
-      <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" alt="School Image 1">
+    
+    <button class="slider-arrow prev">&#10094;</button>
+    <button class="slider-arrow next">&#10095;</button>
+    
+    <div class="slider-nav">
+        {% if home_sliders %}
+            {% for slider in home_sliders %}
+            <div class="slider-dot {{ 'active' if loop.first else '' }}" data-index="{{ loop.index0 }}"></div>
+            {% endfor %}
+        {% else %}
+            <div class="slider-dot active" data-index="0"></div>
+            <div class="slider-dot" data-index="1"></div>
+            <div class="slider-dot" data-index="2"></div>
+            <div class="slider-dot" data-index="3"></div>
+            <div class="slider-dot" data-index="4"></div>
+        {% endif %}
     </div>
-    <div class="slide">
-      <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" alt="School Image 2">
-    </div>
-    <div class="slide">
-      <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" alt="School Image 3">
-    </div>
-    {% endif %}
-  </div>
-  
-  <button class="slider-arrow prev">&#10094;</button>
-  <button class="slider-arrow next">&#10095;</button>
-  
-  <div class="slider-nav">
-    {% for slider in home_sliders %}
-    <div class="slider-dot {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}"></div>
-    {% endfor %}
-    {% if not home_sliders or home_sliders|length < 1 %}
-    <div class="slider-dot active" data-index="0"></div>
-    <div class="slider-dot" data-index="1"></div>
-    <div class="slider-dot" data-index="2"></div>
-    {% endif %}
-  </div>
 </section>
 
 <section class="cards">
-  <div class="card" onclick="window.location.href='{{ url_for('news') }}'">
-      <h3>LATEST NEWS</h3>
-      <p>Stay updated with our school's latest announcements and achievements.</p>
-      <a href="{{ url_for('news') }}">READ MORE</a>
-  </div>
+    <div class="card" onclick="window.location.href='{{ url_for("news") }}'">
+        <h3>LATEST NEWS</h3>
+        <p>Stay updated with our school's latest announcements and achievements.</p>
+        <a href="{{ url_for('news') }}">READ MORE</a>
+    </div>
 
-  <div class="card" onclick="window.location.href='{{ url_for('events') }}'">
-      <h3>UPCOMING EVENTS</h3>
-      <p>Check out our calendar for sports days, annual functions, and more.</p>
-      <a href="{{ url_for('events') }}">READ MORE</a>
-  </div>
+    <div class="card" onclick="window.location.href='{{ url_for("events") }}'">
+        <h3>UPCOMING EVENTS</h3>
+        <p>Check out our calendar for sports days, annual functions, and more.</p>
+        <a href="{{ url_for('events') }}">READ MORE</a>
+    </div>
+    
+    <div class="card" onclick="window.location.href='{{ url_for("achievements") }}'">
+        <h3>OUR ACHIEVEMENTS</h3>
+        <p>Celebrating our students' excellence in academics and extracurriculars.</p>
+        <a href="{{ url_for('achievements') }}">READ MORE</a>
+    </div>
 
-  <div class="card" onclick="window.location.href='{{ url_for('achievements') }}'">
-      <h3>OUR ACHIEVEMENTS</h3>
-      <p>Celebrating our students' excellence in academics and extracurriculars.</p>
-      <a href="{{ url_for('achievements') }}">READ MORE</a>
-  </div>
+    <div class="card" onclick="window.location.href='{{ url_for("admission") }}'">
+        <h3>ADMISSIONS</h3>
+        <p>Learn about our admission process, requirements and important dates.</p>
+        <a href="{{ url_for('admission') }}">READ MORE</a>
+    </div>
 
-  <div class="card" onclick="window.location.href='{{ url_for('admission') }}'">
-      <h3>ADMISSIONS</h3>
-      <p>Learn about our admission process, requirements and important dates.</p>
-      <a href="{{ url_for('admission') }}">READ MORE</a>
-  </div>
+    <div class="card" onclick="window.location.href='{{ url_for("syllabus") }}'">
+        <h3>SYLLABUS</h3>
+        <p>Explore our comprehensive curriculum for all classes and subjects.</p>
+        <a href="{{ url_for('syllabus') }}">READ MORE</a>
+    </div>
 
-  <div class="card" onclick="window.location.href='{{ url_for('syllabus') }}'">
-      <h3>SYLLABUS</h3>
-      <p>Explore our comprehensive curriculum for all classes and subjects.</p>
-      <a href="{{ url_for('syllabus') }}">READ MORE</a>
-  </div>
+    <div class="card" onclick="window.location.href='{{ url_for("gallery") }}'">
+        <h3>GALLERY</h3>
+        <p>Explore our school through photos of events, activities and facilities.</p>
+        <a href="{{ url_for('gallery') }}">READ MORE</a>
+    </div>
 
-  <div class="card" onclick="window.location.href='{{ url_for('gallery') }}'">
-      <h3>GALLERY</h3>
-      <p>Expore our school .</p>
-      <a href="{{ url_for('gallery') }}">READ MORE</a>
-  </div>
+    <div class="card" onclick="window.location.href='{{ url_for("teachers") }}'">
+        <h3>TEACHERS</h3>
+        <p>Meet our dedicated faculty and learn about their qualifications.</p>
+        <a href="{{ url_for('teachers') }}">READ MORE</a>
+    </div>
 
-  <div class="card" onclick="window.location.href='{{ url_for('teachers') }}'">
-      <h3>TEACHERS</h3>
-      <p>know our teachers and their qualification .</p>
-      <a href="{{ url_for('teachers') }}">READ MORE</a>
-  </div>
-
-  <div class="card" onclick="window.location.href='{{ url_for('facilities') }}'">
-      <h3>FACILITIES</h3>
-      <p>Discover our state-of-the-art infrastructure and learning resources.</p>
-      <a href="{{ url_for('facilities') }}">READ MORE</a>
-  </div>
+    <div class="card" onclick="window.location.href='{{ url_for("facilities") }}'">
+        <h3>FACILITIES</h3>
+        <p>Discover our state-of-the-art infrastructure and learning resources.</p>
+        <a href="{{ url_for('facilities') }}">READ MORE</a>
+    </div>
 </section>
-{% endblock %}
 
-{% block scripts %}
 <script>
 // Slider functionality
-const slider = document.querySelector('.slider');
-const slides = document.querySelectorAll('.slide');
-const dots = document.querySelectorAll('.slider-dot');
-const prevBtn = document.querySelector('.prev');
-const nextBtn = document.querySelector('.next');
-
-let currentIndex = 0;
-let slideInterval;
-const slideDuration = 5000; // 5 seconds
-
-function goToSlide(index) {
-  if (index < 0) {
-    index = slides.length - 1;
-  } else if (index >= slides.length) {
-    index = 0;
-  }
-  
-  currentIndex = index;
-  slider.style.transform = `translateX(-${currentIndex * 100}%)`;
-  
-  // Update dots
-  dots.forEach((dot, i) => {
-    dot.classList.toggle('active', i === currentIndex);
-  });
-}
-
-function nextSlide() {
-  goToSlide(currentIndex + 1);
-}
-
-function prevSlide() {
-  goToSlide(currentIndex - 1);
-}
-
-function startSlider() {
-  slideInterval = setInterval(nextSlide, slideDuration);
-}
-
-function resetInterval() {
-  clearInterval(slideInterval);
-  startSlider();
-}
-
-// Event listeners
-nextBtn.addEventListener('click', () => {
-  nextSlide();
-  resetInterval();
+document.addEventListener('DOMContentLoaded', function() {
+    const slider = document.querySelector('.slider');
+    const slides = document.querySelectorAll('.slide');
+    const dots = document.querySelectorAll('.slider-dot');
+    const prevBtn = document.querySelector('.prev');
+    const nextBtn = document.querySelector('.next');
+    
+    let currentIndex = 0;
+    let slideInterval;
+    const slideDuration = 5000; // 5 seconds
+    
+    function goToSlide(index) {
+        if (index < 0) {
+            index = slides.length - 1;
+        } else if (index >= slides.length) {
+            index = 0;
+        }
+        
+        currentIndex = index;
+        slider.style.transform = `translateX(-${currentIndex * 100}%)`;
+        
+        // Update dots
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === currentIndex);
+        });
+    }
+    
+    function nextSlide() {
+        goToSlide(currentIndex + 1);
+    }
+    
+    function prevSlide() {
+        goToSlide(currentIndex - 1);
+    }
+    
+    function startSlider() {
+        slideInterval = setInterval(nextSlide, slideDuration);
+    }
+    
+    function resetInterval() {
+        clearInterval(slideInterval);
+        startSlider();
+    }
+    
+    // Event listeners
+    nextBtn.addEventListener('click', () => {
+        nextSlide();
+        resetInterval();
+    });
+    
+    prevBtn.addEventListener('click', () => {
+        prevSlide();
+        resetInterval();
+    });
+    
+    dots.forEach((dot, i) => {
+        dot.addEventListener('click', () => {
+            goToSlide(i);
+            resetInterval();
+        });
+    });
+    
+    // Start the slider
+    startSlider();
 });
-
-prevBtn.addEventListener('click', () => {
-  prevSlide();
-  resetInterval();
-});
-
-dots.forEach((dot, i) => {
-  dot.addEventListener('click', () => {
-    goToSlide(i);
-    resetInterval();
-  });
-});
-
-// Start the slider
-startSlider();
 </script>
 {% endblock %}

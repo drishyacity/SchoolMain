@@ -1,246 +1,71 @@
 {% extends 'base.html' %}
 
-{% block title %}Contact Us - {{ settings.school_name }}{% endblock %}
+{% block title %}Contact Us - {{ settings.school_name if settings else 'Shree Gyan Bharti High School' }}{% endblock %}
 
 {% block content %}
-<!-- Page Header Start -->
-<div class="container-fluid bg-primary py-5 mb-5">
-    <div class="container py-5">
-        <div class="row">
-            <div class="col-12 text-center">
-                <h1 class="text-white display-4 mt-5 mb-2">Contact Us</h1>
-                <div class="d-inline-block text-white">
-                    <p class="m-0"><a class="text-white" href="{{ url_for('index') }}">Home</a></p>
-                    <p class="m-0 px-2">-</p>
-                    <p class="m-0">Contact Us</p>
+<div class="contact-container">
+    <h1>Contact Our School</h1>
+    
+    <div class="contact-grid">
+        <div class="contact-info">
+            <h2>Get In Touch</h2>
+            
+            <div class="contact-info-item">
+                <div class="contact-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <div>
+                    <h3>Address</h3>
+                    <p>{{ settings.school_address if settings else '123 Education Street,<br>City, State 123456,<br>India' | safe }}</p>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
-<!-- Page Header End -->
-
-<!-- Contact Start -->
-<div class="container py-5">
-    <div class="text-center mb-5">
-        <h6 class="text-primary text-uppercase section-title">Get In Touch</h6>
-        <h2>Contact {{ settings.school_name }}</h2>
-        <p class="lead">We'd love to hear from you. Get in touch with us for any inquiries or information.</p>
-    </div>
-    
-    <div class="row">
-        <!-- Contact Form -->
-        <div class="col-lg-7 mb-5 mb-lg-0">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-5">
-                    <h4 class="card-title mb-4">Send Us A Message</h4>
-                    
-                    <form method="POST" action="{{ url_for('contact') }}">
-                        {{ form.hidden_tag() }}
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="name" class="form-label">Your Name</label>
-                                    {{ form.name(class="form-control", placeholder="Enter your name") }}
-                                    {% if form.name.errors %}
-                                    <div class="text-danger">
-                                        {% for error in form.name.errors %}
-                                        <small>{{ error }}</small>
-                                        {% endfor %}
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="email" class="form-label">Your Email</label>
-                                    {{ form.email(class="form-control", placeholder="Enter your email") }}
-                                    {% if form.email.errors %}
-                                    <div class="text-danger">
-                                        {% for error in form.email.errors %}
-                                        <small>{{ error }}</small>
-                                        {% endfor %}
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="form-group">
-                                    <label for="subject" class="form-label">Subject</label>
-                                    {{ form.subject(class="form-control", placeholder="Enter subject") }}
-                                    {% if form.subject.errors %}
-                                    <div class="text-danger">
-                                        {% for error in form.subject.errors %}
-                                        <small>{{ error }}</small>
-                                        {% endfor %}
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="form-group">
-                                    <label for="message" class="form-label">Your Message</label>
-                                    {{ form.message(class="form-control", rows=5, placeholder="Enter your message") }}
-                                    {% if form.message.errors %}
-                                    <div class="text-danger">
-                                        {% for error in form.message.errors %}
-                                        <small>{{ error }}</small>
-                                        {% endfor %}
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                {{ form.submit(class="btn btn-primary w-100 py-3") }}
-                            </div>
-                        </div>
-                    </form>
+            
+            <div class="contact-info-item">
+                <div class="contact-icon">
+                    <i class="fas fa-phone-alt"></i>
+                </div>
+                <div>
+                    <h3>Phone</h3>
+                    <p>{{ settings.school_phone if settings else '+91 1234567890' }}</p>
+                </div>
+            </div>
+            
+            <div class="contact-info-item">
+                <div class="contact-icon">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <div>
+                    <h3>Email</h3>
+                    <p>{{ settings.school_email if settings else 'info@sgbhs.edu' }}</p>
                 </div>
             </div>
         </div>
         
-        <!-- Contact Information -->
-        <div class="col-lg-5">
-            <div class="bg-light rounded p-5 mb-4">
-                <h4 class="mb-4">Contact Details</h4>
-                <div class="d-flex align-items-center mb-4">
-                    <div class="d-flex align-items-center justify-content-center flex-shrink-0" style="width: 50px; height: 50px; background-color: var(--bs-primary); border-radius: 50%;">
-                        <i class="fas fa-map-marker-alt text-white"></i>
-                    </div>
-                    <div class="ms-3">
-                        <h5 class="mb-0">School Address</h5>
-                        <p class="mb-0">{{ settings.school_address }}</p>
-                    </div>
+        <div class="contact-form">
+            <h2>Send Us a Message</h2>
+            <form method="POST" action="{{ url_for('contact') }}">
+                {{ form.hidden_tag() }}
+                <div class="form-group">
+                    {{ form.name(class="form-control", placeholder="Your Name", required=true) }}
                 </div>
-                <div class="d-flex align-items-center mb-4">
-                    <div class="d-flex align-items-center justify-content-center flex-shrink-0" style="width: 50px; height: 50px; background-color: var(--bs-primary); border-radius: 50%;">
-                        <i class="fas fa-phone text-white"></i>
-                    </div>
-                    <div class="ms-3">
-                        <h5 class="mb-0">Call Us</h5>
-                        <p class="mb-0">{{ settings.school_phone }}</p>
-                    </div>
+                <div class="form-group">
+                    {{ form.email(class="form-control", placeholder="Your Email", required=true) }}
                 </div>
-                <div class="d-flex align-items-center">
-                    <div class="d-flex align-items-center justify-content-center flex-shrink-0" style="width: 50px; height: 50px; background-color: var(--bs-primary); border-radius: 50%;">
-                        <i class="fas fa-envelope text-white"></i>
-                    </div>
-                    <div class="ms-3">
-                        <h5 class="mb-0">Email Us</h5>
-                        <p class="mb-0">{{ settings.school_email }}</p>
-                    </div>
+                <div class="form-group">
+                    {{ form.subject(class="form-control", placeholder="Subject") }}
                 </div>
-            </div>
-            
-            <div class="bg-light rounded p-5">
-                <h4 class="mb-4">Office Hours</h4>
-                <div class="d-flex">
-                    <div class="d-flex flex-column">
-                        <p class="mb-2"><i class="fas fa-clock text-primary me-2"></i>Monday - Friday</p>
-                        <p class="mb-2"><i class="fas fa-clock text-primary me-2"></i>Saturday</p>
-                        <p class="mb-0"><i class="fas fa-clock text-primary me-2"></i>Sunday</p>
-                    </div>
-                    <div class="d-flex flex-column ms-4">
-                        <p class="mb-2">9:00 AM - 3:00 PM</p>
-                        <p class="mb-2">9:00 AM - 12:00 PM</p>
-                        <p class="mb-0">Closed</p>
-                    </div>
+                <div class="form-group">
+                    {{ form.message(class="form-control", placeholder="Your Message", required=true) }}
                 </div>
-            </div>
+                {{ form.submit(class="submit-btn") }}
+            </form>
         </div>
-    </div>
-</div>
-<!-- Contact End -->
-
-<!-- Map Start -->
-<div class="container-fluid p-0 mb-5">
-    <div class="row">
-        <div class="col-12">
-            <div class="ratio ratio-16x9" style="height: 400px;">
-                <iframe class="w-100 h-100" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3589.0435810516223!2d85.48640737536656!3d26.590169276678856!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eced41c4e9fb6b%3A0xa40e3d76c1e3d16f!2sBakhari%20Chowk%2C%20Bihar%20843302!5e0!3m2!1sen!2sin!4v1714967518128!5m2!1sen!2sin" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Map End -->
-
-<!-- FAQ Section Start -->
-<div class="container py-5">
-    <div class="text-center mb-5">
-        <h6 class="text-primary text-uppercase section-title">Questions</h6>
-        <h2>Frequently Asked Questions</h2>
     </div>
     
-    <div class="row">
-        <div class="col-lg-8 mx-auto">
-            <div class="accordion" id="faqAccordion">
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="headingOne">
-                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
-                            What are the school hours?
-                        </button>
-                    </h2>
-                    <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
-                        <div class="accordion-body">
-                            School hours are from 8:00 AM to 2:30 PM Monday through Friday. The school gates open at 7:30 AM, and students are expected to arrive no later than 7:50 AM for morning assembly.
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="headingTwo">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
-                            What is the admission process?
-                        </button>
-                    </h2>
-                    <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                        <div class="accordion-body">
-                            The admission process involves filling out an application form, which can be downloaded from our website or collected from the school office. After submission, students may be required to take an entrance test and attend an interview with their parents. Please visit our <a href="{{ url_for('admission') }}">Admission</a> page for detailed information.
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="headingThree">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
-                            Does the school provide transportation services?
-                        </button>
-                    </h2>
-                    <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                        <div class="accordion-body">
-                            Yes, we provide transportation services for students residing in the city and nearby areas. Our buses are equipped with GPS tracking systems and are monitored for safety. Transportation fees vary depending on the distance from the school.
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="headingFour">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour">
-                            What extracurricular activities does the school offer?
-                        </button>
-                    </h2>
-                    <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                        <div class="accordion-body">
-                            We offer a wide range of extracurricular activities including sports (cricket, football, basketball, badminton, chess), performing arts (music, dance, drama), visual arts, debate, public speaking, science club, robotics, and more. These activities are integral to our curriculum and help in the holistic development of our students.
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="headingFive">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive">
-                            How can parents stay updated about their child's progress?
-                        </button>
-                    </h2>
-                    <div id="collapseFive" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                        <div class="accordion-body">
-                            Parents can stay updated through our parent-teacher meetings held quarterly, our online parent portal where attendance, grades, and behavior reports are updated regularly, and through our school's mobile app. We also send regular newsletters and updates via email.
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="map-container">
+        <!-- Google Map embed code would go here -->
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3503.837258077164!2d77.2098644150816!3d28.57564498243993!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390ce2a7a6d30c91%3A0x11a3a9c1a5a4b0d5!2sIndia%20Gate!5e0!3m2!1sen!2sin!4v1620000000000!5m2!1sen!2sin" 
+                width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
     </div>
 </div>
-<!-- FAQ Section End -->
 {% endblock %}

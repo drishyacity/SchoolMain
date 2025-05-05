@@ -1,351 +1,108 @@
 {% extends 'base.html' %}
 
-{% block title %}Achievements - {{ settings.school_name }}{% endblock %}
+{% block title %}Our Achievements - {{ settings.school_name if settings else 'Shree Gyan Bharti High School' }}{% endblock %}
+
+{% block inline_css %}
+.achievements-container {
+    padding: 30px 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+.achievement-category {
+    margin-bottom: 40px;
+}
+.achievement-item {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+.achievement-icon {
+    font-size: 2rem;
+    color: #0c2d57;
+    margin-right: 20px;
+    min-width: 60px;
+    text-align: center;
+}
+{% endblock %}
 
 {% block content %}
-<!-- Page Header Start -->
-<div class="container-fluid bg-primary py-5 mb-5">
-    <div class="container py-5">
-        <div class="row">
-            <div class="col-12 text-center">
-                <h1 class="text-white display-4 mt-5 mb-2">Achievements</h1>
-                <div class="d-inline-block text-white">
-                    <p class="m-0"><a class="text-white" href="{{ url_for('index') }}">Home</a></p>
-                    <p class="m-0 px-2">-</p>
-                    <p class="m-0">Achievements</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Page Header End -->
-
-<!-- School Achievements Start -->
-<div class="container py-5">
-    <div class="text-center mb-5">
-        <h6 class="text-primary text-uppercase section-title">Our Pride</h6>
-        <h2>School Achievements</h2>
-        <p class="lead">We take pride in our school's numerous accomplishments over the years.</p>
-    </div>
+<div class="achievements-container">
+    <h1>Our Achievements</h1>
     
-    <!-- Timeline Events -->
-    <div class="row">
-        <div class="col-lg-10 mx-auto">
-            <div class="timeline-container position-relative mb-5">
-                <!-- Line running through the timeline -->
-                <div class="timeline-line position-absolute h-100" style="width: 2px; background-color: var(--bs-primary); left: 50%; transform: translateX(-50%);"></div>
-                
-                <!-- Achievement Item 1 -->
-                <div class="row mb-5">
-                    <div class="col-md-6 text-md-end pe-md-5 mb-3 mb-md-0">
-                        <div class="card border-0 shadow-sm h-100">
-                            <div class="card-body p-4">
-                                <h4 class="card-title text-primary">Academic Excellence Award</h4>
-                                <p class="small text-muted">2024</p>
-                                <p>{{ settings.school_name }} was recognized by the State Education Department for outstanding academic performance, with 95% of our students scoring above 80% in the board examinations.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <!-- Empty space for the right side of the timeline -->
-                    </div>
-                </div>
-                
-                <!-- Achievement Item 2 -->
-                <div class="row mb-5">
-                    <div class="col-md-6">
-                        <!-- Empty space for the left side of the timeline -->
-                    </div>
-                    <div class="col-md-6 ps-md-5">
-                        <div class="card border-0 shadow-sm h-100">
-                            <div class="card-body p-4">
-                                <h4 class="card-title text-primary">National Science Fair Champions</h4>
-                                <p class="small text-muted">2023</p>
-                                <p>Our school's science team won the National Science Fair Competition with their innovative project on renewable energy solutions. The team's project was recognized for its practical application and environmental impact.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Achievement Item 3 -->
-                <div class="row mb-5">
-                    <div class="col-md-6 text-md-end pe-md-5 mb-3 mb-md-0">
-                        <div class="card border-0 shadow-sm h-100">
-                            <div class="card-body p-4">
-                                <h4 class="card-title text-primary">State Chess Championship</h4>
-                                <p class="small text-muted">2023</p>
-                                <p>Our school chess team won the State Chess Championship for the third consecutive year. Two of our students were selected for the national-level competition, representing our state with great honor.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <!-- Empty space for the right side of the timeline -->
-                    </div>
-                </div>
-                
-                <!-- Achievement Item 4 -->
-                <div class="row mb-5">
-                    <div class="col-md-6">
-                        <!-- Empty space for the left side of the timeline -->
-                    </div>
-                    <div class="col-md-6 ps-md-5">
-                        <div class="card border-0 shadow-sm h-100">
-                            <div class="card-body p-4">
-                                <h4 class="card-title text-primary">Green School Certification</h4>
-                                <p class="small text-muted">2022</p>
-                                <p>{{ settings.school_name }} received the prestigious Green School Certification for our eco-friendly initiatives, sustainable practices, and environmental education programs. Our rainwater harvesting system and solar energy implementation were particularly commended.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Achievement Item 5 -->
-                <div class="row mb-5">
-                    <div class="col-md-6 text-md-end pe-md-5 mb-3 mb-md-0">
-                        <div class="card border-0 shadow-sm h-100">
-                            <div class="card-body p-4">
-                                <h4 class="card-title text-primary">Cultural Excellence Award</h4>
-                                <p class="small text-muted">2022</p>
-                                <p>Our school's cultural team won the Inter-School Cultural Competition organized by the District Cultural Department. Our students showcased their talents in classical dance, music, and theatrical performances.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <!-- Empty space for the right side of the timeline -->
-                    </div>
-                </div>
-                
-                <!-- Achievement Item 6 -->
-                <div class="row">
-                    <div class="col-md-6">
-                        <!-- Empty space for the left side of the timeline -->
-                    </div>
-                    <div class="col-md-6 ps-md-5">
-                        <div class="card border-0 shadow-sm h-100">
-                            <div class="card-body p-4">
-                                <h4 class="card-title text-primary">Mathematics Olympiad</h4>
-                                <p class="small text-muted">2021</p>
-                                <p>Five of our students qualified for the International Mathematics Olympiad, with one student securing a silver medal. This achievement highlights our school's strong mathematics program and the dedication of our students and faculty.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <div class="achievement-category">
+        <h2>Academic Excellence</h2>
+        
+        <div class="achievement-item">
+            <div class="achievement-icon">
+                <i class="fas fa-medal"></i>
             </div>
-        </div>
-    </div>
-</div>
-<!-- School Achievements End -->
-
-<!-- Student Achievements Start -->
-<div class="container-fluid py-5" style="background-color: var(--bs-light);">
-    <div class="container">
-        <div class="text-center mb-5">
-            <h6 class="text-primary text-uppercase section-title">Student Excellence</h6>
-            <h2>Notable Student Achievements</h2>
+            <div>
+                <h3>100% Board Exam Pass Rate</h3>
+                <p>For the fifth consecutive year, all our 10th and 12th grade students passed their board examinations.</p>
+            </div>
         </div>
         
-        <div class="row g-4">
-            <!-- Student Achievement Card 1 -->
-            <div class="col-lg-4 col-md-6">
-                <div class="card border-0 shadow-sm h-100">
-                    <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" class="card-img-top" alt="Student Achievement" style="height: 200px; object-fit: cover;">
-                    <div class="card-body">
-                        <h5 class="card-title">Aarav Sharma</h5>
-                        <p class="text-muted">Class XII (2023-24)</p>
-                        <ul class="list-unstyled ps-0">
-                            <li><i class="fas fa-medal text-primary me-2"></i> CBSE Board Topper with 99.2%</li>
-                            <li><i class="fas fa-medal text-primary me-2"></i> JEE Advanced AIR-245</li>
-                            <li><i class="fas fa-medal text-primary me-2"></i> National Science Talent Scholarship</li>
-                        </ul>
-                    </div>
-                </div>
+        <div class="achievement-item">
+            <div class="achievement-icon">
+                <i class="fas fa-trophy"></i>
             </div>
-            
-            <!-- Student Achievement Card 2 -->
-            <div class="col-lg-4 col-md-6">
-                <div class="card border-0 shadow-sm h-100">
-                    <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" class="card-img-top" alt="Student Achievement" style="height: 200px; object-fit: cover;">
-                    <div class="card-body">
-                        <h5 class="card-title">Meera Patel</h5>
-                        <p class="text-muted">Class X (2023-24)</p>
-                        <ul class="list-unstyled ps-0">
-                            <li><i class="fas fa-medal text-primary me-2"></i> National Level Chess Champion</li>
-                            <li><i class="fas fa-medal text-primary me-2"></i> Represented India in International Chess Tournament</li>
-                            <li><i class="fas fa-medal text-primary me-2"></i> Academic Excellence with 98.4% in Board Exams</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Student Achievement Card 3 -->
-            <div class="col-lg-4 col-md-6">
-                <div class="card border-0 shadow-sm h-100">
-                    <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" class="card-img-top" alt="Student Achievement" style="height: 200px; object-fit: cover;">
-                    <div class="card-body">
-                        <h5 class="card-title">Arjun Singh</h5>
-                        <p class="text-muted">Class IX (2023-24)</p>
-                        <ul class="list-unstyled ps-0">
-                            <li><i class="fas fa-medal text-primary me-2"></i> National Science Olympiad Gold Medalist</li>
-                            <li><i class="fas fa-medal text-primary me-2"></i> State-level Debate Competition Winner</li>
-                            <li><i class="fas fa-medal text-primary me-2"></i> Published Research Paper in Junior Science Journal</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Student Achievement Card 4 -->
-            <div class="col-lg-4 col-md-6">
-                <div class="card border-0 shadow-sm h-100">
-                    <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" class="card-img-top" alt="Student Achievement" style="height: 200px; object-fit: cover;">
-                    <div class="card-body">
-                        <h5 class="card-title">Priya Gupta</h5>
-                        <p class="text-muted">Class XII (2022-23)</p>
-                        <ul class="list-unstyled ps-0">
-                            <li><i class="fas fa-medal text-primary me-2"></i> National Level Classical Dance Competition Winner</li>
-                            <li><i class="fas fa-medal text-primary me-2"></i> Cultural Exchange Program Representative to Japan</li>
-                            <li><i class="fas fa-medal text-primary me-2"></i> Academic Excellence with 96.5% in Board Exams</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Student Achievement Card 5 -->
-            <div class="col-lg-4 col-md-6">
-                <div class="card border-0 shadow-sm h-100">
-                    <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" class="card-img-top" alt="Student Achievement" style="height: 200px; object-fit: cover;">
-                    <div class="card-body">
-                        <h5 class="card-title">Vikram Reddy</h5>
-                        <p class="text-muted">Class XI (2023-24)</p>
-                        <ul class="list-unstyled ps-0">
-                            <li><i class="fas fa-medal text-primary me-2"></i> State Cricket Team Captain</li>
-                            <li><i class="fas fa-medal text-primary me-2"></i> Sports Scholarship Recipient</li>
-                            <li><i class="fas fa-medal text-primary me-2"></i> Best All-Rounder Award in Inter-School Sports Meet</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Student Achievement Card 6 -->
-            <div class="col-lg-4 col-md-6">
-                <div class="card border-0 shadow-sm h-100">
-                    <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" class="card-img-top" alt="Student Achievement" style="height: 200px; object-fit: cover;">
-                    <div class="card-body">
-                        <h5 class="card-title">Aisha Khan</h5>
-                        <p class="text-muted">Class VIII (2023-24)</p>
-                        <ul class="list-unstyled ps-0">
-                            <li><i class="fas fa-medal text-primary me-2"></i> Young Scientist Award for Environmental Project</li>
-                            <li><i class="fas fa-medal text-primary me-2"></i> National Level Essay Competition Winner</li>
-                            <li><i class="fas fa-medal text-primary me-2"></i> School Leadership Award</li>
-                        </ul>
-                    </div>
-                </div>
+            <div>
+                <h3>District Toppers</h3>
+                <p>Three of our students ranked in the top 10 of the district in the 12th grade board exams.</p>
             </div>
         </div>
-    </div>
-</div>
-<!-- Student Achievements End -->
-
-<!-- Sports Achievements Start -->
-<div class="container py-5">
-    <div class="text-center mb-5">
-        <h6 class="text-primary text-uppercase section-title">Sports Glory</h6>
-        <h2>Our Sports Achievements</h2>
     </div>
     
-    <div class="row">
-        <div class="col-lg-10 mx-auto">
-            <div class="table-responsive">
-                <table class="table table-striped table-hover">
-                    <thead class="table-primary">
-                        <tr>
-                            <th scope="col">Year</th>
-                            <th scope="col">Sport</th>
-                            <th scope="col">Achievement</th>
-                            <th scope="col">Level</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>2024</td>
-                            <td>Cricket</td>
-                            <td>Champions - Inter-School Cricket Tournament</td>
-                            <td>District</td>
-                        </tr>
-                        <tr>
-                            <td>2024</td>
-                            <td>Badminton</td>
-                            <td>Runner-up - School Games Federation Tournament</td>
-                            <td>State</td>
-                        </tr>
-                        <tr>
-                            <td>2023</td>
-                            <td>Chess</td>
-                            <td>Champions - Inter-School Chess Championship</td>
-                            <td>State</td>
-                        </tr>
-                        <tr>
-                            <td>2023</td>
-                            <td>Athletics</td>
-                            <td>Gold Medal (4x100m Relay)</td>
-                            <td>District</td>
-                        </tr>
-                        <tr>
-                            <td>2023</td>
-                            <td>Table Tennis</td>
-                            <td>Individual Champion (Girls)</td>
-                            <td>District</td>
-                        </tr>
-                        <tr>
-                            <td>2022</td>
-                            <td>Football</td>
-                            <td>Runner-up - Inter-School Football Tournament</td>
-                            <td>District</td>
-                        </tr>
-                        <tr>
-                            <td>2022</td>
-                            <td>Volleyball</td>
-                            <td>Champions - School Games Competition</td>
-                            <td>District</td>
-                        </tr>
-                        <tr>
-                            <td>2022</td>
-                            <td>Karate</td>
-                            <td>Gold Medal (Individual Category)</td>
-                            <td>National</td>
-                        </tr>
-                        <tr>
-                            <td>2021</td>
-                            <td>Swimming</td>
-                            <td>Gold Medal (50m Freestyle)</td>
-                            <td>State</td>
-                        </tr>
-                        <tr>
-                            <td>2021</td>
-                            <td>Basketball</td>
-                            <td>Champions - Inter-School Basketball Tournament</td>
-                            <td>District</td>
-                        </tr>
-                    </tbody>
-                </table>
+    <div class="achievement-category">
+        <h2>Sports Achievements</h2>
+        
+        <div class="achievement-item">
+            <div class="achievement-icon">
+                <i class="fas fa-running"></i>
+            </div>
+            <div>
+                <h3>State Level Athletics</h3>
+                <p>Our school team won 5 gold medals at the State Level Athletics Championship 2025.</p>
+            </div>
+        </div>
+        
+        <div class="achievement-item">
+            <div class="achievement-icon">
+                <i class="fas fa-futbol"></i>
+            </div>
+            <div>
+                <h3>District Football Champions</h3>
+                <p>Our school football team won the District Championship for the third consecutive year.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="achievement-category">
+        <h2>Co-curricular Activities</h2>
+        
+        <div class="achievement-item">
+            <div class="achievement-icon">
+                <i class="fas fa-palette"></i>
+            </div>
+            <div>
+                <h3>National Art Competition</h3>
+                <p>Two of our students received recognition at the National Level Art Competition 2025.</p>
+            </div>
+        </div>
+        
+        <div class="achievement-item">
+            <div class="achievement-icon">
+                <i class="fas fa-microscope"></i>
+            </div>
+            <div>
+                <h3>Science Olympiad</h3>
+                <p>Our students secured the top position in the Regional Science Olympiad, and five qualified for the national level.</p>
             </div>
         </div>
     </div>
 </div>
-<!-- Sports Achievements End -->
-
-<!-- Call to Action Start -->
-<div class="container-fluid py-5" style="background-color: var(--bs-primary);">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-8 text-white">
-                <h2 class="mb-3">Join us to achieve excellence</h2>
-                <p class="opacity-75 mb-0">Be a part of our journey of excellence. Apply for admission today and unlock your child's potential.</p>
-            </div>
-            <div class="col-lg-4 text-center text-lg-end mt-4 mt-lg-0">
-                <a href="{{ url_for('admission') }}" class="btn btn-light btn-lg">Apply Now</a>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Call to Action End -->
 {% endblock %}

@@ -30,11 +30,6 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ url_for('admin_homeslider') }}" class="nav-link {% if 'admin_homeslider' in request.endpoint %}active{% endif %}">
-                        <i class="fas fa-sliders-h"></i> Home Slider
-                    </a>
-                </li>
-                <li class="nav-item">
                     <a href="{{ url_for('admin_news') }}" class="nav-link {% if 'admin_news' in request.endpoint %}active{% endif %}">
                         <i class="fas fa-newspaper"></i> News
                     </a>
@@ -52,26 +47,6 @@
                 <li class="nav-item">
                     <a href="{{ url_for('admin_academics') }}" class="nav-link {% if 'admin_academics' in request.endpoint %}active{% endif %}">
                         <i class="fas fa-graduation-cap"></i> Academics
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ url_for('admin_teachers') }}" class="nav-link {% if 'admin_teachers' in request.endpoint %}active{% endif %}">
-                        <i class="fas fa-chalkboard-teacher"></i> Teachers
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ url_for('admin_facilities') }}" class="nav-link {% if 'admin_facilities' in request.endpoint %}active{% endif %}">
-                        <i class="fas fa-building"></i> Facilities
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ url_for('admin_syllabus') }}" class="nav-link {% if 'admin_syllabus' in request.endpoint %}active{% endif %}">
-                        <i class="fas fa-book"></i> Syllabus
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ url_for('admin_admissions') }}" class="nav-link {% if 'admin_admissions' in request.endpoint %}active{% endif %}">
-                        <i class="fas fa-user-graduate"></i> Admissions
                     </a>
                 </li>
                 <li class="nav-item">

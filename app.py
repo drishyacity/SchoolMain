@@ -1,19 +1,25 @@
 import os
 import logging
-import uuid
 from datetime import datetime
 from flask import Flask, render_template, redirect, url_for, flash, request, jsonify, abort
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import DeclarativeBase
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
 from werkzeug.middleware.proxy_fix import ProxyFix
+import uuid
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-# Import db from database.py
-from database import db
+# Initialize SQLAlchemy with a base class
+class Base(DeclarativeBase):
+    pass
+
+# Create a db instance
+db = SQLAlchemy(model_class=Base)
 
 # Create the app
 app = Flask(__name__)
@@ -39,51 +45,21 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 # Initialize the database
 db.init_app(app)
 
-# Import models
-import models
-
-# Import forms and utils
-import forms
-from utils import allowed_file, save_file
-
 # Initialize login manager
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'admin_login'
 login_manager.login_message = 'Please log in to access the admin panel.'
 
-# Import models and forms after everything is set up
 from models import User, News, Event, GalleryImage, Contact, AboutSection, AcademicProgram, SchoolSetting, \
     Teacher, Facility, Syllabus, AdmissionForm, HomeSlider
 from forms import LoginForm, NewsForm, EventForm, GalleryUploadForm, ContactForm, AboutSectionForm, AcademicProgramForm, \
     SchoolSettingsForm, UserForm, ProfileForm, TeacherForm, FacilityForm, SyllabusForm, AdmissionForm, HomeSliderForm, AdmissionResponseForm
+from utils import allowed_file, save_file
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-
-@app.context_processor
-def inject_current_year():
-    return {'current_year': datetime.now().year}
-
-@app.context_processor
-def inject_settings():
-    try:
-        settings = SchoolSetting.query.first()
-        if not settings:
-            settings = SchoolSetting(
-                school_name='Shree Gyan Bharti High School',
-                school_address='Bakhari Chowk Sitamarhi, Bihar 843302, India',
-                school_phone='+91 1234567890',
-                school_email='info@sgbhs.edu',
-                school_logo_path='IMG-20250425-WA0004.jpg'
-            )
-            db.session.add(settings)
-            db.session.commit()
-        return {'settings': settings}
-    except Exception as e:
-        # If table doesn't exist yet or other error
-        return {'settings': None}
 
 # Create database tables
 with app.app_context():
@@ -123,8 +99,8 @@ def index():
     for file in os.listdir(app.config['UPLOAD_FOLDER']):
         if file.startswith('IMG-') and file.endswith(('.jpg', '.jpeg', '.png', '.gif')):
             image_paths.append(file)
-    return render_template('home_single.html', settings=settings, news_items=news_items, events=events, 
-                           home_sliders=home_sliders, images_list=image_paths, current_year=datetime.now().year)
+    return render_template('index.html', settings=settings, news_items=news_items, events=events, 
+                           home_sliders=home_sliders, images_list=image_paths)
 
 @app.route('/about')
 def about():
@@ -159,26 +135,7 @@ def syllabus():
 @app.route('/admission', methods=['GET', 'POST'])
 def admission():
     settings = SchoolSetting.query.first()
-    form = AdmissionForm()
-    
-    if form.validate_on_submit():
-        application = AdmissionForm(
-            student_name=form.student_name.data,
-            parent_name=form.parent_name.data,
-            email=form.email.data,
-            phone=form.phone.data,
-            address=form.address.data,
-            class_applying=form.class_applying.data,
-            previous_school=form.previous_school.data,
-            date_of_birth=form.date_of_birth.data,
-            submission_date=datetime.now(),
-            status='Pending'
-        )
-        db.session.add(application)
-        db.session.commit()
-        flash('Your admission application has been submitted successfully!', 'success')
-        return redirect(url_for('admission'))
-    
+    form = None  # We'll create an admission form later
     return render_template('admission.html', settings=settings, form=form)
 
 @app.route('/events')
@@ -733,343 +690,6 @@ def admin_profile():
         return redirect(url_for('admin_profile'))
     
     return render_template('admin/profile.html', form=form)
-
-# Home Slider Management
-@app.route('/admin/homeslider')
-@login_required
-def admin_homeslider():
-    sliders = HomeSlider.query.order_by(HomeSlider.order).all()
-    return render_template('admin/homeslider_manage.html', sliders=sliders)
-
-@app.route('/admin/homeslider/add', methods=['GET', 'POST'])
-@login_required
-def admin_add_homeslider():
-    form = HomeSliderForm()
-    if form.validate_on_submit():
-        image_path = None
-        if form.image.data:
-            if allowed_file(form.image.data.filename, app.config['ALLOWED_EXTENSIONS']):
-                image_path = save_file(form.image.data, app.config['UPLOAD_FOLDER'], 'slider')
-            else:
-                flash('Invalid file format. Allowed formats: png, jpg, jpeg, gif', 'danger')
-                return render_template('admin/homeslider_form.html', form=form, title="Add Slider Image")
-        
-        slider = HomeSlider(
-            title=form.title.data,
-            image_path=image_path,
-            order=form.order.data,
-            active=form.active.data
-        )
-        db.session.add(slider)
-        db.session.commit()
-        flash('Slider image added successfully!', 'success')
-        return redirect(url_for('admin_homeslider'))
-    
-    return render_template('admin/homeslider_form.html', form=form, title="Add Slider Image")
-
-@app.route('/admin/homeslider/edit/<int:id>', methods=['GET', 'POST'])
-@login_required
-def admin_edit_homeslider(id):
-    slider = HomeSlider.query.get_or_404(id)
-    form = HomeSliderForm(obj=slider)
-    
-    if form.validate_on_submit():
-        slider.title = form.title.data
-        slider.order = form.order.data
-        slider.active = form.active.data
-        
-        if form.image.data:
-            if allowed_file(form.image.data.filename, app.config['ALLOWED_EXTENSIONS']):
-                # Delete old image if exists
-                if slider.image_path and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], slider.image_path)):
-                    os.remove(os.path.join(app.config['UPLOAD_FOLDER'], slider.image_path))
-                
-                slider.image_path = save_file(form.image.data, app.config['UPLOAD_FOLDER'], 'slider')
-            else:
-                flash('Invalid file format. Allowed formats: png, jpg, jpeg, gif', 'danger')
-                return render_template('admin/homeslider_form.html', form=form, title="Edit Slider Image")
-        
-        db.session.commit()
-        flash('Slider image updated successfully!', 'success')
-        return redirect(url_for('admin_homeslider'))
-    
-    return render_template('admin/homeslider_form.html', form=form, title="Edit Slider Image")
-
-@app.route('/admin/homeslider/delete/<int:id>', methods=['POST'])
-@login_required
-def admin_delete_homeslider(id):
-    slider = HomeSlider.query.get_or_404(id)
-    
-    # Delete image file if exists
-    if slider.image_path and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], slider.image_path)):
-        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], slider.image_path))
-    
-    db.session.delete(slider)
-    db.session.commit()
-    flash('Slider image deleted successfully!', 'success')
-    return redirect(url_for('admin_homeslider'))
-
-# Teachers Management
-@app.route('/admin/teachers')
-@login_required
-def admin_teachers():
-    teachers = Teacher.query.order_by(Teacher.order).all()
-    return render_template('admin/teachers_manage.html', teachers=teachers)
-
-@app.route('/admin/teachers/add', methods=['GET', 'POST'])
-@login_required
-def admin_add_teacher():
-    form = TeacherForm()
-    if form.validate_on_submit():
-        image_path = None
-        if form.image.data:
-            if allowed_file(form.image.data.filename, app.config['ALLOWED_EXTENSIONS']):
-                image_path = save_file(form.image.data, app.config['UPLOAD_FOLDER'], 'teachers')
-            else:
-                flash('Invalid file format. Allowed formats: png, jpg, jpeg, gif', 'danger')
-                return render_template('admin/teacher_form.html', form=form, title="Add Teacher")
-        
-        teacher = Teacher(
-            name=form.name.data,
-            position=form.position.data,
-            qualification=form.qualification.data,
-            bio=form.bio.data,
-            image_path=image_path,
-            order=form.order.data
-        )
-        db.session.add(teacher)
-        db.session.commit()
-        flash('Teacher added successfully!', 'success')
-        return redirect(url_for('admin_teachers'))
-    
-    return render_template('admin/teacher_form.html', form=form, title="Add Teacher")
-
-@app.route('/admin/teachers/edit/<int:id>', methods=['GET', 'POST'])
-@login_required
-def admin_edit_teacher(id):
-    teacher = Teacher.query.get_or_404(id)
-    form = TeacherForm(obj=teacher)
-    
-    if form.validate_on_submit():
-        teacher.name = form.name.data
-        teacher.position = form.position.data
-        teacher.qualification = form.qualification.data
-        teacher.bio = form.bio.data
-        teacher.order = form.order.data
-        
-        if form.image.data:
-            if allowed_file(form.image.data.filename, app.config['ALLOWED_EXTENSIONS']):
-                # Delete old image if exists
-                if teacher.image_path and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], teacher.image_path)):
-                    os.remove(os.path.join(app.config['UPLOAD_FOLDER'], teacher.image_path))
-                
-                teacher.image_path = save_file(form.image.data, app.config['UPLOAD_FOLDER'], 'teachers')
-            else:
-                flash('Invalid file format. Allowed formats: png, jpg, jpeg, gif', 'danger')
-                return render_template('admin/teacher_form.html', form=form, title="Edit Teacher")
-        
-        db.session.commit()
-        flash('Teacher updated successfully!', 'success')
-        return redirect(url_for('admin_teachers'))
-    
-    return render_template('admin/teacher_form.html', form=form, title="Edit Teacher")
-
-@app.route('/admin/teachers/delete/<int:id>', methods=['POST'])
-@login_required
-def admin_delete_teacher(id):
-    teacher = Teacher.query.get_or_404(id)
-    
-    # Delete image file if exists
-    if teacher.image_path and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], teacher.image_path)):
-        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], teacher.image_path))
-    
-    db.session.delete(teacher)
-    db.session.commit()
-    flash('Teacher deleted successfully!', 'success')
-    return redirect(url_for('admin_teachers'))
-
-# Facilities Management
-@app.route('/admin/facilities')
-@login_required
-def admin_facilities():
-    facilities = Facility.query.order_by(Facility.order).all()
-    return render_template('admin/facilities_manage.html', facilities=facilities)
-
-@app.route('/admin/facilities/add', methods=['GET', 'POST'])
-@login_required
-def admin_add_facility():
-    form = FacilityForm()
-    if form.validate_on_submit():
-        image_path = None
-        if form.image.data:
-            if allowed_file(form.image.data.filename, app.config['ALLOWED_EXTENSIONS']):
-                image_path = save_file(form.image.data, app.config['UPLOAD_FOLDER'], 'facilities')
-            else:
-                flash('Invalid file format. Allowed formats: png, jpg, jpeg, gif', 'danger')
-                return render_template('admin/facility_form.html', form=form, title="Add Facility")
-        
-        facility = Facility(
-            title=form.title.data,
-            description=form.description.data,
-            image_path=image_path,
-            order=form.order.data
-        )
-        db.session.add(facility)
-        db.session.commit()
-        flash('Facility added successfully!', 'success')
-        return redirect(url_for('admin_facilities'))
-    
-    return render_template('admin/facility_form.html', form=form, title="Add Facility")
-
-@app.route('/admin/facilities/edit/<int:id>', methods=['GET', 'POST'])
-@login_required
-def admin_edit_facility(id):
-    facility = Facility.query.get_or_404(id)
-    form = FacilityForm(obj=facility)
-    
-    if form.validate_on_submit():
-        facility.title = form.title.data
-        facility.description = form.description.data
-        facility.order = form.order.data
-        
-        if form.image.data:
-            if allowed_file(form.image.data.filename, app.config['ALLOWED_EXTENSIONS']):
-                # Delete old image if exists
-                if facility.image_path and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], facility.image_path)):
-                    os.remove(os.path.join(app.config['UPLOAD_FOLDER'], facility.image_path))
-                
-                facility.image_path = save_file(form.image.data, app.config['UPLOAD_FOLDER'], 'facilities')
-            else:
-                flash('Invalid file format. Allowed formats: png, jpg, jpeg, gif', 'danger')
-                return render_template('admin/facility_form.html', form=form, title="Edit Facility")
-        
-        db.session.commit()
-        flash('Facility updated successfully!', 'success')
-        return redirect(url_for('admin_facilities'))
-    
-    return render_template('admin/facility_form.html', form=form, title="Edit Facility")
-
-@app.route('/admin/facilities/delete/<int:id>', methods=['POST'])
-@login_required
-def admin_delete_facility(id):
-    facility = Facility.query.get_or_404(id)
-    
-    # Delete image file if exists
-    if facility.image_path and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], facility.image_path)):
-        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], facility.image_path))
-    
-    db.session.delete(facility)
-    db.session.commit()
-    flash('Facility deleted successfully!', 'success')
-    return redirect(url_for('admin_facilities'))
-
-# Syllabus Management
-@app.route('/admin/syllabus')
-@login_required
-def admin_syllabus():
-    syllabus_list = Syllabus.query.order_by(Syllabus.class_name, Syllabus.subject).all()
-    return render_template('admin/syllabus_manage.html', syllabus_list=syllabus_list)
-
-@app.route('/admin/syllabus/add', methods=['GET', 'POST'])
-@login_required
-def admin_add_syllabus():
-    form = SyllabusForm()
-    if form.validate_on_submit():
-        file_path = None
-        if form.file.data:
-            if allowed_file(form.file.data.filename, {'pdf'}):
-                file_path = save_file(form.file.data, app.config['UPLOAD_FOLDER'], 'syllabus')
-            else:
-                flash('Invalid file format. Allowed format: pdf', 'danger')
-                return render_template('admin/syllabus_form.html', form=form, title="Add Syllabus")
-        
-        syllabus = Syllabus(
-            class_name=form.class_name.data,
-            subject=form.subject.data,
-            description=form.description.data,
-            file_path=file_path,
-            order=form.order.data
-        )
-        db.session.add(syllabus)
-        db.session.commit()
-        flash('Syllabus added successfully!', 'success')
-        return redirect(url_for('admin_syllabus'))
-    
-    return render_template('admin/syllabus_form.html', form=form, title="Add Syllabus")
-
-@app.route('/admin/syllabus/edit/<int:id>', methods=['GET', 'POST'])
-@login_required
-def admin_edit_syllabus(id):
-    syllabus = Syllabus.query.get_or_404(id)
-    form = SyllabusForm(obj=syllabus)
-    
-    if form.validate_on_submit():
-        syllabus.class_name = form.class_name.data
-        syllabus.subject = form.subject.data
-        syllabus.description = form.description.data
-        syllabus.order = form.order.data
-        
-        if form.file.data:
-            if allowed_file(form.file.data.filename, {'pdf'}):
-                # Delete old file if exists
-                if syllabus.file_path and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], syllabus.file_path)):
-                    os.remove(os.path.join(app.config['UPLOAD_FOLDER'], syllabus.file_path))
-                
-                syllabus.file_path = save_file(form.file.data, app.config['UPLOAD_FOLDER'], 'syllabus')
-            else:
-                flash('Invalid file format. Allowed format: pdf', 'danger')
-                return render_template('admin/syllabus_form.html', form=form, title="Edit Syllabus")
-        
-        db.session.commit()
-        flash('Syllabus updated successfully!', 'success')
-        return redirect(url_for('admin_syllabus'))
-    
-    return render_template('admin/syllabus_form.html', form=form, title="Edit Syllabus")
-
-@app.route('/admin/syllabus/delete/<int:id>', methods=['POST'])
-@login_required
-def admin_delete_syllabus(id):
-    syllabus = Syllabus.query.get_or_404(id)
-    
-    # Delete file if exists
-    if syllabus.file_path and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], syllabus.file_path)):
-        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], syllabus.file_path))
-    
-    db.session.delete(syllabus)
-    db.session.commit()
-    flash('Syllabus deleted successfully!', 'success')
-    return redirect(url_for('admin_syllabus'))
-
-# Admission Applications Management
-@app.route('/admin/admissions')
-@login_required
-def admin_admissions():
-    admissions = AdmissionForm.query.order_by(AdmissionForm.submission_date.desc()).all()
-    return render_template('admin/admissions_manage.html', admissions=admissions)
-
-@app.route('/admin/admissions/view/<int:id>', methods=['GET', 'POST'])
-@login_required
-def admin_view_admission(id):
-    admission = AdmissionForm.query.get_or_404(id)
-    form = AdmissionResponseForm(obj=admission)
-    
-    if form.validate_on_submit():
-        admission.status = form.status.data
-        admission.comments = form.comments.data
-        db.session.commit()
-        flash('Admission application status updated successfully!', 'success')
-        return redirect(url_for('admin_admissions'))
-    
-    return render_template('admin/admission_view.html', admission=admission, form=form)
-
-@app.route('/admin/admissions/delete/<int:id>', methods=['POST'])
-@login_required
-def admin_delete_admission(id):
-    admission = AdmissionForm.query.get_or_404(id)
-    db.session.delete(admission)
-    db.session.commit()
-    flash('Admission application deleted successfully!', 'success')
-    return redirect(url_for('admin_admissions'))
 
 # Error handlers
 @app.errorhandler(404)

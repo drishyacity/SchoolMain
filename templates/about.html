@@ -1,250 +1,33 @@
 {% extends 'base.html' %}
 
-{% block title %}About Us - {{ settings.school_name }}{% endblock %}
+{% block title %}About Us - {{ settings.school_name if settings else 'Shree Gyan Bharti High School' }}{% endblock %}
 
 {% block content %}
-<!-- Page Header Start -->
-<div class="container-fluid bg-primary py-5 mb-5">
-    <div class="container py-5">
-        <div class="row">
-            <div class="col-12 text-center">
-                <h1 class="text-white display-4 mt-5 mb-2">About Our School</h1>
-                <div class="d-inline-block text-white">
-                    <p class="m-0"><a class="text-white" href="{{ url_for('index') }}">Home</a></p>
-                    <p class="m-0 px-2">-</p>
-                    <p class="m-0">About Us</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Page Header End -->
-
-<!-- About Sections Start -->
-<div class="container py-5">
-    <div class="text-center mb-5">
-        <h6 class="text-primary text-uppercase section-title">Learn About Us</h6>
-        <h2>{{ settings.school_name }}</h2>
-        <p class="lead">A place where quality education meets character development.</p>
-    </div>
+<div class="page-content">
+    <h1>About Our School</h1>
     
     {% if about_sections %}
         {% for section in about_sections %}
-            <div class="row about-section mb-5">
-                <div class="col-lg-{% if loop.index is divisibleby 2 %}6 order-lg-2{% else %}6{% endif %}">
-                    <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" alt="{{ section.title }}" class="img-fluid rounded shadow-sm" style="object-fit: cover; height: 350px; width: 100%;">
-                </div>
-                <div class="col-lg-{% if loop.index is divisibleby 2 %}6 order-lg-1{% else %}6{% endif %} d-flex align-items-center">
-                    <div class="p-3">
-                        <h3 class="mb-4">{{ section.title }}</h3>
-                        <p>{{ section.content }}</p>
-                    </div>
-                </div>
-            </div>
+        <div class="about-section">
+            <h2>{{ section.title }}</h2>
+            <p>{{ section.content|safe }}</p>
+        </div>
         {% endfor %}
     {% else %}
-        <!-- Default sections if no dynamic content is available -->
-        <div class="row about-section mb-5">
-            <div class="col-lg-6">
-                <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" alt="Our History" class="img-fluid rounded shadow-sm" style="object-fit: cover; height: 350px; width: 100%;">
-            </div>
-            <div class="col-lg-6 d-flex align-items-center">
-                <div class="p-3">
-                    <h3 class="mb-4">Our History</h3>
-                    <p>Founded in 1995, {{ settings.school_name }} has been providing quality education to students in our community for over 25 years. We started with just 50 students and have grown to become one of the most respected institutions in the region with a commitment to academic excellence and character development.</p>
-                </div>
-            </div>
+        <div class="about-section">
+            <h2>Our History</h2>
+            <p>Founded in 1995, Shree Gyan Bharti High School has been providing quality education to students in our community for over 25 years. We started with just 50 students and have grown to become one of the most respected institutions in the region.</p>
         </div>
         
-        <div class="row about-section mb-5">
-            <div class="col-lg-6 order-lg-2">
-                <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" alt="Our Mission" class="img-fluid rounded shadow-sm" style="object-fit: cover; height: 350px; width: 100%;">
-            </div>
-            <div class="col-lg-6 order-lg-1 d-flex align-items-center">
-                <div class="p-3">
-                    <h3 class="mb-4">Our Mission</h3>
-                    <p>To provide a nurturing environment that fosters academic excellence, character development, and lifelong learning. We aim to develop well-rounded individuals who will contribute positively to society. Our mission is to prepare students not only for exams but for life itself, with a focus on moral values, critical thinking, and creativity.</p>
-                </div>
-            </div>
+        <div class="about-section">
+            <h2>Our Mission</h2>
+            <p>To provide a nurturing environment that fosters academic excellence, character development, and lifelong learning. We aim to develop well-rounded individuals who will contribute positively to society.</p>
         </div>
         
-        <div class="row about-section mb-5">
-            <div class="col-lg-6">
-                <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" alt="Our Facilities" class="img-fluid rounded shadow-sm" style="object-fit: cover; height: 350px; width: 100%;">
-            </div>
-            <div class="col-lg-6 d-flex align-items-center">
-                <div class="p-3">
-                    <h3 class="mb-4">Our Facilities</h3>
-                    <p>Our campus features modern classrooms, well-equipped science and computer labs, a spacious library, and excellent sports facilities to support holistic development of our students. We believe in providing an environment that encourages learning, exploration, and growth, with facilities that meet international standards of education.</p>
-                </div>
-            </div>
+        <div class="about-section">
+            <h2>Our Facilities</h2>
+            <p>Our campus features modern classrooms, well-equipped science and computer labs, a spacious library, and excellent sports facilities to support holistic development of our students.</p>
         </div>
     {% endif %}
 </div>
-<!-- About Sections End -->
-
-<!-- Stats Section Start -->
-<div class="container-fluid py-5" style="background-color: var(--bs-light);">
-    <div class="container">
-        <div class="text-center mb-5">
-            <h6 class="text-primary text-uppercase section-title">Our Achievement</h6>
-            <h2>Our School At A Glance</h2>
-        </div>
-        <div class="row g-4">
-            <div class="col-lg-3 col-md-6">
-                <div class="card border-0 h-100 text-center shadow-sm">
-                    <div class="card-body p-4">
-                        <i class="fas fa-user-graduate fa-3x text-primary mb-3"></i>
-                        <h5 class="card-title">500+</h5>
-                        <p class="card-text">Students</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="card border-0 h-100 text-center shadow-sm">
-                    <div class="card-body p-4">
-                        <i class="fas fa-chalkboard-teacher fa-3x text-primary mb-3"></i>
-                        <h5 class="card-title">30+</h5>
-                        <p class="card-text">Certified Teachers</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="card border-0 h-100 text-center shadow-sm">
-                    <div class="card-body p-4">
-                        <i class="fas fa-award fa-3x text-primary mb-3"></i>
-                        <h5 class="card-title">25+</h5>
-                        <p class="card-text">Years of Excellence</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="card border-0 h-100 text-center shadow-sm">
-                    <div class="card-body p-4">
-                        <i class="fas fa-trophy fa-3x text-primary mb-3"></i>
-                        <h5 class="card-title">50+</h5>
-                        <p class="card-text">Awards Won</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Stats Section End -->
-
-<!-- Team Preview Start -->
-<div class="container py-5">
-    <div class="text-center mb-5">
-        <h6 class="text-primary text-uppercase section-title">Our Faculty</h6>
-        <h2>Meet Our School Leadership</h2>
-    </div>
-    <div class="row g-4">
-        <div class="col-lg-4 col-md-6">
-            <div class="card team-item">
-                <div class="overflow-hidden">
-                    <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" class="card-img-top" alt="Principal" style="height: 300px; object-fit: cover;">
-                </div>
-                <div class="card-body text-center">
-                    <h5 class="card-title mb-0">Dr. Rakesh Kumar</h5>
-                    <p class="text-primary">Principal</p>
-                    <p class="small text-muted">Ph.D. in Education</p>
-                    <p class="card-text">With over 20 years of experience in education administration, Dr. Kumar leads our school with passion and vision.</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4 col-md-6">
-            <div class="card team-item">
-                <div class="overflow-hidden">
-                    <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" class="card-img-top" alt="Vice Principal" style="height: 300px; object-fit: cover;">
-                </div>
-                <div class="card-body text-center">
-                    <h5 class="card-title mb-0">Mrs. Priya Sharma</h5>
-                    <p class="text-primary">Vice Principal</p>
-                    <p class="small text-muted">M.Ed. in Curriculum Development</p>
-                    <p class="card-text">Mrs. Sharma oversees our academic programs and ensures the highest quality of education for our students.</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4 col-md-6">
-            <div class="card team-item">
-                <div class="overflow-hidden">
-                    <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" class="card-img-top" alt="Administrator" style="height: 300px; object-fit: cover;">
-                </div>
-                <div class="card-body text-center">
-                    <h5 class="card-title mb-0">Mr. Sunil Patel</h5>
-                    <p class="text-primary">Administrator</p>
-                    <p class="small text-muted">MBA in School Management</p>
-                    <p class="card-text">Mr. Patel manages the school's daily operations and infrastructure to create an optimal learning environment.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="text-center mt-4">
-        <a href="{{ url_for('teachers') }}" class="btn btn-primary">View All Teachers</a>
-    </div>
-</div>
-<!-- Team Preview End -->
-
-<!-- Testimonials Section Start -->
-<div class="container-fluid py-5" style="background-color: var(--bs-light);">
-    <div class="container">
-        <div class="text-center mb-5">
-            <h6 class="text-primary text-uppercase section-title">Testimonials</h6>
-            <h2>What Parents Say</h2>
-        </div>
-        <div class="row g-4 justify-content-center">
-            <div class="col-lg-8">
-                <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel">
-                    <div class="carousel-inner">
-                        <div class="carousel-item active">
-                            <div class="card border-0 shadow-sm">
-                                <div class="card-body p-5 text-center">
-                                    <i class="fas fa-quote-left fa-3x text-primary mb-4"></i>
-                                    <p class="lead mb-4">"{{ settings.school_name }} has provided an excellent educational environment for my child. The teachers are caring and the curriculum is challenging yet engaging."</p>
-                                    <div>
-                                        <h5 class="mb-0">Mrs. Anjali Gupta</h5>
-                                        <p class="text-muted">Parent of Class 8 Student</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="carousel-item">
-                            <div class="card border-0 shadow-sm">
-                                <div class="card-body p-5 text-center">
-                                    <i class="fas fa-quote-left fa-3x text-primary mb-4"></i>
-                                    <p class="lead mb-4">"I've seen tremendous growth in my daughter's confidence and academic skills since joining this school. The focus on holistic development is truly commendable."</p>
-                                    <div>
-                                        <h5 class="mb-0">Mr. Rajesh Singh</h5>
-                                        <p class="text-muted">Parent of Class 5 Student</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="carousel-item">
-                            <div class="card border-0 shadow-sm">
-                                <div class="card-body p-5 text-center">
-                                    <i class="fas fa-quote-left fa-3x text-primary mb-4"></i>
-                                    <p class="lead mb-4">"The school's commitment to both academic excellence and character development is what sets it apart. My son loves coming to school every day."</p>
-                                    <div>
-                                        <h5 class="mb-0">Mrs. Sunita Verma</h5>
-                                        <p class="text-muted">Parent of Class 10 Student</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev">
-                        <span class="carousel-control-prev-icon bg-primary rounded-circle" aria-hidden="true"></span>
-                        <span class="visually-hidden">Previous</span>
-                    </button>
-                    <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="next">
-                        <span class="carousel-control-next-icon bg-primary rounded-circle" aria-hidden="true"></span>
-                        <span class="visually-hidden">Next</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Testimonials Section End -->
 {% endblock %}
