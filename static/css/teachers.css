@@ -1,0 +1,237 @@
+/* Teachers Page Styles */
+
+/* Leadership Section */
+.leadership-section {
+    margin-bottom: 50px;
+}
+
+.section-title {
+    color: #0c2d57;
+    margin-bottom: 30px;
+    text-align: center;
+    font-size: 2rem;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+.section-title:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background-color: #0c2d57;
+}
+
+.leadership-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.leadership-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    padding: 20px;
+    text-align: center;
+}
+
+.leadership-image-container {
+    width: 100%;
+    height: 400px; /* Match admin preview aspect ratio */
+    overflow: hidden;
+    position: relative;
+    background-color: #f8f9fa; /* Light background to prevent black */
+    border-radius: 8px;
+}
+
+.leadership-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+    transition: transform 0.3s ease;
+    background-color: #f8f9fa; /* Light background for loading */
+    display: block; /* Ensure proper display */
+}
+
+.leadership-info {
+    padding: 20px;
+}
+
+.leadership-name {
+    color: #0c2d57;
+    margin-bottom: 5px;
+    font-size: 1.5rem;
+}
+
+.leadership-position {
+    color: #666;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.leadership-qualification {
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.leadership-bio {
+    color: #555;
+    line-height: 1.6;
+}
+
+/* Faculty Section */
+.faculty-section {
+    margin-bottom: 50px;
+}
+
+.teachers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+}
+
+.teacher-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.teacher-card:hover {
+    transform: translateY(-5px);
+}
+
+.teacher-image-container {
+    width: 100%;
+    height: 300px; /* Match admin preview aspect ratio */
+    overflow: hidden;
+    position: relative;
+    background-color: #f8f9fa; /* Light background to prevent black */
+    border-radius: 8px 8px 0 0; /* Rounded top corners only */
+}
+
+.teacher-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+    transition: transform 0.3s ease;
+    background-color: #f8f9fa; /* Light background for loading */
+    display: block; /* Ensure proper display */
+}
+
+.teacher-info {
+    padding: 15px;
+}
+
+.teacher-name {
+    color: #0c2d57;
+    margin-bottom: 5px;
+    font-size: 1.2rem;
+}
+
+.teacher-position {
+    color: #666;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.teacher-qualification {
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.teacher-bio {
+    color: #555;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-top: 10px;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.empty-state h3 {
+    color: #0c2d57;
+    margin-bottom: 10px;
+}
+
+.empty-state p {
+    color: #666;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Utility classes */
+.text-center {
+    text-align: center;
+}
+
+/* Circle image option for leadership */
+.leadership-image-container.circle {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    margin: 0 auto 20px;
+    border: 5px solid #fff;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.leadership-image-container.circle .leadership-image {
+    border-radius: 50%;
+}
+
+/* Hover effects */
+.leadership-image-container:hover .leadership-image,
+.teacher-image-container:hover .teacher-image {
+    transform: scale(1.05);
+    transition: transform 0.3s ease;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .leadership-image-container {
+        height: 300px; /* Scale down for mobile */
+    }
+
+    .teacher-image-container {
+        height: 225px; /* Scale down maintaining aspect ratio */
+    }
+}
+
+@media (max-width: 480px) {
+    .leadership-card {
+        flex-direction: column;
+    }
+
+    .leadership-image-container {
+        height: 250px; /* Scale down further for small mobile */
+    }
+
+    .teacher-image-container {
+        height: 187px; /* Scale down maintaining aspect ratio */
+    }
+
+    .leadership-image-container.circle {
+        width: 150px;
+        height: 150px;
+    }
+}

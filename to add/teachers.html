@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Teachers - Shree Gyan Bharti High School</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+    }
+    
+    header {
+      background: #fff;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      position: relative;
+      z-index: 1000;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo img {
+      width: 40px;
+      height: 40px;
+    }
+    .logo h2 {
+      font-size: 18px;
+      color: #0c2d57;
+    }
+    nav ul {
+      display: flex;
+      list-style: none;
+      align-items: center;
+    }
+    nav ul li {
+      margin-left: 20px;
+      position: relative;
+    }
+    nav ul li a {
+      text-decoration: none;
+      color: #0c2d57;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .menu-toggle {
+      display: none;
+      font-size: 24px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      margin-right: 10px;
+      color: #0c2d57;
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      min-width: 180px;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      border-radius: 5px;
+      z-index: 999;
+    }
+    .dropdown-content a {
+      display: block;
+      padding: 10px;
+      color: #0c2d57;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .dropdown-content a:hover {
+      background: #f1f1f1;
+    }
+
+    .dropdown.active .dropdown-content {
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .menu-toggle {
+        display: block;
+      }
+      nav {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: white;
+        display: none;
+        flex-direction: column;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      nav.active {
+        display: flex;
+      }
+      nav ul {
+        flex-direction: column;
+        width: 100%;
+        text-align: center;
+      }
+      nav ul li {
+        margin: 10px 0;
+      }
+      nav ul li a {
+        display: block;
+        width: 100%;
+        padding: 10px 0;
+      }
+      .dropdown-content {
+        top: 45px;
+        right: 10px;
+        left: auto;
+        transform: none;
+      }
+    }
+
+    .section {
+      display: flex;
+      align-items: center;
+      padding: 60px 20px;
+      background: #fff;
+      border-bottom: 1px solid #ddd;
+      height: 450px;
+    }
+
+    .section img {
+      width: 250px;
+      height: 250px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-right: 40px;
+    }
+
+    .section .info {
+      max-width: 700px;
+      margin-left: auto;
+    }
+
+    .section .info h2 {
+      margin-bottom: 10px;
+      color: #0c2d57;
+    }
+
+    .section .info h4 {
+      margin-bottom: 10px;
+      color: #555;
+    }
+
+    .section .info p {
+      color: #333;
+      line-height: 1.5;
+    }
+
+    .section .info .more-btn {
+      margin-top: 20px;
+      display: inline-block;
+      background: #0c2d57;
+      color: white;
+      padding: 10px 20px;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background 0.3s ease;
+    }
+
+    .section .info .more-btn:hover {
+      background: #0a1f3c;
+    }
+
+    /* Section Heading */
+    .section-heading {
+      text-align: center;
+      padding: 5px 0;
+      background-color: #0c2d57;
+      color: white;
+    }
+
+    /* Teachers Grid */
+    .teachers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      padding: 40px 20px;
+      background: #f9f9f9;
+    }
+
+    .teacher-card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+      min-height: 460px; /* Minimum height fix, grows if needed */
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    .teacher-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    /* Teacher Image Container */
+    .image-container {
+      width: 120px;
+      height: 120px;
+      border: 2px solid black;
+      margin: 0 auto 15px auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      border-radius: 10px;
+    }
+
+    .image-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .teacher-card h3 {
+      color: #0c2d57;
+      margin-bottom: 5px;
+    }
+
+    .teacher-card p {
+      font-size: 14px;
+      color: #555;
+      margin: 4px 0;
+    }
+
+    .subject-description {
+      margin-top: 15px;
+      font-weight: bold;
+      font-size: 16px;
+      color: #333;
+      padding-top: 10px;
+      border-top: 1px solid #eee;
+    }
+    /* Footer Base */
+footer {
+    background: #0c2d57;
+    color: white;
+    padding: 30px 20px;
+    text-align: center;
+}
+
+.footer a {
+    color: white;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer a:hover {
+    color: var(--accent-color);
+}
+
+/* Grid Layout */
+.footer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 40px;
+    margin-bottom: 60px;
+    text-align: left;
+}
+
+/* Footer Column */
+.footer-col {
+    margin-bottom: 20px;
+}
+
+.footer-col h4 {
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    display: inline-block;
+    padding-bottom: 5px;
+}
+
+.footer-col ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-col ul li {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.footer-col ul li i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+/* Logo Style */
+.logo img {
+    height: 50px;
+    margin-right: 10px;
+}
+
+.logo span {
+    font-size: 1.1rem;
+}
+
+/* Social Links */
+.social-links {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.social-links a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+footer .social-links img {
+    width: 25px;
+    height: 25px;
+    transition: transform 0.3s ease;
+}
+
+footer .social-links img:hover {
+    transform: scale(1.2);
+}
+
+.social-links i {
+    font-size: 24px;
+    transition: transform 0.3s ease;
+}
+
+.social-links i:hover {
+    transform: scale(1.2);
+}
+
+/* Footer Bottom */
+.footer-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+    font-size: 0.9rem;
+}
+
+.footer-links {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+  </style>
+</head>
+<body>
+
+    <header>
+        <button class="menu-toggle" id="menu-toggle">&#9776;</button>
+    
+        <div class="logo">
+          <img src="IMG-20250425-WA0004.jpg" alt="Logo" />
+          <h2>SHREE GYAN BHARTI HIGH SCHOOL</h2>
+        </div>
+    
+        <nav id="nav">
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="academics.html">Academics</a></li>
+            <li><a href="events.html">Events</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+            <li class="dropdown" id="login-dropdown">
+              <a id="login-btn">Login</a>
+              <div class="dropdown-content" id="dropdown-menu">
+                <a href="adminlogin.html">Admin Login</a>
+                <a href="teacherlogin.html">Teacher Login</a>
+                <a href="studentlogin.html">Student Login</a>
+              </div>
+            </li>
+          </ul>
+        </nav>
+      </header>  
+
+  <!-- Meet Our Leadership Section -->
+  <div class="section-heading">
+    <h2>Meet Our Leadership & Teachers</h2>
+  </div>
+
+  <!-- Director Section -->
+  <section class="section">
+    <img src="IMG-20250426-WA0089.jpg" alt="Director Photo">
+    <div class="info">
+      <h2>Mr. Ram Naresh Singh</h2>
+      <h4>Director</h4>
+      <p>“Education is not preparation for life; education is life itself.”<br>
+      With decades of experience and a passion for nurturing young minds, Mr. Sharma has been guiding our institution toward excellence since its inception.</p>
+      <a class="more-btn" href="director.html">More</a>
+    </div>
+  </section>
+
+  <!-- Principal Section -->
+  <section class="section">
+    <img src="IMG-20250426-WA0173.jpg" alt="Principal Photo">
+    <div class="info">
+      <h2>Mrs. Nitu Singh</h2>
+      <h4>Principal</h4>
+      <p>“A good education is a foundation for a better future.”<br>
+      Mrs. Nitu leads the school with strong values, innovation, and a deep commitment to academic success and holistic development.</p>
+      <a class="more-btn" href="principal.html">More</a>
+    </div>
+  </section>
+
+  <!-- Dedicated Teachers Section -->
+  <div class="section-heading">
+    <h2>Dedicated Teachers</h2>
+    <p>Our highly qualified and dedicated teachers are the foundation of our school's success. Their passion for teaching and commitment to student growth is reflected in everything they do.</p>
+  </div>
+
+  <!-- Teachers Grid -->
+  <div class="teachers-grid">
+    <div class="teacher-card">
+      <div class="image-container">
+        <img src="IMG-20250426-WA0038.jpg" alt="Teacher">
+      </div>
+      <h3>Rajnish kumar</h3>
+      <p>Qualification: B.Sc , NTT ,ADCA , Deled</p>
+      <p>Experience: 5 Years</p>
+      <p>Subject: Science + computer</p>
+      <div class="subject-description">
+        Passionate about making science easy and interesting for students. Believes in practical learning.
+      </div>
+    </div>
+
+    <div class="teacher-card">
+      <div class="image-container">
+        <img src="IMG-20250426-WA0040.jpg" alt="Teacher">
+      </div>
+      <h3>Neha Singh</h3>
+      <p>Qualification: M.A, B.Ed</p>
+      <p>Experience: 8 Years</p>
+      <p>Subject: English</p>
+      <div class="subject-description">
+        Dedicated to enhancing communication skills and literary appreciation among students.
+      </div>
+    </div>
+
+    <div class="teacher-card">
+      <div class="image-container">
+        <img src="IMG-20250427-WA0017.jpg" alt="Teacher">
+      </div>
+      <h3>Niraj Kumar</h3>
+      <p>Qualification: Deled , Ctet with training</p>
+      <p>Experience: 6 Years</p>
+      <p>Subject: Sanskrit</p>
+      <div class="subject-description">
+        Focused on building strong Sanskrit foundations with easy-to-understand methods.
+      </div>
+    </div>
+
+    <!-- Add more teacher cards as needed -->
+  </div>
+      <!-- Font Awesome (required for icons) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<footer class="footer" id="contact">
+  <div class="container">
+    <div class="footer-grid">
+      
+      <!-- School Info & Social Links -->
+      <div class="footer-col">
+        <div class="logo" style="display: flex; align-items: center; gap: 10px;">
+          <img src="IMG-20250425-WA0004.jpg" alt="School Logo" style="height: 50px; width: auto; object-fit: contain; vertical-align: middle;">
+          <span><strong>Shree Gyan Bharti High School</strong></span>
+        </div>
+        <p>Empowering young minds with knowledge, values, and a vision for a brighter future.</p>
+        
+        <div class="social-links">
+          <a href="https://facebook.com" target="_blank">
+            <img src="https://cdn-icons-png.flaticon.com/512/124/124010.png" alt="Facebook">
+          </a>
+          <a href="https://twitter.com" target="_blank">
+            <img src="https://cdn-icons-png.flaticon.com/512/733/733579.png" alt="Twitter">
+          </a>
+          <a href="https://instagram.com" target="_blank">
+            <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="Instagram">
+          </a>
+          <a href="https://linkedin.com" target="_blank">
+            <i class="fab fa-linkedin" style="color: white; font-size: 24px;"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="footer-col">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="admission.html">Admission</a></li>
+          <li><a href="news.html">News</a></li>
+          <li><a href="events.html">Events</a></li>
+          <li><a href="achievements.html">Achievements</a></li>
+        </ul>
+      </div>
+
+      <!-- Resources -->
+      <div class="footer-col">
+        <h4>Resources</h4>
+        <ul>
+          <li><a href="#">Documentation</a></li>
+          <li><a href="#">Tutorials</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Syllabus</a></li>
+        </ul>
+      </div>
+
+      <!-- Contact Info -->
+      <div class="footer-col">
+        <h4>Contact Us</h4>
+        <ul>
+          <li><i class="fas fa-envelope"></i> support@multitools.com</li>
+          <li><i class="fas fa-phone"></i> +91 7970655058</li>
+          <li><i class="fas fa-map-marker-alt"></i> Location X</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- Bottom Section -->
+    <div class="footer-bottom">
+      <p>&copy; 2025 Shree Gyan Bharti. All rights reserved.</p>
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Cookies</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+    const menuToggle = document.getElementById("menu-toggle");
+    const nav = document.getElementById("nav");
+    const loginDropdown = document.getElementById("login-dropdown");
+    const loginBtn = document.getElementById("login-btn");
+
+    menuToggle.addEventListener("click", () => {
+      nav.classList.toggle("active");
+    });
+
+    loginBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      loginDropdown.classList.toggle("active");
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!loginDropdown.contains(e.target) && !loginBtn.contains(e.target)) {
+        loginDropdown.classList.remove("active");
+      }
+    });
+  </script>
+
+</body>
+</html>

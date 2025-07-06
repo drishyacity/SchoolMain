@@ -102,7 +102,7 @@ nav ul li a {
     .menu-toggle {
         display: block;
     }
-    
+
     nav {
         position: absolute;
         top: 100%;
@@ -113,27 +113,27 @@ nav ul li a {
         flex-direction: column;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
-    
+
     nav.active {
         display: flex;
     }
-    
+
     nav ul {
         flex-direction: column;
         width: 100%;
         text-align: center;
     }
-    
+
     nav ul li {
         margin: 10px 0;
     }
-    
+
     nav ul li a {
         display: block;
         width: 100%;
         padding: 10px 0;
     }
-    
+
     .dropdown-content {
         top: 45px;
         right: 10px;
@@ -311,6 +311,53 @@ footer .social-links img:hover {
 
 .gallery-item:hover img {
     transform: scale(1.05);
+}
+
+/* Pagination Styles */
+.pagination-container {
+    grid-column: 1 / -1;
+    margin-top: 30px;
+    text-align: center;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.page-link {
+    display: inline-block;
+    padding: 8px 12px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    color: #0c2d57;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.page-link:hover {
+    background-color: #f5f5f5;
+}
+
+.page-link.active {
+    background-color: #0c2d57;
+    color: white;
+    border-color: #0c2d57;
+}
+
+.page-link.disabled {
+    color: #aaa;
+    pointer-events: none;
+}
+
+.page-info {
+    color: #666;
+    font-size: 0.9rem;
+    margin-top: 10px;
 }
 
 /* About Section Styles */

@@ -2,6 +2,49 @@
 
 {% block title %}{{ title }}{% endblock %}
 
+{% block styles %}
+{{ super() }}
+<style>
+    /* Image Cropper Styles */
+
+    /* Main preview box for cropping/adjusting image */
+    #main-preview {
+        width: 400px;
+        height: 300px;
+        border: 3px solid #007bff;
+        border-radius: 5px;
+        margin: 0 auto;
+        overflow: hidden;
+        position: relative;
+        background: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    #main-preview img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center top;
+        user-select: none;
+        cursor: grab;
+    }
+
+    /* Remove all preview box styles */
+    .preview-box, #teacher-preview, #leadership-preview, #circle-preview, .teacher-preview-container, .leadership-preview-container, .circle-preview-container {
+        display: none !important;
+    }
+
+    /* Position type hints */
+    .position-hint {
+        display: none;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid px-4">
     <h1 class="mt-4">{{ title }}</h1>
@@ -10,9 +53,9 @@
         <li class="breadcrumb-item"><a href="{{ url_for('admin_teachers') }}">Teachers</a></li>
         <li class="breadcrumb-item active">{{ title }}</li>
     </ol>
-    
+
     {% include 'admin/includes/flash_messages.html' %}
-    
+
     <div class="card mb-4">
         <div class="card-header">
             <i class="fas fa-user-tie me-1"></i>
@@ -21,7 +64,7 @@
         <div class="card-body">
             <form method="POST" enctype="multipart/form-data">
                 {{ form.hidden_tag() }}
-                
+
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <div class="form-group">
@@ -38,8 +81,26 @@
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="position">Position</label>
-                            {{ form.position(class="form-control", placeholder="e.g. Math Teacher, Principal") }}
+                            <label for="position_type">Position Type</label>
+                            {{ form.position_type(class="form-control") }}
+                            {% if form.position_type.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.position_type.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="position">Position Title</label>
+                            {{ form.position(class="form-control", placeholder="e.g. Math Teacher, Principal, Director") }}
+                            <small class="text-muted position-hint leadership-hint" style="display: none;">Examples: Principal, Director, Chairman, Vice Principal</small>
+                            <small class="text-muted position-hint teaching-hint" style="display: none;">Examples: Math Teacher, Science Teacher, Physical Education Teacher</small>
                             {% if form.position.errors %}
                                 <div class="text-danger">
                                     {% for error in form.position.errors %}
@@ -50,7 +111,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <div class="form-group">
@@ -80,7 +141,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="row mb-3">
                     <div class="col-md-12">
                         <div class="form-group">
@@ -96,13 +157,25 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="row mb-3">
                     <div class="col-md-12">
                         <div class="form-group">
                             <label for="image">Teacher Image</label>
-                            {{ form.image(class="form-control") }}
+                            <div class="input-group">
+                                {{ form.image(class="form-control", id="image-upload") }}
+                                <button type="button" class="btn btn-primary" id="show-cropper-btn">
+                                    <i class="fas fa-crop-alt me-1"></i> Adjust Image
+                                </button>
+                            </div>
                             <small class="text-muted">Accepted formats: JPG, JPEG, PNG, GIF</small>
+                            <small class="text-muted d-block mt-1">Recommended dimensions: 400x400 pixels for leadership, 400x300 pixels for teaching staff.</small>
+                            <div class="alert alert-warning mt-2">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-exclamation-triangle text-danger me-2"></i>
+                                    <span><strong>Important:</strong> After selecting an image, click the "Adjust Image" button to control how it appears on the website.</span>
+                                </div>
+                            </div>
                             {% if form.image.errors %}
                                 <div class="text-danger">
                                     {% for error in form.image.errors %}
@@ -113,20 +186,99 @@
                         </div>
                     </div>
                 </div>
-                
+
+                <!-- Image Cropper -->
+                <div id="image-cropper-container" class="card mt-4 mb-4 border-primary shadow" style="display: none;">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-crop-alt me-2"></i>Image Adjustment Tool</h5>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Important:</strong> Adjust your image below to control how it appears on the website.
+                            <ul class="mb-0 mt-2">
+                                <li><strong>Drag</strong> the image to reposition it</li>
+                                <li>Use the <strong>zoom slider</strong> to zoom in or out</li>
+                                <li>Click <strong>"Apply Changes"</strong> when you're satisfied with the preview</li>
+                            </ul>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="card mb-3 shadow-sm">
+                                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-0">Adjust Image</h6>
+                                        <div>
+                                            <button type="button" id="reset-button" class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-undo me-1"></i> Reset
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <!-- Instagram-style preview area for adjusting the image -->
+                                        <div id="main-preview" style="width: 400px; height: 300px; border: 3px solid #007bff; border-radius: 5px; margin: 0 auto; overflow: hidden; position: relative; background: #f8f9fa; cursor: move;"></div>
+                                    </div>
+                                    <div class="card-footer bg-light">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-search-minus text-muted me-2"></i>
+                                            <div class="flex-grow-1">
+                                                <label for="zoom-slider" class="form-label mb-0 fw-bold">Zoom: <span id="zoom-value">100%</span></label>
+                                                <input type="range" class="form-range" id="zoom-slider" min="0.1" max="3" step="0.1" value="1">
+                                            </div>
+                                            <i class="fas fa-search-plus text-muted ms-2"></i>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-end">
+                                    <button type="button" id="apply-button" class="btn btn-success btn-lg">
+                                        <i class="fas fa-check me-1"></i> Apply Changes
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hidden input to store crop data -->
+                    <input type="hidden" id="crop-data" name="crop_data">
+                </div>
+
                 {% if form.obj and form.obj.image_path %}
                 <div class="row mb-3">
                     <div class="col-md-12">
-                        <div class="form-group">
-                            <label>Current Image</label>
-                            <div>
-                                <img src="{{ url_for('static', filename='uploads/' + form.obj.image_path) }}" alt="Current Image" style="max-width: 200px; max-height: 200px;">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">Current Image</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="text-center mb-2">
+                                            <span class="badge bg-primary">Current Image</span>
+                                        </div>
+                                        <div style="width: 200px; height: {% if form.obj.position_type == 'leadership' %}200px{% else %}150px{% endif %}; margin: 0 auto; border: 2px solid #ccc; overflow: hidden;">
+                                            <img src="{{ url_for('static', filename='uploads/' + form.obj.image_path) }}" alt="Current Image" style="width: 100%; height: 100%; object-fit: cover; object-position: center top;">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            <strong>Current Image Settings</strong>
+                                            <p class="mb-0 mt-2">If you want to adjust how this image appears on the website, click the button below:</p>
+                                        </div>
+                                        <button type="button" id="adjust-current-image" class="btn btn-primary">
+                                            <i class="fas fa-crop-alt me-1"></i> Adjust Current Image
+                                        </button>
+                                        <p class="text-muted small mt-2">Note: Uploading a new image will replace the current one.</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 {% endif %}
-                
+
                 <div class="d-flex justify-content-between">
                     <a href="{{ url_for('admin_teachers') }}" class="btn btn-secondary">Cancel</a>
                     {{ form.submit(class="btn btn-primary") }}
@@ -135,4 +287,348 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Position type hints
+        const positionTypeSelect = document.getElementById('position_type');
+        const leadershipHint = document.querySelector('.leadership-hint');
+        const teachingHint = document.querySelector('.teaching-hint');
+        const cropDataInput = document.getElementById('crop-data');
+        const showCropperBtn = document.getElementById('show-cropper-btn');
+        const fileInput = document.getElementById('image-upload');
+        const cropperContainer = document.getElementById('image-cropper-container');
+        const mainPreview = document.getElementById('main-preview');
+        const zoomSlider = document.getElementById('zoom-slider');
+        const zoomValue = document.getElementById('zoom-value');
+        const resetButton = document.getElementById('reset-button');
+        const applyButton = document.getElementById('apply-button');
+
+        // State variables
+        let currentImage = null;
+        let zoom = 1;
+        let posX = 0;
+        let posY = 0;
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
+
+        // Function to update hints and preview containers based on selected position type
+        function updatePositionHints() {
+            if (positionTypeSelect.value === 'leadership') {
+                // Update hints
+                if (leadershipHint) leadershipHint.style.display = 'block';
+                if (teachingHint) teachingHint.style.display = 'none';
+
+                // Update preview box size for leadership
+                mainPreview.style.width = '400px';
+                mainPreview.style.height = '400px';
+            } else {
+                // Update hints
+                if (leadershipHint) leadershipHint.style.display = 'none';
+                if (teachingHint) teachingHint.style.display = 'block';
+
+                // Update preview box size for teaching staff
+                mainPreview.style.width = '400px';
+                mainPreview.style.height = '300px';
+            }
+        }
+
+        // Initial update
+        updatePositionHints();
+
+        // Update on change
+        positionTypeSelect.addEventListener('change', updatePositionHints);
+
+        // Show cropper button event
+        showCropperBtn.addEventListener('click', function() {
+            if (fileInput.files && fileInput.files[0]) {
+                // If an image is already selected, show the cropper
+                cropperContainer.style.display = 'block';
+                cropperContainer.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                // If no image is selected, prompt the user to select one
+                alert('Please select an image first.');
+                fileInput.click();
+            }
+        });
+
+        // Function to load and display image - Instagram style
+        function loadImage(src) {
+            // Clear previous image
+            mainPreview.innerHTML = '';
+            currentImage = new Image();
+
+            currentImage.onload = function() {
+                console.log('Image loaded successfully:', src);
+
+                // Calculate the scale to fit image properly in preview
+                const previewWidth = mainPreview.offsetWidth;
+                const previewHeight = mainPreview.offsetHeight;
+                const imgWidth = currentImage.naturalWidth;
+                const imgHeight = currentImage.naturalHeight;
+
+                console.log('Preview dimensions:', previewWidth, 'x', previewHeight);
+                console.log('Image dimensions:', imgWidth, 'x', imgHeight);
+
+                // Calculate scale to cover the preview area completely
+                const scaleX = previewWidth / imgWidth;
+                const scaleY = previewHeight / imgHeight;
+                const initialScale = Math.max(scaleX, scaleY);
+
+                console.log('Initial scale:', initialScale);
+
+                // Set image styles for proper display
+                currentImage.style.position = 'absolute';
+                currentImage.style.top = '50%';
+                currentImage.style.left = '50%';
+                currentImage.style.width = imgWidth + 'px';
+                currentImage.style.height = imgHeight + 'px';
+                currentImage.style.transformOrigin = 'center center';
+                currentImage.style.userSelect = 'none';
+                currentImage.style.cursor = 'grab';
+                currentImage.style.pointerEvents = 'none';
+                currentImage.draggable = false;
+
+                // Apply initial scale to cover the preview area
+                zoom = initialScale;
+                zoomSlider.value = initialScale;
+                zoomValue.textContent = Math.round(initialScale * 100) + '%';
+                posX = 0;
+                posY = 0;
+
+                updateImagePosition();
+            };
+
+            currentImage.onerror = function() {
+                console.error('Failed to load image:', src);
+                mainPreview.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666;">Failed to load image</div>';
+            };
+
+            currentImage.src = src;
+            mainPreview.appendChild(currentImage);
+
+            // Show cropper container
+            cropperContainer.style.display = 'block';
+        }
+
+        // Function to center the image in the preview
+        function centerImage() {
+            if (!currentImage || !mainPreview) return;
+
+            // Get the dimensions of the preview and image
+            const previewRect = mainPreview.getBoundingClientRect();
+            const imgWidth = currentImage.naturalWidth;
+            const imgHeight = currentImage.naturalHeight;
+
+            // Calculate the position to center the image
+            posX = (previewRect.width - imgWidth) / 2;
+            posY = (previewRect.height - imgHeight) / 2;
+
+            // Update the image position
+            updateImagePosition();
+        }
+
+        // File input change event
+        fileInput.addEventListener('change', function(e) {
+            const file = this.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                loadImage(e.target.result);
+            };
+
+            reader.readAsDataURL(file);
+        });
+
+        // Load existing image if available
+        {% if form.obj and form.obj.image_path %}
+        const adjustCurrentImageBtn = document.getElementById('adjust-current-image');
+        if (adjustCurrentImageBtn) {
+            adjustCurrentImageBtn.addEventListener('click', function() {
+                loadImage("{{ url_for('static', filename='uploads/' + form.obj.image_path) }}");
+            });
+        }
+        {% endif %}
+
+        // Zoom slider event
+        zoomSlider.addEventListener('input', function() {
+            zoom = parseFloat(this.value);
+            zoomValue.textContent = Math.round(zoom * 100) + '%';
+            updateImagePosition();
+        });
+
+        // Reset button event
+        resetButton.addEventListener('click', function() {
+            if (!currentImage) return;
+
+            // Recalculate initial scale
+            const previewWidth = mainPreview.offsetWidth;
+            const previewHeight = mainPreview.offsetHeight;
+            const imgWidth = currentImage.naturalWidth;
+            const imgHeight = currentImage.naturalHeight;
+
+            const scaleX = previewWidth / imgWidth;
+            const scaleY = previewHeight / imgHeight;
+            const initialScale = Math.max(scaleX, scaleY);
+
+            zoom = initialScale;
+            zoomSlider.value = initialScale;
+            zoomValue.textContent = Math.round(initialScale * 100) + '%';
+            posX = 0;
+            posY = 0;
+
+            updateImagePosition();
+        });
+
+        // Apply button event
+        applyButton.addEventListener('click', function() {
+            if (!currentImage) return;
+
+            // Store crop data with all necessary information
+            let previewWidth = 400;
+            let previewHeight = 300;
+
+            // Set dimensions based on position type
+            if (positionTypeSelect && positionTypeSelect.value === 'leadership') {
+                previewHeight = 400;
+            }
+
+            // Get the natural dimensions of the image
+            const imgWidth = currentImage.naturalWidth;
+            const imgHeight = currentImage.naturalHeight;
+
+            // Calculate a more appropriate zoom level if the image is very large
+            // This helps prevent excessive zooming for large images
+            const maxDimension = Math.max(imgWidth, imgHeight);
+            const recommendedZoom = Math.min(zoom, maxDimension / Math.max(previewWidth, previewHeight) * 0.8);
+
+            const cropData = {
+                zoom: recommendedZoom,
+                posX: posX,
+                posY: posY,
+                previewWidth: previewWidth,
+                previewHeight: previewHeight,
+                positionType: positionTypeSelect ? positionTypeSelect.value : 'teaching'
+            };
+
+            // Update the hidden input with the crop data
+            cropDataInput.value = JSON.stringify(cropData);
+
+            // Show success message
+            const successMessage = document.createElement('div');
+            successMessage.className = 'alert alert-success mt-3';
+            successMessage.innerHTML = '<i class="fas fa-check-circle me-2"></i><strong>Success!</strong> Image adjustments have been applied. You can now save the form.';
+
+            // Add the message after the apply button
+            applyButton.parentNode.appendChild(successMessage);
+
+            // Remove the message after 5 seconds
+            setTimeout(() => {
+                if (successMessage.parentNode) {
+                    successMessage.parentNode.removeChild(successMessage);
+                }
+            }, 5000);
+        });
+
+        // Mouse events for dragging
+        mainPreview.addEventListener('mousedown', startDrag);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', endDrag);
+
+        // Touch events for mobile
+        mainPreview.addEventListener('touchstart', startDrag);
+        document.addEventListener('touchmove', drag);
+        document.addEventListener('touchend', endDrag);
+
+        // Start drag
+        function startDrag(e) {
+            if (!currentImage) return;
+
+            isDragging = true;
+
+            // Get start position
+            if (e.type === 'mousedown') {
+                startX = e.clientX;
+                startY = e.clientY;
+            } else if (e.type === 'touchstart') {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+            }
+
+            e.preventDefault();
+        }
+
+        // Drag
+        function drag(e) {
+            if (!isDragging || !currentImage) return;
+
+            let currentX, currentY;
+
+            if (e.type === 'mousemove') {
+                currentX = e.clientX;
+                currentY = e.clientY;
+            } else if (e.type === 'touchmove') {
+                currentX = e.touches[0].clientX;
+                currentY = e.touches[0].clientY;
+            }
+
+            // Calculate the distance moved
+            const deltaX = currentX - startX;
+            const deltaY = currentY - startY;
+
+            // Update position
+            posX += deltaX;
+            posY += deltaY;
+
+            // Update start position for next move
+            startX = currentX;
+            startY = currentY;
+
+            // Update image position
+            updateImagePosition();
+
+            e.preventDefault();
+        }
+
+        // End drag
+        function endDrag() {
+            isDragging = false;
+        }
+
+        // Update image position - Instagram style
+        function updateImagePosition() {
+            if (!currentImage) return;
+
+            // Instagram-style transform: scale first, then translate from center
+            currentImage.style.transform = `translate(-50%, -50%) scale(${zoom}) translate(${posX}px, ${posY}px)`;
+            currentImage.style.transformOrigin = 'center center';
+
+            // Update crop data input with current values
+            if (cropDataInput) {
+                let previewWidth = 400;
+                let previewHeight = 300;
+
+                // Set dimensions based on position type
+                if (positionTypeSelect && positionTypeSelect.value === 'leadership') {
+                    previewHeight = 400;
+                }
+
+                const cropData = {
+                    zoom: zoom,
+                    posX: posX,
+                    posY: posY,
+                    previewWidth: previewWidth,
+                    previewHeight: previewHeight,
+                    positionType: positionTypeSelect ? positionTypeSelect.value : 'teaching'
+                };
+                cropDataInput.value = JSON.stringify(cropData);
+            }
+        }
+    });
+</script>
 {% endblock %}

@@ -9,88 +9,288 @@
         <li class="breadcrumb-item"><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
         <li class="breadcrumb-item active">Teachers</li>
     </ol>
-    
+
     {% include 'admin/includes/flash_messages.html' %}
-    
+
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
             <div>
                 <i class="fas fa-user-tie me-1"></i>
-                Teachers List
+                Faculty Management
             </div>
-            <a href="{{ url_for('admin_add_teacher') }}" class="btn btn-primary btn-sm">
-                <i class="fas fa-plus"></i> Add New Teacher
-            </a>
+            <div>
+                <a href="{{ url_for('admin_add_teacher') }}?type=leadership" class="btn btn-success btn-sm me-2">
+                    <i class="fas fa-plus"></i> Add Principal/Director
+                </a>
+                <a href="{{ url_for('admin_add_teacher') }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus"></i> Add Teacher
+                </a>
+            </div>
         </div>
         <div class="card-body">
-            {% if teachers %}
-                <div class="table-responsive">
-                    <table class="table table-bordered table-striped" id="dataTable" width="100%" cellspacing="0">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Position</th>
-                                <th>Qualification</th>
-                                <th>Image</th>
-                                <th>Display Order</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for teacher in teachers %}
-                                <tr>
-                                    <td>{{ teacher.name }}</td>
-                                    <td>{{ teacher.position }}</td>
-                                    <td>{{ teacher.qualification }}</td>
-                                    <td>
-                                        {% if teacher.image_path %}
-                                            <img src="{{ url_for('static', filename='uploads/' + teacher.image_path) }}" alt="{{ teacher.name }}" width="50" height="50" style="object-fit: cover;">
-                                        {% else %}
-                                            <span class="text-muted">No image</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>{{ teacher.order }}</td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <a href="{{ url_for('admin_edit_teacher', id=teacher.id) }}" class="btn btn-sm btn-primary">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ teacher.id }}">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs" id="staffTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="leadership-tab" data-bs-toggle="tab" data-bs-target="#leadership" type="button" role="tab" aria-controls="leadership" aria-selected="true">
+                        <i class="fas fa-crown me-1"></i> Leadership
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="teachers-tab" data-bs-toggle="tab" data-bs-target="#teachers" type="button" role="tab" aria-controls="teachers" aria-selected="false">
+                        <i class="fas fa-chalkboard-teacher me-1"></i> Teaching Staff
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab" aria-controls="all" aria-selected="false">
+                        <i class="fas fa-users me-1"></i> All Staff
+                    </button>
+                </li>
+            </ul>
 
-                                        <!-- Delete Modal -->
-                                        <div class="modal fade" id="deleteModal{{ teacher.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ teacher.id }}" aria-hidden="true">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="deleteModalLabel{{ teacher.id }}">Confirm Delete</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <!-- Tab content -->
+            <div class="tab-content mt-4" id="staffTabContent">
+                <!-- Leadership Tab -->
+                <div class="tab-pane fade show active" id="leadership" role="tabpanel" aria-labelledby="leadership-tab">
+                    {% set leadership_found = false %}
+                    {% for teacher in teachers %}
+                        {% if teacher.position_type == 'leadership' %}
+                            {% set leadership_found = true %}
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if leadership_found %}
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped leadership-table" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Position</th>
+                                        <th>Qualification</th>
+                                        <th>Image</th>
+                                        <th>Display Order</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for teacher in teachers %}
+                                        {% if teacher.position_type == 'leadership' %}
+                                            <tr>
+                                                <td>{{ teacher.name }}</td>
+                                                <td>{{ teacher.position }}</td>
+                                                <td>{{ teacher.qualification }}</td>
+                                                <td>
+                                                    {% if teacher.image_path %}
+                                                        <img src="{{ url_for('static', filename='uploads/' + teacher.image_path) }}" alt="{{ teacher.name }}" width="50" height="50" style="object-fit: cover; object-position: center top;">
+                                                    {% else %}
+                                                        <span class="text-muted">No image</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>{{ teacher.order }}</td>
+                                                <td>
+                                                    <div class="btn-group">
+                                                        <a href="{{ url_for('admin_edit_teacher', id=teacher.id) }}" class="btn btn-sm btn-primary">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ teacher.id }}">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
                                                     </div>
-                                                    <div class="modal-body">
-                                                        Are you sure you want to delete <strong>{{ teacher.name }}</strong>?
+
+                                                    <!-- Delete Modal -->
+                                                    <div class="modal fade" id="deleteModal{{ teacher.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ teacher.id }}" aria-hidden="true">
+                                                        <div class="modal-dialog">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title" id="deleteModalLabel{{ teacher.id }}">Confirm Delete</h5>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    Are you sure you want to delete <strong>{{ teacher.name }}</strong>?
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                                    <form action="{{ url_for('admin_delete_teacher', id=teacher.id) }}" method="post">
+                                                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                        <form action="{{ url_for('admin_delete_teacher', id=teacher.id) }}" method="post">
-                                                            <button type="submit" class="btn btn-danger">Delete</button>
-                                                        </form>
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            No leadership staff have been added yet. <a href="{{ url_for('admin_add_teacher') }}?type=leadership">Add a principal or director</a>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Teachers Tab -->
+                <div class="tab-pane fade" id="teachers" role="tabpanel" aria-labelledby="teachers-tab">
+                    {% set teachers_found = false %}
+                    {% for teacher in teachers %}
+                        {% if teacher.position_type == 'teaching' %}
+                            {% set teachers_found = true %}
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if teachers_found %}
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped teachers-table" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Position</th>
+                                        <th>Qualification</th>
+                                        <th>Image</th>
+                                        <th>Display Order</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for teacher in teachers %}
+                                        {% if teacher.position_type == 'teaching' %}
+                                            <tr>
+                                                <td>{{ teacher.name }}</td>
+                                                <td>{{ teacher.position }}</td>
+                                                <td>{{ teacher.qualification }}</td>
+                                                <td>
+                                                    {% if teacher.image_path %}
+                                                        <img src="{{ url_for('static', filename='uploads/' + teacher.image_path) }}" alt="{{ teacher.name }}" width="50" height="50" style="object-fit: cover; object-position: center top;">
+                                                    {% else %}
+                                                        <span class="text-muted">No image</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>{{ teacher.order }}</td>
+                                                <td>
+                                                    <div class="btn-group">
+                                                        <a href="{{ url_for('admin_edit_teacher', id=teacher.id) }}" class="btn btn-sm btn-primary">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ teacher.id }}">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+
+                                                    <!-- Delete Modal -->
+                                                    <div class="modal fade" id="deleteModal{{ teacher.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ teacher.id }}" aria-hidden="true">
+                                                        <div class="modal-dialog">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title" id="deleteModalLabel{{ teacher.id }}">Confirm Delete</h5>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    Are you sure you want to delete <strong>{{ teacher.name }}</strong>?
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                                    <form action="{{ url_for('admin_delete_teacher', id=teacher.id) }}" method="post">
+                                                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            No teaching staff have been added yet. <a href="{{ url_for('admin_add_teacher') }}">Add a teacher</a>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- All Staff Tab -->
+                <div class="tab-pane fade" id="all" role="tabpanel" aria-labelledby="all-tab">
+                    {% if teachers %}
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped all-table" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Type</th>
+                                        <th>Position</th>
+                                        <th>Qualification</th>
+                                        <th>Image</th>
+                                        <th>Display Order</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for teacher in teachers %}
+                                        <tr>
+                                            <td>{{ teacher.name }}</td>
+                                            <td>
+                                                {% if teacher.position_type == 'leadership' %}
+                                                    <span class="badge bg-success">Leadership</span>
+                                                {% else %}
+                                                    <span class="badge bg-primary">Teaching</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ teacher.position }}</td>
+                                            <td>{{ teacher.qualification }}</td>
+                                            <td>
+                                                {% if teacher.image_path %}
+                                                    <img src="{{ url_for('static', filename='uploads/' + teacher.image_path) }}" alt="{{ teacher.name }}" width="50" height="50" style="object-fit: cover; object-position: center top;">
+                                                {% else %}
+                                                    <span class="text-muted">No image</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ teacher.order }}</td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <a href="{{ url_for('admin_edit_teacher', id=teacher.id) }}" class="btn btn-sm btn-primary">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ teacher.id }}">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+
+                                                <!-- Delete Modal -->
+                                                <div class="modal fade" id="deleteModal{{ teacher.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ teacher.id }}" aria-hidden="true">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="deleteModalLabel{{ teacher.id }}">Confirm Delete</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                Are you sure you want to delete <strong>{{ teacher.name }}</strong>?
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                                <form action="{{ url_for('admin_delete_teacher', id=teacher.id) }}" method="post">
+                                                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                                                </form>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            No staff have been added yet. <a href="{{ url_for('admin_add_teacher') }}">Add a teacher</a>
+                        </div>
+                    {% endif %}
                 </div>
-            {% else %}
-                <div class="alert alert-info">
-                    No teachers have been added yet. <a href="{{ url_for('admin_add_teacher') }}">Add a teacher</a>
-                </div>
-            {% endif %}
+            </div>
         </div>
     </div>
 </div>
@@ -99,7 +299,34 @@
 {% block scripts %}
 <script>
     $(document).ready(function() {
-        $('#dataTable').DataTable();
+        // Initialize DataTables for each tab
+        $('.leadership-table').DataTable({
+            order: [[4, 'asc']] // Sort by display order column
+        });
+
+        $('.teachers-table').DataTable({
+            order: [[4, 'asc']] // Sort by display order column
+        });
+
+        $('.all-table').DataTable({
+            order: [[5, 'asc']] // Sort by display order column
+        });
+
+        // Handle tab change to redraw tables (fixes layout issues)
+        $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+            $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
+        });
+
+        // Set active tab based on URL hash or default to leadership
+        let hash = window.location.hash;
+        if (hash) {
+            $('.nav-tabs a[href="' + hash + '"]').tab('show');
+        }
+
+        // Update URL hash when tab changes
+        $('.nav-tabs a').on('shown.bs.tab', function (e) {
+            window.location.hash = e.target.hash;
+        });
     });
 </script>
 {% endblock %}

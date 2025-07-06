@@ -1,0 +1,102 @@
+/* Image Cropper Styles */
+.image-cropper-container {
+    position: relative;
+    width: 100%;
+    margin-bottom: 20px;
+    display: none;
+}
+
+.image-cropper-preview {
+    width: 100%;
+    height: 300px;
+    overflow: hidden;
+    position: relative;
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.image-cropper-preview.leadership {
+    /* 1:1 aspect ratio for leadership */
+    height: 300px;
+}
+
+.image-cropper-preview.teaching {
+    /* 4:3 aspect ratio for teachers */
+    height: 250px;
+}
+
+.image-cropper-preview img {
+    position: absolute;
+    transform-origin: center;
+}
+
+.image-cropper-controls {
+    margin-top: 15px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.image-cropper-controls .form-group {
+    margin-bottom: 15px;
+}
+
+.image-cropper-controls label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.image-cropper-controls .slider-container {
+    display: flex;
+    align-items: center;
+}
+
+.image-cropper-controls .slider {
+    flex-grow: 1;
+    margin-right: 10px;
+}
+
+.image-cropper-controls .value {
+    width: 50px;
+    text-align: center;
+}
+
+.image-cropper-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+.image-cropper-buttons button {
+    min-width: 100px;
+}
+
+.image-cropper-data {
+    display: none;
+}
+
+/* Preview boxes */
+.preview-boxes {
+    padding: 15px;
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.preview-box {
+    margin-bottom: 15px;
+}
+
+.preview-container {
+    background-color: #eee;
+    position: relative;
+    overflow: hidden;
+}
+
+.preview-container img {
+    position: absolute;
+    transform-origin: center;
+}

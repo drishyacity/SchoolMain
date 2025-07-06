@@ -2,6 +2,11 @@
 
 {% block title %}Teachers - {{ settings.school_name if settings else 'Shree Gyan Bharti High School' }}{% endblock %}
 
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/teachers.css') }}">
+{% endblock %}
+
 {% block inline_css %}
 .page-header {
     background-color: #0c2d57;
@@ -20,6 +25,102 @@
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px 60px;
+}
+
+/* Leadership Section Styles */
+.leadership-section {
+    margin-bottom: 60px;
+}
+
+.section-title {
+    color: #0c2d57;
+    font-size: 1.8rem;
+    text-align: center;
+    margin-bottom: 30px;
+    position: relative;
+    padding-bottom: 15px;
+}
+
+.section-title:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background-color: #0c2d57;
+}
+
+.leadership-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 40px;
+    margin-top: 30px;
+}
+
+.leadership-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    padding-bottom: 20px;
+}
+
+.leadership-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.leadership-image {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+}
+
+.leadership-info {
+    padding: 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.leadership-name {
+    color: #0c2d57;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.leadership-position {
+    color: #555;
+    font-weight: bold;
+    font-style: italic;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+.leadership-qualification {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.leadership-bio {
+    color: #666;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    text-align: justify;
+}
+
+/* Faculty Section Styles */
+.faculty-section {
+    margin-top: 60px;
 }
 
 .teachers-grid {
@@ -95,41 +196,122 @@
     color: #666;
     margin-bottom: 0;
 }
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .leadership-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .leadership-card {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+}
 {% endblock %}
 
 {% block content %}
 <section class="page-header">
-    <h1>Our Teachers</h1>
+    <h1>Our Faculty</h1>
 </section>
 
-<section class="teachers-container">
-    {% if teachers %}
+<div class="teachers-container">
+    <!-- Leadership Section (Principal & Directors) -->
+    <section class="leadership-section">
+        <h2 class="section-title">School Leadership</h2>
+
+        <div class="leadership-grid">
+            {% set leadership_found = false %}
+
+            {% for teacher in teachers %}
+                {% if teacher.position_type == 'leadership' %}
+                    {% set leadership_found = true %}
+                    <div class="leadership-card">
+                        <!-- Regular style for leadership positions -->
+                        <div class="leadership-image-container">
+                            {% if teacher.image_path %}
+                                <img src="{{ url_for('static', filename='uploads/' + teacher.image_path) }}"
+                                     alt="{{ teacher.name }}"
+                                     class="leadership-image"
+                                     loading="lazy"
+                                     onerror="console.log('Image failed to load:', this.src); this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div style="display: none; width: 100%; height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: bold;">
+                                    {{ teacher.name.split()[0][0] }}{{ teacher.name.split()[-1][0] if teacher.name.split()|length > 1 else '' }}
+                                </div>
+                            {% else %}
+                                <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: bold;">
+                                    {{ teacher.name.split()[0][0] }}{{ teacher.name.split()[-1][0] if teacher.name.split()|length > 1 else '' }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="leadership-info">
+                            <h3 class="leadership-name">{{ teacher.name }}</h3>
+                            <p class="leadership-position">{{ teacher.position }}</p>
+                            <p class="leadership-qualification"><strong>Qualification:</strong> {{ teacher.qualification }}</p>
+                            {% if teacher.bio %}
+                            <p class="leadership-bio">{{ teacher.bio }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+            {% if not leadership_found %}
+                <div class="empty-state">
+                    <h3>Leadership Profiles Coming Soon</h3>
+                    <p>Information about our school leadership will be available shortly.</p>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Faculty Section (Regular Teachers) -->
+    <section class="faculty-section">
+        <h2 class="section-title">Teaching Staff</h2>
+
+        {% set regular_teachers_found = false %}
         <div class="teachers-grid">
             {% for teacher in teachers %}
-                <div class="teacher-card">
-                    {% if teacher.image_path %}
-                        <img src="{{ url_for('static', filename='uploads/' + teacher.image_path) }}" alt="{{ teacher.name }}" class="teacher-image">
-                    {% else %}
-                        <img src="{{ url_for('static', filename='img/teacher-placeholder.jpg') }}" alt="{{ teacher.name }}" class="teacher-image">
-                    {% endif %}
-                    <div class="teacher-info">
-                        <h3 class="teacher-name">{{ teacher.name }}</h3>
-                        <div class="teacher-position">{{ teacher.position }}</div>
-                        <div class="teacher-qualification">
-                            <strong>Qualification:</strong> {{ teacher.qualification }}
+                {% if teacher.position_type == 'teaching' %}
+                    {% set regular_teachers_found = true %}
+                    <div class="teacher-card">
+                        <div class="teacher-image-container">
+                            {% if teacher.image_path %}
+                                <img src="{{ url_for('static', filename='uploads/' + teacher.image_path) }}"
+                                     alt="{{ teacher.name }}"
+                                     class="teacher-image"
+                                     loading="lazy"
+                                     onerror="console.log('Image failed to load:', this.src); this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div style="display: none; width: 100%; height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: bold;">
+                                    {{ teacher.name.split()[0][0] }}{{ teacher.name.split()[-1][0] if teacher.name.split()|length > 1 else '' }}
+                                </div>
+                            {% else %}
+                                <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: bold;">
+                                    {{ teacher.name.split()[0][0] }}{{ teacher.name.split()[-1][0] if teacher.name.split()|length > 1 else '' }}
+                                </div>
+                            {% endif %}
                         </div>
-                        {% if teacher.bio %}
-                            <div class="teacher-bio">{{ teacher.bio }}</div>
-                        {% endif %}
+                        <div class="teacher-info">
+                            <h3 class="teacher-name">{{ teacher.name }}</h3>
+                            <div class="teacher-position">{{ teacher.position }}</div>
+                            <div class="teacher-qualification">
+                                <strong>Qualification:</strong> {{ teacher.qualification }}
+                            </div>
+                            {% if teacher.bio %}
+                                <div class="teacher-bio">{{ teacher.bio }}</div>
+                            {% endif %}
+                        </div>
                     </div>
-                </div>
+                {% endif %}
             {% endfor %}
         </div>
-    {% else %}
-        <div class="empty-state">
-            <h3>Meet Our Faculty</h3>
-            <p>Our dedicated teachers information will be updated soon. Our faculty consists of highly qualified professionals committed to providing quality education.</p>
-        </div>
-    {% endif %}
-</section>
+
+        {% if not regular_teachers_found and not teachers %}
+            <div class="empty-state">
+                <h3>Meet Our Faculty</h3>
+                <p>Our dedicated teachers information will be updated soon. Our faculty consists of highly qualified professionals committed to providing quality education.</p>
+            </div>
+        {% endif %}
+    </section>
+</div>
 {% endblock %}

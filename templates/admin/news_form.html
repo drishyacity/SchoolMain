@@ -10,12 +10,12 @@
             <i class="fas fa-arrow-left"></i> Back to News
         </a>
     </div>
-    
+
     <div class="card">
         <div class="card-body">
             <form method="POST" enctype="multipart/form-data">
                 {{ form.hidden_tag() }}
-                
+
                 <div class="mb-3">
                     <label for="title" class="form-label required">Title</label>
                     {{ form.title(class="form-control", id="title") }}
@@ -23,7 +23,7 @@
                         <div class="text-danger">{{ error }}</div>
                     {% endfor %}
                 </div>
-                
+
                 <div class="mb-3">
                     <label for="date" class="form-label required">Date</label>
                     {{ form.date(class="form-control", id="date", type="date") }}
@@ -31,7 +31,7 @@
                         <div class="text-danger">{{ error }}</div>
                     {% endfor %}
                 </div>
-                
+
                 <div class="mb-3">
                     <label for="content" class="form-label required">Content</label>
                     {{ form.content(class="form-control ckeditor", id="content", rows="10") }}
@@ -39,14 +39,14 @@
                         <div class="text-danger">{{ error }}</div>
                     {% endfor %}
                 </div>
-                
+
                 <div class="mb-3">
                     <label for="image" class="form-label">Featured Image</label>
                     {{ form.image(class="form-control image-upload", id="image") }}
                     {% for error in form.image.errors %}
                         <div class="text-danger">{{ error }}</div>
                     {% endfor %}
-                    
+
                     <div class="mt-2">
                         {% if form.image.object_data and form.image.object_data.image_path %}
                             <img src="{{ url_for('static', filename='uploads/' + form.image.object_data.image_path) }}" id="image-preview" class="img-thumbnail" style="max-height: 200px;">
@@ -55,7 +55,7 @@
                         {% endif %}
                     </div>
                 </div>
-                
+
                 <div class="text-end">
                     <a href="{{ url_for('admin_news') }}" class="btn btn-outline-secondary me-2">Cancel</a>
                     {{ form.submit(class="btn btn-primary") }}
@@ -64,4 +64,10 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // No additional scripts needed - CKEditor 4 handles form submission automatically
+</script>
 {% endblock %}

@@ -91,7 +91,11 @@ class ProfileForm(FlaskForm):
 
 class TeacherForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired(), Length(max=100)])
-    position = StringField('Position', validators=[DataRequired(), Length(max=100)])
+    position_type = SelectField('Position Type', choices=[
+        ('leadership', 'Leadership (Principal/Director)'),
+        ('teaching', 'Teaching Staff')
+    ], validators=[DataRequired()])
+    position = StringField('Position Title', validators=[DataRequired(), Length(max=100)])
     qualification = StringField('Qualification', validators=[DataRequired(), Length(max=200)])
     bio = TextAreaField('Biography', validators=[Optional()])
     image = FileField('Image', validators=[
@@ -139,7 +143,7 @@ class HomeSliderForm(FlaskForm):
     order = IntegerField('Display Order', default=0, validators=[NumberRange(min=0)])
     active = BooleanField('Active', default=True)
     submit = SubmitField('Save')
-    
+
 class AdmissionResponseForm(FlaskForm):
     status = SelectField('Status', choices=[
         ('Pending', 'Pending'),

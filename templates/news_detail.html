@@ -59,15 +59,15 @@
     <div class="news-meta">
         <i class="far fa-calendar-alt"></i> Published on {{ news.date.strftime('%B %d, %Y') }}
     </div>
-    
+
     {% if news.image_path %}
-    <img src="{{ url_for('static', filename='uploads/' + news.image_path) }}" alt="{{ news.title }}" class="news-featured-img">
+    <img src="{{ url_for('static', filename='uploads/' + news.image_path) }}" alt="{{ news.title }}" class="news-featured-img" onerror="this.onerror=null; this.src='{{ url_for('static', filename='uploads/placeholder.jpg') }}'; this.alt='Image not found';">
     {% endif %}
-    
+
     <div class="news-content">
         {{ news.content|safe }}
     </div>
-    
+
     <a href="{{ url_for('news') }}" class="back-link">
         <i class="fas fa-arrow-left"></i> Back to News
     </a>

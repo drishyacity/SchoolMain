@@ -10,12 +10,12 @@
             <i class="fas fa-arrow-left"></i> Back to Gallery
         </a>
     </div>
-    
+
     <div class="card">
         <div class="card-body">
             <form method="POST" enctype="multipart/form-data">
                 {{ form.hidden_tag() }}
-                
+
                 <div class="mb-3">
                     <label for="title" class="form-label">Image Title (Optional)</label>
                     {{ form.title(class="form-control", id="title", placeholder="Common title for all uploaded images") }}
@@ -23,7 +23,7 @@
                         <div class="text-danger">{{ error }}</div>
                     {% endfor %}
                 </div>
-                
+
                 <div class="mb-3">
                     <label for="caption" class="form-label">Image Caption (Optional)</label>
                     {{ form.caption(class="form-control", id="caption", placeholder="Common caption for all uploaded images") }}
@@ -31,7 +31,7 @@
                         <div class="text-danger">{{ error }}</div>
                     {% endfor %}
                 </div>
-                
+
                 <div class="mb-3">
                     <label for="images" class="form-label required">Select Images</label>
                     {{ form.images(class="form-control", id="images", multiple=true) }}
@@ -40,11 +40,11 @@
                         <div class="text-danger">{{ error }}</div>
                     {% endfor %}
                 </div>
-                
+
                 <div id="image-previews" class="mb-3">
                     <!-- Image previews will be displayed here -->
                 </div>
-                
+
                 <div class="text-end">
                     <a href="{{ url_for('admin_gallery') }}" class="btn btn-outline-secondary me-2">Cancel</a>
                     {{ form.submit(class="btn btn-primary") }}
@@ -53,4 +53,71 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Image preview functionality
+        const imageInput = document.getElementById('images');
+        const previewContainer = document.getElementById('image-previews');
+
+        imageInput.addEventListener('change', function() {
+            previewContainer.innerHTML = ''; // Clear previous previews
+
+            if (this.files) {
+                const files = Array.from(this.files);
+                console.log(`Selected ${files.length} files`);
+
+                if (files.length > 0) {
+                    previewContainer.innerHTML = '<h5 class="mb-3">Image Previews:</h5><div class="row"></div>';
+                    const previewRow = previewContainer.querySelector('.row');
+
+                    files.forEach(file => {
+                        console.log(`Processing file: ${file.name}`);
+                        if (file.type.match('image.*')) {
+                            const reader = new FileReader();
+
+                            reader.onload = function(e) {
+                                const col = document.createElement('div');
+                                col.className = 'col-md-3 col-sm-4 col-6 mb-3';
+
+                                const card = document.createElement('div');
+                                card.className = 'card h-100';
+
+                                const img = document.createElement('img');
+                                img.src = e.target.result;
+                                img.className = 'card-img-top';
+                                img.style = 'height: 150px; object-fit: cover;';
+                                img.alt = file.name;
+
+                                const cardBody = document.createElement('div');
+                                cardBody.className = 'card-body p-2';
+
+                                const fileName = document.createElement('p');
+                                fileName.className = 'card-text small mb-0';
+                                fileName.textContent = file.name;
+
+                                const fileSize = document.createElement('p');
+                                fileSize.className = 'card-text small text-muted';
+                                fileSize.textContent = `${Math.round(file.size / 1024)} KB`;
+
+                                cardBody.appendChild(fileName);
+                                cardBody.appendChild(fileSize);
+                                card.appendChild(img);
+                                card.appendChild(cardBody);
+                                col.appendChild(card);
+                                previewRow.appendChild(col);
+
+                                console.log(`Preview created for: ${file.name}`);
+                            };
+
+                            reader.readAsDataURL(file);
+                        }
+                    });
+                }
+            }
+        });
+    });
+</script>
 {% endblock %}
