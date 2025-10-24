@@ -17,6 +17,18 @@
 .section .info h2 { margin-bottom:10px; color:#0c2d57; }
 .section .info h4 { margin-bottom:10px; color:#555; }
 .fallback-tile { width:100%; height:100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display:flex; align-items:center; justify-content:center; color:#fff; font-size:2rem; font-weight:bold; }
+/* Utility */
+.hidden { display:none; }
+
+/* Leadership photo wrapper (replaces inline styles) */
+.leader-photo { width:300px; height:400px; border-radius:10px; overflow:hidden; margin-right:40px; flex-shrink:0; }
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .section { flex-direction: column; align-items: flex-start; padding: 30px 16px; }
+  .leader-photo { width: 100%; height: auto; max-height: 60vh; margin-right: 0; margin-bottom: 16px; }
+  .section .info { max-width: 100%; margin-left: 0; }
+}
 {% endblock %}
 
 {% block content %}
@@ -27,11 +39,11 @@
 <!-- Leadership: one feature section per leader -->
 {% for teacher in leadership %}
 <section class="section">
-  <div style="width:300px;height:400px;border-radius:10px;overflow:hidden;margin-right:40px;flex-shrink:0;">
+  <div class="leader-photo">
     {% if teacher.image_path %}
-      <img src="{{ teacher.image_path }}" alt="{{ teacher.name }}" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+      <img src="{{ teacher.image_path }}" alt="{{ teacher.name }}" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
     {% endif %}
-    <div class="fallback-tile" style="display:{% if teacher.image_path %}none{% else %}flex{% endif %};">
+    <div class="fallback-tile {{ 'hidden' if teacher.image_path else '' }}">
       {{ teacher.name.split()[0][0] }}{{ teacher.name.split()[-1][0] if teacher.name.split()|length > 1 else '' }}
     </div>
   </div>
@@ -57,9 +69,9 @@
   <div class="teacher-card">
     <div class="image-container">
       {% if teacher.image_path %}
-      <img src="{{ teacher.image_path }}" alt="{{ teacher.name }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+      <img src="{{ teacher.image_path }}" alt="{{ teacher.name }}" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
       {% endif %}
-      <div class="fallback-tile" style="display:{% if teacher.image_path %}none{% else %}flex{% endif %}; font-size: 1.5rem;">
+      <div class="fallback-tile {{ 'hidden' if teacher.image_path else '' }}" style="font-size: 1.5rem;">
         {{ teacher.name.split()[0][0] }}{{ teacher.name.split()[-1][0] if teacher.name.split()|length > 1 else '' }}
       </div>
     </div>

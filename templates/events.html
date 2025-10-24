@@ -48,6 +48,8 @@
     object-fit: cover;
 }
 
+.no-image .event-img { display: none; }
+
 .event-details {
     padding: 20px;
     flex-grow: 1;
@@ -113,11 +115,9 @@
         {% if upcoming_events %}
         <div class="events-list">
             {% for event in upcoming_events %}
-            <div class="event-card">
+            <div class="event-card {% if not event.image_path %}no-image{% endif %}">
                 {% if event.image_path %}
                 <img src="{{ event.image_path }}" alt="{{ event.title }}" class="event-img">
-                {% else %}
-                <img src="https://images.unsplash.com/photo-1577896851231-70ef18881754?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60" alt="{{ event.title }}" class="event-img">
                 {% endif %}
                 
                 <div class="event-details">
@@ -164,11 +164,9 @@
         {% if past_events %}
         <div class="events-list">
             {% for event in past_events %}
-            <div class="event-card">
+            <div class="event-card {% if not event.image_path %}no-image{% endif %}">
                 {% if event.image_path %}
                 <img src="{{ event.image_path }}" alt="{{ event.title }}" class="event-img">
-                {% else %}
-                <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60" alt="{{ event.title }}" class="event-img">
                 {% endif %}
                 
                 <div class="event-details">
