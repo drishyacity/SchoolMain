@@ -45,8 +45,13 @@ app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'uploads')
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif', 'svg'}
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max upload size
 
-# Create upload folder if it doesn't exist
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+# Do not create folders on serverless (read-only) environments like Vercel
+# Only create locally when not running on Vercel
+if not os.environ.get('VERCEL') and not os.environ.get('READ_ONLY_FS'):
+    try:
+        os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    except Exception:
+        pass
 
 # Initialize login manager
 login_manager = LoginManager()
