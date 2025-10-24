@@ -66,6 +66,12 @@ from forms import LoginForm, NewsForm, EventForm, GalleryUploadForm, ContactForm
     SchoolSettingsForm, UserForm, ProfileForm, TeacherForm, FacilityForm, SyllabusForm, AdmissionApplicationForm, HomeSliderForm, AdmissionResponseForm, AdmissionInfoForm, AchievementsForm, AchievementsItemForm, AdmissionFormFieldForm
 from utils import allowed_file, save_file, delete_storage_url
 
+# Ensure tables exist and run lightweight migrations at import time (serverless-safe)
+try:
+    init_db()
+except Exception:
+    pass
+
 def delete_db_path_if_needed(path_str):
     if not path_str or not isinstance(path_str, str):
         return
