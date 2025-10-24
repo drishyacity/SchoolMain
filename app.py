@@ -1,5 +1,9 @@
 import os
-from dotenv import load_dotenv, find_dotenv
+try:
+    from dotenv import load_dotenv, find_dotenv
+except Exception:
+    load_dotenv = None
+    find_dotenv = None
 import io
 import json
 import logging
@@ -21,8 +25,12 @@ from database import db
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-# Load environment variables from .env (search up the directory tree)
-load_dotenv(find_dotenv())
+# Load environment variables from .env (search up the directory tree) if dotenv is available
+if load_dotenv and find_dotenv:
+    try:
+        load_dotenv(find_dotenv())
+    except Exception:
+        pass
 
 # Create the app
 app = Flask(__name__)
