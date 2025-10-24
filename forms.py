@@ -57,6 +57,7 @@ class GalleryUploadForm(FlaskForm):
 class ContactForm(FlaskForm):
     name = StringField('Your Name', validators=[DataRequired(), Length(max=100)])
     email = StringField('Your Email', validators=[DataRequired(), Email(), Length(max=120)])
+    phone = StringField('Your Phone', validators=[Optional(), Length(max=20)])
     subject = StringField('Subject', validators=[Optional(), Length(max=200)])
     message = TextAreaField('Your Message', validators=[DataRequired()])
     submit = SubmitField('Send Message')
@@ -88,6 +89,10 @@ class SchoolSettingsForm(FlaskForm):
         FileAllowed(['jpg', 'jpeg', 'png', 'gif'], 'Images only!')
     ])
     map_embed_html = TextAreaField('Google Map Embed (iframe HTML)', validators=[Optional()])
+    social_facebook_url = StringField('Facebook URL', validators=[Optional(), Length(max=255)])
+    social_twitter_url = StringField('X (Twitter) URL', validators=[Optional(), Length(max=255)])
+    social_instagram_url = StringField('Instagram URL', validators=[Optional(), Length(max=255)])
+    social_linkedin_url = StringField('LinkedIn URL', validators=[Optional(), Length(max=255)])
     submit = SubmitField('Save Settings')
 
 class UserForm(FlaskForm):

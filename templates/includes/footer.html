@@ -13,17 +13,17 @@
         <p>Empowering young minds with knowledge, values, and a vision for a brighter future.</p>
         
         <div class="social-links">
-          <a href="https://facebook.com" target="_blank">
-            <img src="https://cdn-icons-png.flaticon.com/512/124/124010.png" alt="Facebook">
+          <a href="{{ (settings.social_facebook_url if settings and settings.social_facebook_url else 'https://facebook.com') }}" target="_blank" aria-label="Facebook">
+            <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/facebook.svg" alt="Facebook" style="height:24px; filter: invert(1);">
           </a>
-          <a href="https://twitter.com" target="_blank">
-            <img src="https://cdn-icons-png.flaticon.com/512/733/733579.png" alt="Twitter">
+          <a href="{{ (settings.social_twitter_url if settings and settings.social_twitter_url else 'https://x.com') }}" target="_blank" aria-label="X">
+            <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/x.svg" alt="X" style="height:24px; filter: invert(1);">
           </a>
-          <a href="https://instagram.com" target="_blank">
-            <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="Instagram">
+          <a href="{{ (settings.social_instagram_url if settings and settings.social_instagram_url else 'https://instagram.com') }}" target="_blank" aria-label="Instagram">
+            <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/instagram.svg" alt="Instagram" style="height:24px; filter: invert(1);">
           </a>
-          <a href="https://linkedin.com" target="_blank">
-            <i class="fab fa-linkedin" style="color: white; font-size: 24px;"></i>
+          <a href="{{ (settings.social_linkedin_url if settings and settings.social_linkedin_url else 'https://linkedin.com') }}" target="_blank" aria-label="LinkedIn">
+            <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/linkedin.svg" alt="LinkedIn" style="height:24px; filter: invert(1);">
           </a>
         </div>
       </div>

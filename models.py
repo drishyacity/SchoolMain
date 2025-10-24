@@ -79,6 +79,7 @@ class Contact(db.Model):
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False)
     email = Column(String(120), nullable=False)
+    phone = Column(String(20), nullable=True)
     subject = Column(String(200), nullable=True)
     message = Column(Text, nullable=False)
     date = Column(DateTime, default=datetime.now)
@@ -206,6 +207,10 @@ class SchoolSetting(db.Model):
     school_email = Column(String(120), nullable=False)
     school_logo_path = Column(String(255), default='IMG-20250425-WA0004.jpg')
     map_embed_html = Column(Text, nullable=True)
+    social_facebook_url = Column(String(255), nullable=True)
+    social_twitter_url = Column(String(255), nullable=True)
+    social_instagram_url = Column(String(255), nullable=True)
+    social_linkedin_url = Column(String(255), nullable=True)
 
     def __repr__(self):
         return f'<SchoolSetting {self.school_name}>'

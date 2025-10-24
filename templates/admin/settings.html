@@ -77,6 +77,28 @@
                       </div>
                     {% endif %}
                 </div>
+
+                <div class="mb-4">
+                    <h5 class="mb-3">Social Media Links</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="social_facebook_url" class="form-label">Facebook URL</label>
+                            {{ form.social_facebook_url(class="form-control", id="social_facebook_url", placeholder="https://facebook.com/yourpage") }}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="social_twitter_url" class="form-label">X (Twitter) URL</label>
+                            {{ form.social_twitter_url(class="form-control", id="social_twitter_url", placeholder="https://x.com/yourhandle") }}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="social_instagram_url" class="form-label">Instagram URL</label>
+                            {{ form.social_instagram_url(class="form-control", id="social_instagram_url", placeholder="https://instagram.com/yourprofile") }}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="social_linkedin_url" class="form-label">LinkedIn URL</label>
+                            {{ form.social_linkedin_url(class="form-control", id="social_linkedin_url", placeholder="https://linkedin.com/company/yourcompany") }}
+                        </div>
+                    </div>
+                </div>
                 
                 <div class="text-end">
                     {{ form.submit(class="btn btn-primary") }}

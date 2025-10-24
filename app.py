@@ -127,6 +127,19 @@ def init_db():
                         conn4.execute(_sql_text4("ALTER TABLE teachers ADD COLUMN experience VARCHAR(100)"))
                     if 'subject' not in cols4:
                         conn4.execute(_sql_text4("ALTER TABLE teachers ADD COLUMN subject VARCHAR(100)"))
+            # School settings social links
+            if 'school_settings' in tables:
+                colsS = [c['name'] for c in inspector.get_columns('school_settings')]
+                from sqlalchemy import text as _sql_textS
+                with db.engine.begin() as connS:
+                    if 'social_facebook_url' not in colsS:
+                        connS.execute(_sql_textS("ALTER TABLE school_settings ADD COLUMN social_facebook_url VARCHAR(255)"))
+                    if 'social_twitter_url' not in colsS:
+                        connS.execute(_sql_textS("ALTER TABLE school_settings ADD COLUMN social_twitter_url VARCHAR(255)"))
+                    if 'social_instagram_url' not in colsS:
+                        connS.execute(_sql_textS("ALTER TABLE school_settings ADD COLUMN social_instagram_url VARCHAR(255)"))
+                    if 'social_linkedin_url' not in colsS:
+                        connS.execute(_sql_textS("ALTER TABLE school_settings ADD COLUMN social_linkedin_url VARCHAR(255)"))
             # Gallery migrations: add dimensions and ratio category
             if 'gallery_images' in tables:
                 cols5 = [c['name'] for c in inspector.get_columns('gallery_images')]
@@ -138,6 +151,13 @@ def init_db():
                         conn5.execute(_sql_text5("ALTER TABLE gallery_images ADD COLUMN height INTEGER"))
                     if 'ratio_category' not in cols5:
                         conn5.execute(_sql_text5("ALTER TABLE gallery_images ADD COLUMN ratio_category VARCHAR(20)"))
+            # Contacts migration: add phone column
+            if 'contacts' in tables:
+                cols6 = [c['name'] for c in inspector.get_columns('contacts')]
+                from sqlalchemy import text as _sql_text6
+                with db.engine.begin() as conn6:
+                    if 'phone' not in cols6:
+                        conn6.execute(_sql_text6("ALTER TABLE contacts ADD COLUMN phone VARCHAR(20)"))
         except Exception:
             # Ignore migration errors so app can still start; admin page may fail until DB is aligned
             pass
@@ -315,6 +335,7 @@ def contact():
         new_contact = Contact(
             name=form.name.data,
             email=form.email.data,
+            phone=form.phone.data,
             subject=form.subject.data,
             message=form.message.data
         )
@@ -370,11 +391,24 @@ def admin_dashboard():
     events_count = Event.query.count()
     gallery_count = GalleryImage.query.count()
     contacts_count = Contact.query.count()
+    # Latest 5 news (most recent first)
+    recent_news = News.query.order_by(News.date.desc()).limit(5).all()
+    # Upcoming 5 events (today and future)
+    today = datetime.now().date()
+    upcoming_events = Event.query.filter(Event.date >= today).order_by(Event.date.asc()).limit(5).all()
+    # Latest contact message
+    latest_contact = Contact.query.order_by(Contact.date.desc()).first()
+    # Latest admission form
+    latest_admission = AdmissionForm.query.order_by(AdmissionForm.submission_date.desc()).first()
     return render_template('admin/dashboard.html',
                            news_count=news_count,
                            events_count=events_count,
                            gallery_count=gallery_count,
-                           contacts_count=contacts_count)
+                           contacts_count=contacts_count,
+                           recent_news=recent_news,
+                           upcoming_events=upcoming_events,
+                           latest_contact=latest_contact,
+                           latest_admission=latest_admission)
 
 # News Management
 @app.route('/admin/news')
@@ -751,6 +785,9 @@ def admin_contacts():
 @login_required
 def admin_view_contact(id):
     contact = Contact.query.get_or_404(id)
+    if not contact.is_read:
+        contact.is_read = True
+        db.session.commit()
     return render_template('admin/contact_view.html', contact=contact)
 
 @app.route('/admin/contacts/delete/<int:id>', methods=['POST'])
@@ -775,6 +812,11 @@ def admin_settings():
         settings.school_phone = form.school_phone.data
         settings.school_email = form.school_email.data
         settings.map_embed_html = form.map_embed_html.data
+        # Social links
+        settings.social_facebook_url = form.social_facebook_url.data
+        settings.social_twitter_url = form.social_twitter_url.data
+        settings.social_instagram_url = form.social_instagram_url.data
+        settings.social_linkedin_url = form.social_linkedin_url.data
 
         if form.school_logo.data:
             if allowed_file(form.school_logo.data.filename, app.config['ALLOWED_EXTENSIONS']):

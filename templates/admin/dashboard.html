@@ -116,21 +116,21 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <!-- This would normally be populated with data from the backend -->
-                                        <tr>
-                                            <td>Welcome to the new website</td>
-                                            <td>May 15, 2025</td>
-                                            <td>
-                                                <a href="#" class="btn btn-sm btn-primary">Edit</a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Annual Sports Day Announcement</td>
-                                            <td>May 10, 2025</td>
-                                            <td>
-                                                <a href="#" class="btn btn-sm btn-primary">Edit</a>
-                                            </td>
-                                        </tr>
+                                        {% if recent_news %}
+                                            {% for n in recent_news %}
+                                            <tr>
+                                                <td>{{ n.title }}</td>
+                                                <td>{{ n.date.strftime('%b %d, %Y') if n.date else '' }}</td>
+                                                <td>
+                                                    <a href="{{ url_for('admin_edit_news', id=n.id) }}" class="btn btn-sm btn-primary">Edit</a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        {% else %}
+                                            <tr>
+                                                <td colspan="3" class="text-muted">No news found.</td>
+                                            </tr>
+                                        {% endif %}
                                     </tbody>
                                 </table>
                             </div>
@@ -147,23 +147,22 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <!-- This would normally be populated with data from the backend -->
-                                        <tr>
-                                            <td>Parent-Teacher Meeting</td>
-                                            <td>Jun 25, 2025</td>
-                                            <td>School Auditorium</td>
-                                            <td>
-                                                <a href="#" class="btn btn-sm btn-primary">Edit</a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Annual School Exhibition</td>
-                                            <td>Jun 30, 2025</td>
-                                            <td>School Campus</td>
-                                            <td>
-                                                <a href="#" class="btn btn-sm btn-primary">Edit</a>
-                                            </td>
-                                        </tr>
+                                        {% if upcoming_events %}
+                                            {% for e in upcoming_events %}
+                                            <tr>
+                                                <td>{{ e.title }}</td>
+                                                <td>{{ e.date.strftime('%b %d, %Y') if e.date else '' }}</td>
+                                                <td>{{ e.location }}</td>
+                                                <td>
+                                                    <a href="{{ url_for('admin_edit_event', id=e.id) }}" class="btn btn-sm btn-primary">Edit</a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        {% else %}
+                                            <tr>
+                                                <td colspan="4" class="text-muted">No upcoming events.</td>
+                                            </tr>
+                                        {% endif %}
                                     </tbody>
                                 </table>
                             </div>
@@ -174,6 +173,51 @@
         </div>
         
         <div class="col-lg-4 mb-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Latest Contact Message</h5>
+                </div>
+                <div class="card-body">
+                    {% if latest_contact %}
+                        <div class="mb-2 d-flex justify-content-between">
+                            <strong>{{ latest_contact.name }}</strong>
+                            <small class="text-muted">{{ latest_contact.date.strftime('%b %d, %Y %I:%M %p') }}</small>
+                        </div>
+                        <div class="mb-1 text-muted">{{ latest_contact.email }}{% if latest_contact.phone %} · {{ latest_contact.phone }}{% endif %}</div>
+                        <div class="mb-2"><em>{{ latest_contact.subject or 'No subject' }}</em></div>
+                        <div class="text-truncate" style="max-width:100%">{{ latest_contact.message }}</div>
+                        <div class="mt-3">
+                            <a href="{{ url_for('admin_view_contact', id=latest_contact.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                            <a href="{{ url_for('admin_contacts') }}" class="btn btn-sm btn-link">All Messages</a>
+                        </div>
+                    {% else %}
+                        <div class="text-muted">No messages yet.</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Latest Admission Submission</h5>
+                </div>
+                <div class="card-body">
+                    {% if latest_admission %}
+                        <div class="mb-2 d-flex justify-content-between">
+                            <strong>{{ latest_admission.student_name }}</strong>
+                            <span class="badge bg-secondary">{{ latest_admission.status }}</span>
+                        </div>
+                        <div class="mb-1 text-muted">{{ latest_admission.parent_name }} · {{ latest_admission.email }} · {{ latest_admission.phone }}</div>
+                        <div class="mb-1">Class: <strong>{{ latest_admission.class_applying }}</strong></div>
+                        <div class="mb-1 text-muted">Submitted on {{ latest_admission.submission_date.strftime('%b %d, %Y %I:%M %p') }}</div>
+                        <div class="mt-3">
+                            <a href="{{ url_for('admin_admission_applications') }}" class="btn btn-sm btn-outline-primary">View Applications</a>
+                        </div>
+                    {% else %}
+                        <div class="text-muted">No applications yet.</div>
+                    {% endif %}
+                </div>
+            </div>
+
             <div class="card">
                 <div class="card-header">
                     <h5 class="card-title mb-0">Quick Actions</h5>
