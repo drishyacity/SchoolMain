@@ -94,13 +94,13 @@
                     </div>
                 </div>
 
-                <div class="row mb-3">
+                <div class="row mb-3" id="group-position">
                     <div class="col-md-12">
                         <div class="form-group">
                             <label for="position">Position Title</label>
-                            {{ form.position(class="form-control", placeholder="e.g. Math Teacher, Principal, Director") }}
+                            {{ form.position(class="form-control", placeholder="e.g. Principal, Director") }}
                             <small class="text-muted position-hint leadership-hint" style="display: none;">Examples: Principal, Director, Chairman, Vice Principal</small>
-                            <small class="text-muted position-hint teaching-hint" style="display: none;">Examples: Math Teacher, Science Teacher, Physical Education Teacher</small>
+                            <small class="text-muted position-hint teaching-hint" style="display: none;">(Hidden for Teaching Staff)</small>
                             {% if form.position.errors %}
                                 <div class="text-danger">
                                     {% for error in form.position.errors %}
@@ -113,13 +113,42 @@
                 </div>
 
                 <div class="row mb-3">
-                    <div class="col-md-6">
+                    <div class="col-md-6" id="group-qualification">
                         <div class="form-group">
                             <label for="qualification">Qualification</label>
                             {{ form.qualification(class="form-control", placeholder="Educational Qualifications") }}
                             {% if form.qualification.errors %}
                                 <div class="text-danger">
                                     {% for error in form.qualification.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6" id="group-experience">
+                        <div class="form-group">
+                            <label for="experience">Experience</label>
+                            {{ form.experience(class="form-control", placeholder="e.g. 5 Years") }}
+                            {% if form.experience.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.experience.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6" id="group-subject">
+                        <div class="form-group">
+                            <label for="subject">Subject</label>
+                            {{ form.subject(class="form-control", placeholder="e.g. Science") }}
+                            {% if form.subject.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.subject.errors %}
                                         {{ error }}
                                     {% endfor %}
                                 </div>
@@ -258,7 +287,7 @@
                                             <span class="badge bg-primary">Current Image</span>
                                         </div>
                                         <div style="width: 200px; height: {% if form.obj.position_type == 'leadership' %}200px{% else %}150px{% endif %}; margin: 0 auto; border: 2px solid #ccc; overflow: hidden;">
-                                            <img src="{{ url_for('static', filename='uploads/' + form.obj.image_path) }}" alt="Current Image" style="width: 100%; height: 100%; object-fit: cover; object-position: center top;">
+                                            <img src="{{ form.obj.image_path }}" alt="Current Image" style="width: 100%; height: 100%; object-fit: cover; object-position: center top;">
                                         </div>
                                     </div>
                                     <div class="col-md-8">
@@ -318,22 +347,35 @@
 
         // Function to update hints and preview containers based on selected position type
         function updatePositionHints() {
+            // Leadership: 400x300, Teaching: 400x400
             if (positionTypeSelect.value === 'leadership') {
-                // Update hints
                 if (leadershipHint) leadershipHint.style.display = 'block';
                 if (teachingHint) teachingHint.style.display = 'none';
-
-                // Update preview box size for leadership
-                mainPreview.style.width = '400px';
+                mainPreview.style.width = '300px';
                 mainPreview.style.height = '400px';
+                // Show leadership-only fields, hide teaching-only
+                const gp = document.getElementById('group-position');
+                const gq = document.getElementById('group-qualification');
+                const ge = document.getElementById('group-experience');
+                const gs = document.getElementById('group-subject');
+                if (gp) gp.style.display = '';
+                if (gq) gq.style.display = '';
+                if (ge) ge.style.display = 'none';
+                if (gs) gs.style.display = 'none';
             } else {
-                // Update hints
                 if (leadershipHint) leadershipHint.style.display = 'none';
                 if (teachingHint) teachingHint.style.display = 'block';
-
-                // Update preview box size for teaching staff
                 mainPreview.style.width = '400px';
-                mainPreview.style.height = '300px';
+                mainPreview.style.height = '400px';
+                // Show teaching-only fields, hide leadership-only position
+                const gp = document.getElementById('group-position');
+                const gq = document.getElementById('group-qualification');
+                const ge = document.getElementById('group-experience');
+                const gs = document.getElementById('group-subject');
+                if (gp) gp.style.display = 'none';
+                if (gq) gq.style.display = '';
+                if (ge) ge.style.display = '';
+                if (gs) gs.style.display = '';
             }
         }
 
@@ -450,7 +492,7 @@
         const adjustCurrentImageBtn = document.getElementById('adjust-current-image');
         if (adjustCurrentImageBtn) {
             adjustCurrentImageBtn.addEventListener('click', function() {
-                loadImage("{{ url_for('static', filename='uploads/' + form.obj.image_path) }}");
+                loadImage("{{ form.obj.image_path }}");
             });
         }
         {% endif %}
@@ -490,13 +532,8 @@
             if (!currentImage) return;
 
             // Store crop data with all necessary information
-            let previewWidth = 400;
-            let previewHeight = 300;
-
-            // Set dimensions based on position type
-            if (positionTypeSelect && positionTypeSelect.value === 'leadership') {
-                previewHeight = 400;
-            }
+            let previewWidth = (positionTypeSelect && positionTypeSelect.value === 'leadership') ? 300 : 400;
+            let previewHeight = (positionTypeSelect && positionTypeSelect.value === 'leadership') ? 400 : 400;
 
             // Get the natural dimensions of the image
             const imgWidth = currentImage.naturalWidth;
@@ -610,13 +647,8 @@
 
             // Update crop data input with current values
             if (cropDataInput) {
-                let previewWidth = 400;
-                let previewHeight = 300;
-
-                // Set dimensions based on position type
-                if (positionTypeSelect && positionTypeSelect.value === 'leadership') {
-                    previewHeight = 400;
-                }
+                let previewWidth = (positionTypeSelect && positionTypeSelect.value === 'leadership') ? 300 : 400;
+                let previewHeight = (positionTypeSelect && positionTypeSelect.value === 'leadership') ? 400 : 400;
 
                 const cropData = {
                     zoom: zoom,

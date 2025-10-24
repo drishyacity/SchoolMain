@@ -18,7 +18,9 @@
         <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <a href="{{ url_for('admin_dashboard') }}" class="sidebar-brand">
-                    <img src="{{ url_for('static', filename='uploads/' + settings.school_logo_path) if settings and settings.school_logo_path and 'uploads' not in settings.school_logo_path else url_for('static', filename=settings.school_logo_path) if settings and settings.school_logo_path else url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" alt="Logo">
+                    {% if settings and settings.school_logo_path %}
+                    <img src="{{ settings.school_logo_path }}" alt="Logo">
+                    {% endif %}
                     <span>Admin Panel</span>
                 </a>
             </div>
@@ -80,8 +82,18 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a href="{{ url_for('admin_admission_info') }}" class="nav-link {% if request.endpoint == 'admin_admission_info' %}active{% endif %}">
+                        <i class="fas fa-file-alt"></i> Admission Info
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a href="{{ url_for('admin_home_slider') }}" class="nav-link {% if 'admin_home_slider' in request.endpoint %}active{% endif %}">
                         <i class="fas fa-sliders-h"></i> Sliders
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('admin_edit_achievements') }}" class="nav-link {% if request.endpoint == 'admin_edit_achievements' %}active{% endif %}">
+                        <i class="fas fa-trophy"></i> Achievements Page
                     </a>
                 </li>
                 <li class="nav-item">
@@ -137,8 +149,8 @@
     <!-- jQuery for better DOM manipulation -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-    <!-- CKEditor (for rich text editing) - using older version for better compatibility -->
-    <script src="https://cdn.ckeditor.com/4.16.2/standard/ckeditor.js"></script>
+    <!-- CKEditor (for rich text editing) - upgraded to latest LTS -->
+    <script src="https://cdn.ckeditor.com/4.25.1-lts/standard/ckeditor.js"></script>
 
     <!-- Admin JS -->
     <script src="{{ url_for('static', filename='js/admin.js') }}"></script>

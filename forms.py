@@ -17,6 +17,23 @@ class NewsForm(FlaskForm):
     ])
     submit = SubmitField('Save')
 
+class AdmissionFormFieldForm(FlaskForm):
+    name = StringField('Field Name (unique, no spaces)', validators=[DataRequired(), Length(max=100)])
+    label = StringField('Label', validators=[DataRequired(), Length(max=150)])
+    field_type = SelectField('Field Type', choices=[
+        ('text', 'Text'),
+        ('email', 'Email'),
+        ('tel', 'Phone'),
+        ('textarea', 'Textarea'),
+        ('date', 'Date'),
+        ('select', 'Select')
+    ], validators=[DataRequired()])
+    required = SelectField('Required', choices=[('no','No'), ('yes','Yes')], validators=[DataRequired()])
+    placeholder = StringField('Placeholder', validators=[Optional(), Length(max=255)])
+    options = TextAreaField('Options (comma-separated for Select)', validators=[Optional()])
+    order = IntegerField('Order', default=0, validators=[Optional()])
+    submit = SubmitField('Save Field')
+
 class EventForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired(), Length(max=200)])
     description = TextAreaField('Description', validators=[DataRequired()])
@@ -50,6 +67,12 @@ class AboutSectionForm(FlaskForm):
     order = IntegerField('Display Order', default=0)
     submit = SubmitField('Save')
 
+class AdmissionPairForm(FlaskForm):
+    label = StringField('Label', validators=[DataRequired(), Length(max=100)])
+    detail = StringField('Detail', validators=[DataRequired(), Length(max=255)])
+    order = IntegerField('Order', default=0, validators=[Optional()])
+    submit = SubmitField('Add')
+
 class AcademicProgramForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired(), Length(max=200)])
     description = TextAreaField('Description', validators=[DataRequired()])
@@ -64,6 +87,7 @@ class SchoolSettingsForm(FlaskForm):
     school_logo = FileField('Logo', validators=[
         FileAllowed(['jpg', 'jpeg', 'png', 'gif'], 'Images only!')
     ])
+    map_embed_html = TextAreaField('Google Map Embed (iframe HTML)', validators=[Optional()])
     submit = SubmitField('Save Settings')
 
 class UserForm(FlaskForm):
@@ -95,8 +119,10 @@ class TeacherForm(FlaskForm):
         ('leadership', 'Leadership (Principal/Director)'),
         ('teaching', 'Teaching Staff')
     ], validators=[DataRequired()])
-    position = StringField('Position Title', validators=[DataRequired(), Length(max=100)])
-    qualification = StringField('Qualification', validators=[DataRequired(), Length(max=200)])
+    position = StringField('Position Title', validators=[Optional(), Length(max=100)])
+    qualification = StringField('Qualification', validators=[Optional(), Length(max=200)])
+    experience = StringField('Experience', validators=[Optional(), Length(max=100)])
+    subject = StringField('Subject', validators=[Optional(), Length(max=100)])
     bio = TextAreaField('Biography', validators=[Optional()])
     image = FileField('Image', validators=[
         FileAllowed(['jpg', 'jpeg', 'png', 'gif'], 'Images only!')
@@ -152,3 +178,27 @@ class AdmissionResponseForm(FlaskForm):
     ], validators=[DataRequired()])
     comments = TextAreaField('Comments', validators=[Optional()])
     submit = SubmitField('Update Status')
+
+class AdmissionInfoForm(FlaskForm):
+    intro_text = TextAreaField('Admission Introduction', validators=[Optional()])
+    eligibility_text = TextAreaField('Eligibility Information', validators=[Optional()])
+    documents_text = TextAreaField('Required Documents', validators=[Optional()])
+    important_dates_text = TextAreaField('Important Dates', validators=[Optional()])
+    form_embed_html = TextAreaField('Form Embed HTML (optional)', validators=[Optional()])
+    submit = SubmitField('Save Admission Info')
+
+class AchievementsForm(FlaskForm):
+    content_html = TextAreaField('Achievements Page Content (HTML allowed)', validators=[Optional()])
+    submit = SubmitField('Save Achievements Content')
+
+class AchievementsItemForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired(), Length(max=200)])
+    description = TextAreaField('Description', validators=[DataRequired()])
+    category = SelectField('Category', choices=[
+        ('Academic', 'Academic'),
+        ('Sports', 'Sports'),
+        ('Co-curricular', 'Co-curricular')
+    ], validators=[DataRequired()])
+    icon_class = StringField('Icon Class (Font Awesome)', validators=[Optional(), Length(max=100)])
+    order = IntegerField('Display Order', default=0)
+    submit = SubmitField('Save')

@@ -2,9 +2,13 @@ import os
 import uuid
 import json
 import logging
+import io
 from werkzeug.utils import secure_filename
 from datetime import datetime
 from PIL import Image
+from database import db
+from models import StoredFile
+from supabase import create_client
 
 def allowed_file(filename, allowed_extensions):
     """Check if the file has an allowed extension"""
@@ -20,13 +24,8 @@ def save_file(file, upload_folder, crop_data=None):
     filename = secure_filename(file.filename)
     unique_filename = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{uuid.uuid4().hex[:8]}_{filename}"
 
-    # Create full path
-    file_path = os.path.join(upload_folder, unique_filename)
-
     # Log the upload attempt
     logging.info(f"Attempting to save file: {filename} as {unique_filename}")
-    logging.info(f"Upload folder: {upload_folder}")
-    logging.info(f"Full path: {file_path}")
 
     # Process image if it's an image file
     if filename.lower().endswith(('.jpg', '.jpeg', '.png', '.gif')):
@@ -77,72 +76,45 @@ def save_file(file, upload_folder, crop_data=None):
                 except Exception as e:
                     logging.error(f"Error parsing crop data: {str(e)}")
 
-            # Set target dimensions based on position type
-            if position_type == 'leadership':
-                # Square crop for leadership (1:1 aspect ratio)
-                target_width = 400
-                target_height = 400
-            else:
-                # Rectangle crop for teaching (4:3 aspect ratio)
-                target_width = 400
-                target_height = 300
-
-            # Simplified cropping logic
+            # If cropping data is provided, perform crop to target aspect; otherwise, keep original aspect.
             if crop_data:
+                # Set target dimensions based on position type per requested layout
+                if position_type == 'leadership':
+                    target_width = 300
+                    target_height = 400
+                else:
+                    target_width = 400
+                    target_height = 400
+
                 # Apply cropping with user's zoom and position data
                 try:
-                    # Calculate the scaled image dimensions
                     scaled_width = orig_width * zoom
                     scaled_height = orig_height * zoom
-
-                    # Calculate the center position of the scaled image
-                    center_x = scaled_width / 2
-                    center_y = scaled_height / 2
-
-                    # Apply user's position offset (posX, posY are in preview coordinates)
-                    center_x += pos_x
-                    center_y += pos_y
-
-                    # Calculate the crop area in the scaled image coordinates
+                    center_x = (scaled_width / 2) + pos_x
+                    center_y = (scaled_height / 2) + pos_y
                     crop_left = center_x - (target_width / 2)
                     crop_top = center_y - (target_height / 2)
                     crop_right = crop_left + target_width
                     crop_bottom = crop_top + target_height
-
-                    # Convert back to original image coordinates
-                    orig_crop_left = crop_left / zoom
-                    orig_crop_top = crop_top / zoom
-                    orig_crop_right = crop_right / zoom
-                    orig_crop_bottom = crop_bottom / zoom
-
-                    # Ensure we don't crop outside the original image bounds
-                    orig_crop_left = max(0, min(orig_crop_left, orig_width))
-                    orig_crop_top = max(0, min(orig_crop_top, orig_height))
-                    orig_crop_right = max(0, min(orig_crop_right, orig_width))
-                    orig_crop_bottom = max(0, min(orig_crop_bottom, orig_height))
-
-                    # Crop the image
+                    orig_crop_left = max(0, min(crop_left / zoom, orig_width))
+                    orig_crop_top = max(0, min(crop_top / zoom, orig_height))
+                    orig_crop_right = max(0, min(crop_right / zoom, orig_width))
+                    orig_crop_bottom = max(0, min(crop_bottom / zoom, orig_height))
                     img = img.crop((orig_crop_left, orig_crop_top, orig_crop_right, orig_crop_bottom))
                     logging.info(f"Image cropped from ({orig_crop_left}, {orig_crop_top}) to ({orig_crop_right}, {orig_crop_bottom})")
                 except Exception as crop_error:
                     logging.error(f"Error in cropping: {str(crop_error)}, using center crop instead")
-                    # Fallback to center crop
                     left = max(0, (orig_width - target_width) // 2)
                     top = max(0, (orig_height - target_height) // 2)
                     right = min(orig_width, left + target_width)
                     bottom = min(orig_height, top + target_height)
                     img = img.crop((left, top, right, bottom))
-            else:
-                # Simple center crop if no zoom data
-                left = max(0, (orig_width - target_width) // 2)
-                top = max(0, (orig_height - target_height) // 2)
-                right = min(orig_width, left + target_width)
-                bottom = min(orig_height, top + target_height)
-                img = img.crop((left, top, right, bottom))
-                logging.info(f"Applied center crop to {target_width}x{target_height}")
 
-            # Resize to exact target dimensions
-            img = img.resize((target_width, target_height), Image.LANCZOS)
+                # Resize to exact target dimensions only when cropping
+                img = img.resize((target_width, target_height), Image.LANCZOS)
+            else:
+                # No cropping requested: keep original aspect (already optionally downscaled)
+                logging.info("No crop_data provided; saving image without cropping and preserving aspect ratio")
 
             # Save the processed image with proper format
             # Convert to RGB if necessary (for JPEG)
@@ -154,34 +126,76 @@ def save_file(file, upload_folder, crop_data=None):
                 rgb_img.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
                 img = rgb_img
 
-            # Save with high quality
-            if file_path.lower().endswith(('.jpg', '.jpeg')):
-                img.save(file_path, 'JPEG', quality=95, optimize=True)
-            else:
-                img.save(file_path, quality=95, optimize=True)
-
-            logging.info(f"Image processed and saved successfully to {file_path} ({target_width}x{target_height})")
+            # Save image to bytes
+            buf = io.BytesIO()
+            # Choose format based on original extension
+            save_format = 'JPEG' if filename.lower().endswith(('.jpg', '.jpeg')) else 'PNG'
+            img.save(buf, save_format, quality=95, optimize=True)
+            file_bytes = buf.getvalue()
+            logging.info(f"Image processed and buffered successfully ({target_width}x{target_height}), {len(file_bytes)} bytes")
 
         except Exception as e:
             logging.error(f"Error processing image: {str(e)}")
-            # If there's an error, fall back to saving the original file
-            try:
-                with open(file_path, 'wb') as f:
-                    f.write(file_data)
-                logging.info(f"Saved original file as fallback: {file_path}")
-            except Exception as fallback_error:
-                logging.error(f"Failed to save fallback file: {str(fallback_error)}")
-                # Last resort - try with file pointer
-                file.seek(0)
-                with open(file_path, 'wb') as f:
-                    f.write(file.read())
+            # If there's an error, fall back to using the raw uploaded bytes
+            file_bytes = file_data or file.read()
     else:
         # Save the original file if not an image
         file.seek(0)
-        file_data = file.read()
-        with open(file_path, 'wb') as f:
-            f.write(file_data)
-        logging.info(f"Saved non-image file: {file_path}")
+        file_bytes = file.read()
+        logging.info(f"Buffered non-image file: {len(file_bytes)} bytes")
+    mimetype = getattr(file, 'content_type', None) or (
+        'image/jpeg' if filename.lower().endswith(('.jpg', '.jpeg')) else
+        'image/png' if filename.lower().endswith('.png') else
+        'application/octet-stream'
+    )
 
-    # Return just the filename for database storage
-    return unique_filename
+    supabase_url = os.environ.get('SUPABASE_URL')
+    supabase_key = os.environ.get('SUPABASE_SERVICE_ROLE_KEY')
+    bucket = os.environ.get('SUPABASE_BUCKET', 'school')
+    if not supabase_url or not supabase_key:
+        stored = StoredFile(filename=unique_filename, mimetype=mimetype, data=file_bytes)
+        db.session.add(stored)
+        db.session.commit()
+        return f"/files/{stored.id}"
+
+    client = create_client(supabase_url, supabase_key)
+    object_path = f"uploads/{unique_filename}"
+    client.storage.from_(bucket).upload(
+        object_path,
+        file_bytes,
+        file_options={
+            'content-type': mimetype,
+            'upsert': 'true'
+        }
+    )
+    public_url = client.storage.from_(bucket).get_public_url(object_path)
+    if isinstance(public_url, dict):
+        data = public_url.get('data') if hasattr(public_url, 'get') else None
+        if isinstance(data, dict) and 'publicUrl' in data:
+            return data['publicUrl']
+        # some versions may return {'publicUrl': '...'}
+        if 'publicUrl' in public_url:
+            return public_url['publicUrl']
+    return str(public_url)
+
+def delete_storage_url(url: str):
+    try:
+        supabase_url = os.environ.get('SUPABASE_URL')
+        supabase_key = os.environ.get('SUPABASE_SERVICE_ROLE_KEY')
+        bucket = os.environ.get('SUPABASE_BUCKET', 'school')
+        if not supabase_url or not supabase_key:
+            return
+        marker = '/storage/v1/object/public/'
+        if marker not in url:
+            return
+        after = url.split(marker, 1)[1]
+        parts = after.split('/', 1)
+        if len(parts) != 2:
+            return
+        bucket_in_url, object_path = parts
+        if bucket_in_url != bucket:
+            return
+        client = create_client(supabase_url, supabase_key)
+        client.storage.from_(bucket).remove([object_path])
+    except Exception:
+        pass

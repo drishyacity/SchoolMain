@@ -44,7 +44,7 @@
                                     <td>{{ syllabus.description|truncate(100) }}</td>
                                     <td>
                                         {% if syllabus.file_path %}
-                                            <a href="{{ url_for('static', filename='uploads/' + syllabus.file_path) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                            <a href="{{ syllabus.file_path }}" target="_blank" class="btn btn-sm btn-outline-primary">
                                                 <i class="fas fa-file-pdf"></i> View PDF
                                             </a>
                                         {% else %}

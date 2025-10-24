@@ -38,7 +38,7 @@
                             <td>{{ event.location }}</td>
                             <td>
                                 {% if event.image_path %}
-                                <img src="{{ url_for('static', filename='uploads/' + event.image_path) }}" alt="{{ event.title }}" class="img-preview">
+                                <img src="{{ event.image_path }}" alt="{{ event.title }}" class="img-preview">
                                 {% else %}
                                 <span class="text-muted"><i>No image</i></span>
                                 {% endif %}

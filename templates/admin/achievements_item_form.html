@@ -1,0 +1,30 @@
+{% extends 'admin/base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<h1>{{ title }}</h1>
+<form method="POST">
+  {{ form.hidden_tag() }}
+  <div class="mb-3">
+    <label class="form-label">Title</label>
+    {{ form.title(class="form-control", placeholder="e.g., District Toppers") }}
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Category</label>
+    {{ form.category(class="form-select") }}
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Icon Class (Font Awesome)</label>
+    {{ form.icon_class(class="form-control", placeholder="fas fa-trophy") }}
+    <div class="form-text">Use Font Awesome class names, e.g., fas fa-trophy, fas fa-medal, fas fa-running</div>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Description</label>
+    {{ form.description(class="form-control", rows=5, placeholder="Short description of the achievement") }}
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Display Order</label>
+    {{ form.order(class="form-control", placeholder="0") }}
+  </div>
+  {{ form.submit(class="btn btn-primary") }}
+</form>
+{% endblock %}

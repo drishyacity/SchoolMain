@@ -163,7 +163,7 @@
                                 <div class="subject-header">
                                     <h3 class="subject-title">{{ item.subject }}</h3>
                                     {% if item.file_path %}
-                                        <a href="{{ url_for('static', filename='uploads/' + item.file_path) }}" class="download-btn" target="_blank">
+                                        <a href="{{ item.file_path }}" class="download-btn" target="_blank">
                                             <i class="fas fa-download"></i> Download PDF
                                         </a>
                                     {% endif %}

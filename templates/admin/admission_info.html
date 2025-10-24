@@ -1,0 +1,206 @@
+{% extends 'admin/base.html' %}
+{% block title %}Admission Information{% endblock %}
+{% block content %}
+<h1>Admission Information</h1>
+
+<div class="row g-4">
+  <!-- Box 1: Introduction (rich text) -->
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header"><strong>Admission Information (Intro)</strong></div>
+      <div class="card-body">
+        <form method="POST">
+          {{ form.hidden_tag() }}
+          <div class="mb-3">
+            {{ form.intro_text(class="form-control ckeditor", rows=5, placeholder="Introductory text shown at the top of Admission page") }}
+          </div>
+          <div class="text-end">
+            {{ form.submit(class="btn btn-primary", value="Save Intro") }}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Box 2: Eligibility & Documents (combined items) -->
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <strong>Eligibility & Documents</strong>
+      </div>
+      <div class="card-body">
+        <form class="row g-2" method="POST" action="{{ url_for('admin_add_elig_or_doc_item') }}">
+          <div class="col-md-2">
+            <select name="item_type" class="form-select">
+              <option value="eligibility">Eligibility</option>
+              <option value="document">Document</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <input name="label" class="form-control" placeholder="Label (e.g. Age Requirement or Birth Certificate)">
+          </div>
+          <div class="col-md-4">
+            <input name="detail" class="form-control" placeholder="Detail (e.g. As per board norms)">
+          </div>
+          <div class="col-md-2">
+            <input name="order" class="form-control" type="number" placeholder="0" value="0">
+          </div>
+          <div class="col-12 text-end">
+            <button class="btn btn-primary btn-sm" type="submit">Add</button>
+          </div>
+        </form>
+
+        <ul class="list-group mt-3">
+          {% for it in eligibility_items %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span><span class="badge text-bg-secondary me-2">Eligibility</span> <strong>{{ it.label }}:</strong> {{ it.detail }}</span>
+            <span>
+              <a class="btn btn-outline-primary btn-sm" href="{{ url_for('admin_edit_eligibility_item', item_id=it.id) }}">Edit</a>
+              <form method="POST" action="{{ url_for('admin_delete_eligibility_item', item_id=it.id) }}" style="display:inline-block" onsubmit="return confirm('Delete this item?')">
+                <button class="btn btn-outline-danger btn-sm" type="submit">Delete</button>
+              </form>
+            </span>
+          </li>
+          {% endfor %}
+          {% for it in document_items %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span><span class="badge text-bg-info me-2">Document</span> <strong>{{ it.label }}:</strong> {{ it.detail }}</span>
+            <span>
+              <a class="btn btn-outline-primary btn-sm" href="{{ url_for('admin_edit_document_item', item_id=it.id) }}">Edit</a>
+              <form method="POST" action="{{ url_for('admin_delete_document_item', item_id=it.id) }}" style="display:inline-block" onsubmit="return confirm('Delete this item?')">
+                <button class="btn btn-outline-danger btn-sm" type="submit">Delete</button>
+              </form>
+            </span>
+          </li>
+          {% else %}
+          <li class="list-group-item">No eligibility/documents added yet.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Box 4: Important Dates (items) -->
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header"><strong>Important Dates</strong></div>
+      <div class="card-body">
+        <form class="row g-2" method="POST" action="{{ url_for('admin_add_date_item') }}">
+          <div class="col-md-4">
+            <input name="label" class="form-control" placeholder="Label (e.g. Form Submission)">
+          </div>
+          <div class="col-md-6">
+            <input name="detail" class="form-control" placeholder="Detail (e.g. Throughout the year)">
+          </div>
+          <div class="col-md-2">
+            <input name="order" class="form-control" type="number" placeholder="0" value="0">
+          </div>
+          <div class="col-12 text-end">
+            <button class="btn btn-primary btn-sm" type="submit">Add</button>
+          </div>
+        </form>
+
+        <ul class="list-group mt-3">
+          {% for it in date_items %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span><strong>{{ it.label }}:</strong> {{ it.detail }}</span>
+            <span>
+              <a class="btn btn-outline-primary btn-sm" href="{{ url_for('admin_edit_date_item', item_id=it.id) }}">Edit</a>
+              <form method="POST" action="{{ url_for('admin_delete_date_item', item_id=it.id) }}" style="display:inline-block" onsubmit="return confirm('Delete this item?')">
+                <button class="btn btn-outline-danger btn-sm" type="submit">Delete</button>
+              </form>
+            </span>
+          </li>
+          {% else %}
+          <li class="list-group-item">No important dates added yet.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  
+
+  <!-- Inline Box: Admission Form Fields (list + quick add) -->
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header"><strong>Admission Form Fields</strong></div>
+      <div class="card-body">
+        <form class="row g-2" method="POST" action="{{ url_for('admin_quick_add_form_field') }}">
+          <div class="col-md-2">
+            <input name="name" class="form-control" placeholder="name (e.g. student_name)">
+          </div>
+          <div class="col-md-3">
+            <input name="label" class="form-control" placeholder="Label (e.g. Student's Name)">
+          </div>
+          <div class="col-md-3">
+            <input name="placeholder" class="form-control" placeholder="Placeholder (e.g. Full Name)">
+          </div>
+          <div class="col-md-2">
+            <select name="field_type" class="form-select">
+              <option value="text">Text</option>
+              <option value="email">Email</option>
+              <option value="tel">Phone</option>
+              <option value="textarea">Textarea</option>
+              <option value="date">Date</option>
+              <option value="select">Select</option>
+            </select>
+          </div>
+          <div class="col-md-1">
+            <select name="required" class="form-select">
+              <option value="no">Req? No</option>
+              <option value="yes">Req? Yes</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <input name="options" class="form-control" placeholder="Options (for select)">
+          </div>
+          <div class="col-md-1">
+            <input name="order" type="number" value="0" class="form-control" placeholder="0">
+          </div>
+          <div class="col-md-1 text-end">
+            <button class="btn btn-primary btn-sm" type="submit">Add</button>
+          </div>
+        </form>
+
+        <div class="table-responsive mt-3">
+          <table class="table table-striped align-middle">
+            <thead>
+              <tr>
+                <th>Order</th>
+                <th>Label</th>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Required</th>
+                <th>Options</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for f in form_fields %}
+              <tr>
+                <td>{{ f.order }}</td>
+                <td>{{ f.label }}</td>
+                <td><code>{{ f.name }}</code></td>
+                <td>{{ f.field_type }}</td>
+                <td>{% if f.required %}Yes{% else %}No{% endif %}</td>
+                <td>{% if f.options %}{{ f.options }}{% endif %}</td>
+                <td class="text-end">
+                  <a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin_edit_form_field', id=f.id) }}">Edit</a>
+                  <form method="POST" action="{{ url_for('admin_delete_form_field', id=f.id) }}" style="display:inline-block" onsubmit="return confirm('Delete this field?')">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                  </form>
+                </td>
+              </tr>
+              {% else %}
+              <tr><td colspan="7">No fields yet. Use the form above to add.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

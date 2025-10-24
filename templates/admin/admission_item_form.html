@@ -1,0 +1,30 @@
+{% extends 'admin/base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<h1>{{ title }}</h1>
+<form method="POST">
+  {% if current_type %}
+  <div class="mb-3">
+    <label class="form-label">Type</label>
+    <select class="form-select" name="item_type">
+      <option value="eligibility" {% if current_type=='eligibility' %}selected{% endif %}>Eligibility</option>
+      <option value="document" {% if current_type=='document' %}selected{% endif %}>Document</option>
+    </select>
+  </div>
+  {% endif %}
+  <div class="mb-3">
+    <label class="form-label">Label</label>
+    <input class="form-control" name="label" value="{{ item.label }}">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Detail</label>
+    <input class="form-control" name="detail" value="{{ item.detail }}">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Order</label>
+    <input class="form-control" type="number" name="order" value="{{ item.order or 0 }}">
+  </div>
+  <button class="btn btn-primary" type="submit">Save</button>
+  <a href="{{ url_for('admin_admission_info') }}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}

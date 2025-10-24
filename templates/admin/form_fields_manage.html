@@ -1,0 +1,40 @@
+{% extends 'admin/base.html' %}
+{% block title %}Admission Form Fields{% endblock %}
+{% block content %}
+<h1>Admission Form Fields</h1>
+<div class="mb-3">
+  <a href="{{ url_for('admin_add_form_field') }}" class="btn btn-primary">Add Field</a>
+  <a href="{{ url_for('admin_admission_info') }}" class="btn btn-secondary">Back to Admission Info</a>
+</div>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Order</th>
+      <th>Label</th>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Required</th>
+      <th>Options</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for f in fields %}
+    <tr>
+      <td>{{ f.order }}</td>
+      <td>{{ f.label }}</td>
+      <td><code>{{ f.name }}</code></td>
+      <td>{{ f.field_type }}</td>
+      <td>{% if f.required %}Yes{% else %}No{% endif %}</td>
+      <td>{% if f.options %}{{ f.options }}{% endif %}</td>
+      <td>
+        <a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin_edit_form_field', id=f.id) }}">Edit</a>
+        <form method="POST" action="{{ url_for('admin_delete_form_field', id=f.id) }}" style="display:inline-block" onsubmit="return confirm('Delete this field?')">
+          <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

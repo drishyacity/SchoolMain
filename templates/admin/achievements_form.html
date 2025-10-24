@@ -1,0 +1,13 @@
+{% extends 'admin/base.html' %}
+{% block title %}Edit Achievements Page{% endblock %}
+{% block content %}
+<h1>Edit Achievements Page</h1>
+<form method="POST">
+  {{ form.hidden_tag() }}
+  <div class="form-group">
+    <label>Achievements Content (HTML)</label>
+    {{ form.content_html(class="form-control", rows=16, placeholder="Paste or write HTML for the Achievements page") }}
+  </div>
+  {{ form.submit(class="btn btn-primary") }}
+</form>
+{% endblock %}

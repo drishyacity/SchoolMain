@@ -53,7 +53,7 @@
                 <div class="tab-pane fade show active" id="leadership" role="tabpanel" aria-labelledby="leadership-tab">
                     {% set leadership_found = false %}
                     {% for teacher in teachers %}
-                        {% if teacher.position_type == 'leadership' %}
+                        {% if teacher.position_type == 'leadership' or teacher.position in ['Principal','Director','Chairman','Vice Principal','Head of School'] %}
                             {% set leadership_found = true %}
                         {% endif %}
                     {% endfor %}
@@ -73,17 +73,21 @@
                                 </thead>
                                 <tbody>
                                     {% for teacher in teachers %}
-                                        {% if teacher.position_type == 'leadership' %}
+                                        {% if teacher.position_type == 'leadership' or teacher.position in ['Principal','Director','Chairman','Vice Principal','Head of School'] %}
                                             <tr>
                                                 <td>{{ teacher.name }}</td>
                                                 <td>{{ teacher.position }}</td>
                                                 <td>{{ teacher.qualification }}</td>
                                                 <td>
-                                                    {% if teacher.image_path %}
-                                                        <img src="{{ url_for('static', filename='uploads/' + teacher.image_path) }}" alt="{{ teacher.name }}" width="50" height="50" style="object-fit: cover; object-position: center top;">
-                                                    {% else %}
-                                                        <span class="text-muted">No image</span>
-                                                    {% endif %}
+                                                    <div style="width:50px;height:50px;border-radius:6px;overflow:hidden;position:relative;">
+                                                        {% if teacher.image_path %}
+                                                        <img src="{{ teacher.image_path }}" alt="{{ teacher.name }}" width="50" height="50" style="object-fit: cover; object-position: center top; display:block;"
+                                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                                        {% endif %}
+                                                        <div style="display:{% if teacher.image_path %}none{% else %}flex{% endif %};width:100%;height:100%;align-items:center;justify-content:center;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;font-weight:bold;">
+                                                            {{ teacher.name.split()[0][0] }}{{ teacher.name.split()[-1][0] if teacher.name.split()|length > 1 else '' }}
+                                                        </div>
+                                                    </div>
                                                 </td>
                                                 <td>{{ teacher.order }}</td>
                                                 <td>
@@ -134,7 +138,7 @@
                 <div class="tab-pane fade" id="teachers" role="tabpanel" aria-labelledby="teachers-tab">
                     {% set teachers_found = false %}
                     {% for teacher in teachers %}
-                        {% if teacher.position_type == 'teaching' %}
+                        {% if teacher.position_type == 'teaching' and teacher.position not in ['Principal','Director','Chairman','Vice Principal','Head of School'] %}
                             {% set teachers_found = true %}
                         {% endif %}
                     {% endfor %}
@@ -154,14 +158,14 @@
                                 </thead>
                                 <tbody>
                                     {% for teacher in teachers %}
-                                        {% if teacher.position_type == 'teaching' %}
+                                        {% if teacher.position_type == 'teaching' and teacher.position not in ['Principal','Director','Chairman','Vice Principal','Head of School'] %}
                                             <tr>
                                                 <td>{{ teacher.name }}</td>
                                                 <td>{{ teacher.position }}</td>
                                                 <td>{{ teacher.qualification }}</td>
                                                 <td>
                                                     {% if teacher.image_path %}
-                                                        <img src="{{ url_for('static', filename='uploads/' + teacher.image_path) }}" alt="{{ teacher.name }}" width="50" height="50" style="object-fit: cover; object-position: center top;">
+                                                        <img src="{{ teacher.image_path }}" alt="{{ teacher.name }}" width="50" height="50" style="object-fit: cover; object-position: center top;">
                                                     {% else %}
                                                         <span class="text-muted">No image</span>
                                                     {% endif %}
@@ -241,11 +245,15 @@
                                             <td>{{ teacher.position }}</td>
                                             <td>{{ teacher.qualification }}</td>
                                             <td>
-                                                {% if teacher.image_path %}
-                                                    <img src="{{ url_for('static', filename='uploads/' + teacher.image_path) }}" alt="{{ teacher.name }}" width="50" height="50" style="object-fit: cover; object-position: center top;">
-                                                {% else %}
-                                                    <span class="text-muted">No image</span>
-                                                {% endif %}
+                                                <div style="width:50px;height:50px;border-radius:6px;overflow:hidden;position:relative;">
+                                                    {% if teacher.image_path %}
+                                                    <img src="{{ teacher.image_path }}" alt="{{ teacher.name }}" width="50" height="50" style="object-fit: cover; object-position: center top; display:block;"
+                                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                                    {% endif %}
+                                                    <div style="display:{% if teacher.image_path %}none{% else %}flex{% endif %};width:100%;height:100%;align-items:center;justify-content:center;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;font-weight:bold;">
+                                                        {{ teacher.name.split()[0][0] }}{{ teacher.name.split()[-1][0] if teacher.name.split()|length > 1 else '' }}
+                                                    </div>
+                                                </div>
                                             </td>
                                             <td>{{ teacher.order }}</td>
                                             <td>

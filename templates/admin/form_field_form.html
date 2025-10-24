@@ -1,0 +1,37 @@
+{% extends 'admin/base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<h1>{{ title }}</h1>
+<form method="POST">
+  {{ form.hidden_tag() }}
+  <div class="mb-3">
+    <label class="form-label">Field Name (unique, no spaces)</label>
+    {{ form.name(class="form-control", placeholder="student_name") }}
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Label</label>
+    {{ form.label(class="form-control", placeholder="Student's Name") }}
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Field Type</label>
+    {{ form.field_type(class="form-select") }}
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Placeholder</label>
+    {{ form.placeholder(class="form-control", placeholder="e.g. Full Name") }}
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Required</label>
+    {{ form.required(class="form-select") }}
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Options (comma-separated for Select)</label>
+    {{ form.options(class="form-control", rows=3, placeholder="Option 1, Option 2") }}
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Order</label>
+    {{ form.order(class="form-control", placeholder="0") }}
+  </div>
+  {{ form.submit(class="btn btn-primary") }}
+</form>
+{% endblock %}

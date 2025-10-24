@@ -3,6 +3,18 @@ from database import db
 from flask_login import UserMixin
 from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, Date, Time, ForeignKey
 
+class StoredFile(db.Model):
+    __tablename__ = 'stored_files'
+
+    id = Column(Integer, primary_key=True)
+    filename = Column(String(255), nullable=False)
+    mimetype = Column(String(100), nullable=False)
+    data = Column(db.LargeBinary, nullable=False)
+    created_at = Column(DateTime, default=datetime.now)
+
+    def __repr__(self):
+        return f'<StoredFile {self.id}:{self.filename}>'
+
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
 
@@ -101,7 +113,9 @@ class Teacher(db.Model):
     name = Column(String(100), nullable=False)
     position_type = Column(String(50), default='teaching')  # 'leadership' or 'teaching'
     position = Column(String(100), nullable=False)
-    qualification = Column(String(200), nullable=False)
+    qualification = Column(String(200), nullable=True)
+    experience = Column(String(100), nullable=True)
+    subject = Column(String(100), nullable=True)
     bio = Column(Text, nullable=True)
     image_path = Column(String(255))
     order = Column(Integer, default=0)
@@ -133,6 +147,20 @@ class Syllabus(db.Model):
 
     def __repr__(self):
         return f'<Syllabus {self.class_name}-{self.subject}>'
+
+class AdmissionInfo(db.Model):
+    __tablename__ = 'admission_info'
+
+    id = Column(Integer, primary_key=True)
+    intro_text = Column(Text, nullable=True)
+    eligibility_text = Column(Text, nullable=True)
+    documents_text = Column(Text, nullable=True)
+    important_dates_text = Column(Text, nullable=True)
+    form_embed_html = Column(Text, nullable=True)
+    updated_at = Column(DateTime, default=datetime.now)
+
+    def __repr__(self):
+        return f'<AdmissionInfo {self.id}>'
 
 class AdmissionForm(db.Model):
     __tablename__ = 'admission_forms'
@@ -174,6 +202,79 @@ class SchoolSetting(db.Model):
     school_phone = Column(String(20), nullable=False)
     school_email = Column(String(120), nullable=False)
     school_logo_path = Column(String(255), default='IMG-20250425-WA0004.jpg')
+    map_embed_html = Column(Text, nullable=True)
 
     def __repr__(self):
         return f'<SchoolSetting {self.school_name}>'
+
+class AchievementsPage(db.Model):
+    __tablename__ = 'achievements_page'
+
+    id = Column(Integer, primary_key=True)
+    content_html = Column(Text, nullable=True)
+    updated_at = Column(DateTime, default=datetime.now)
+
+    def __repr__(self):
+        return f'<AchievementsPage {self.id}>'
+
+class AchievementsItem(db.Model):
+    __tablename__ = 'achievements_items'
+
+    id = Column(Integer, primary_key=True)
+    title = Column(String(200), nullable=False)
+    description = Column(Text, nullable=False)
+    category = Column(String(100), nullable=False)  # e.g., 'Academic', 'Sports', 'Co-curricular'
+    icon_class = Column(String(100), nullable=True)  # e.g., 'fas fa-trophy'
+    order = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.now)
+
+    def __repr__(self):
+        return f'<AchievementsItem {self.title}>'
+
+class AdmissionEligibilityItem(db.Model):
+    __tablename__ = 'admission_eligibility_items'
+
+    id = Column(Integer, primary_key=True)
+    label = Column(String(100), nullable=False)
+    detail = Column(String(255), nullable=False)
+    order = Column(Integer, default=0)
+
+    def __repr__(self):
+        return f'<AdmissionEligibilityItem {self.label}>'
+
+class AdmissionDocumentItem(db.Model):
+    __tablename__ = 'admission_document_items'
+
+    id = Column(Integer, primary_key=True)
+    label = Column(String(100), nullable=False)
+    detail = Column(String(255), nullable=False)
+    order = Column(Integer, default=0)
+
+    def __repr__(self):
+        return f'<AdmissionDocumentItem {self.label}>'
+
+class AdmissionImportantDateItem(db.Model):
+    __tablename__ = 'admission_important_date_items'
+
+    id = Column(Integer, primary_key=True)
+    label = Column(String(100), nullable=False)
+    detail = Column(String(255), nullable=False)
+    order = Column(Integer, default=0)
+
+    def __repr__(self):
+        return f'<AdmissionImportantDateItem {self.label}>'
+
+class AdmissionFormField(db.Model):
+    __tablename__ = 'admission_form_fields'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False)  # internal field name
+    label = Column(String(150), nullable=False)
+    field_type = Column(String(30), nullable=False)  # text, email, tel, textarea, date, select
+    required = Column(Boolean, default=False)
+    options = Column(Text, nullable=True)  # comma-separated for select
+    order = Column(Integer, default=0)
+    placeholder = Column(String(255), nullable=True)
+
+    def __repr__(self):
+        return f'<AdmissionFormField {self.name}:{self.field_type}>'

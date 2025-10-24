@@ -188,37 +188,70 @@ textarea.form-control {
     <div class="admission-info">
         <div class="info-card">
             <h3>Admission Information</h3>
-            <p>Thank you for your interest in Shree Gyan Bharti High School. We strive to provide quality education and holistic development for all our students.</p>
-            <p>Please read through our admission process and requirements before submitting your application form.</p>
+            {% if admission_info and admission_info.intro_text %}
+                <div>{{ admission_info.intro_text | safe }}</div>
+            {% elif admission_info and admission_info.eligibility_text %}
+                <div>{{ admission_info.eligibility_text | safe }}</div>
+            {% else %}
+                <p>Thank you for your interest in Shree Gyan Bharti High School. Please read through our admission process and requirements before submitting your application form.</p>
+            {% endif %}
         </div>
         
         <div class="info-card">
             <h3>Eligibility & Documents</h3>
-            <ul class="info-list">
-                <li><strong>Age Requirement:</strong> As per board norms</li>
-                <li><strong>Birth Certificate:</strong> Original and photocopy</li>
-                <li><strong>Transfer Certificate:</strong> From previous school (if applicable)</li>
-                <li><strong>Report Card:</strong> From previous school</li>
-                <li><strong>Passport Photos:</strong> 4 recent passport size photographs</li>
-                <li><strong>Aadhar Card:</strong> Photocopy of student and parents</li>
-                <li><strong>Address Proof:</strong> Any valid government document</li>
-            </ul>
+            {% if (eligibility_items and eligibility_items|length) or (document_items and document_items|length) %}
+                <ul class="info-list">
+                    {% for it in eligibility_items %}
+                        <li><strong>{{ it.label }}:</strong> {{ it.detail }}</li>
+                    {% endfor %}
+                    {% for it in document_items %}
+                        <li><strong>{{ it.label }}:</strong> {{ it.detail }}</li>
+                    {% endfor %}
+                </ul>
+            {% elif admission_info and admission_info.documents_text %}
+                <div>{{ admission_info.documents_text | safe }}</div>
+            {% else %}
+                <ul class="info-list">
+                    <li><strong>Age Requirement:</strong> As per board norms</li>
+                    <li><strong>Birth Certificate:</strong> Original and photocopy</li>
+                    <li><strong>Transfer Certificate:</strong> From previous school (if applicable)</li>
+                    <li><strong>Report Card:</strong> From previous school</li>
+                    <li><strong>Passport Photos:</strong> 4 recent passport size photographs</li>
+                    <li><strong>Aadhar Card:</strong> Photocopy of student and parents</li>
+                    <li><strong>Address Proof:</strong> Any valid government document</li>
+                </ul>
+            {% endif %}
         </div>
         
         <div class="info-card">
             <h3>Important Dates</h3>
-            <ul class="info-list">
-                <li><strong>Form Submission:</strong> Throughout the year</li>
-                <li><strong>Entrance Test:</strong> As per schedule</li>
-                <li><strong>Interview:</strong> After entrance test</li>
-                <li><strong>Results:</strong> Within one week of interview</li>
-                <li><strong>Fee Payment:</strong> Within 7 days of selection</li>
-            </ul>
+            {% if date_items and date_items|length %}
+                <ul class="info-list">
+                    {% for it in date_items %}
+                        <li><strong>{{ it.label }}:</strong> {{ it.detail }}</li>
+                    {% endfor %}
+                </ul>
+            {% elif admission_info and admission_info.important_dates_text %}
+                <div>{{ admission_info.important_dates_text | safe }}</div>
+            {% else %}
+                <ul class="info-list">
+                    <li><strong>Form Submission:</strong> Throughout the year</li>
+                    <li><strong>Entrance Test:</strong> As per schedule</li>
+                    <li><strong>Interview:</strong> After entrance test</li>
+                    <li><strong>Results:</strong> Within one week of interview</li>
+                    <li><strong>Fee Payment:</strong> Within 7 days of selection</li>
+                </ul>
+            {% endif %}
         </div>
     </div>
     
     <div class="admission-form">
-        {% if form %}
+        {% if admission_info and admission_info.form_embed_html %}
+            <div class="form-card">
+                <h3>Online Application Form</h3>
+                <div>{{ admission_info.form_embed_html | safe }}</div>
+            </div>
+        {% elif form %}
             <div class="form-card">
                 <h3>Online Application Form</h3>
                 
@@ -226,42 +259,42 @@ textarea.form-control {
                     {{ form.hidden_tag() }}
                     
                     <div class="form-group">
-                        <label class="form-label required">Student's Name</label>
-                        {{ form.student_name(class="form-control", placeholder="Full Name") }}
+                        <label class="form-label required">{{ (field_map.get('student_name').label if field_map and field_map.get('student_name') else "Student's Name") }}</label>
+                        {{ form.student_name(class="form-control", placeholder=(field_map.get('student_name').placeholder if field_map and field_map.get('student_name') and field_map.get('student_name').placeholder else "Full Name")) }}
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label required">Parent/Guardian Name</label>
-                        {{ form.parent_name(class="form-control", placeholder="Parent/Guardian Full Name") }}
+                        <label class="form-label required">{{ (field_map.get('parent_name').label if field_map and field_map.get('parent_name') else "Parent/Guardian Name") }}</label>
+                        {{ form.parent_name(class="form-control", placeholder=(field_map.get('parent_name').placeholder if field_map and field_map.get('parent_name') and field_map.get('parent_name').placeholder else "Parent/Guardian Full Name")) }}
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label required">Email Address</label>
-                        {{ form.email(class="form-control", placeholder="email@example.com") }}
+                        <label class="form-label required">{{ (field_map.get('email').label if field_map and field_map.get('email') else "Email Address") }}</label>
+                        {{ form.email(class="form-control", placeholder=(field_map.get('email').placeholder if field_map and field_map.get('email') and field_map.get('email').placeholder else "email@example.com")) }}
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label required">Phone Number</label>
-                        {{ form.phone(class="form-control", placeholder="Contact Number") }}
+                        <label class="form-label required">{{ (field_map.get('phone').label if field_map and field_map.get('phone') else "Phone Number") }}</label>
+                        {{ form.phone(class="form-control", placeholder=(field_map.get('phone').placeholder if field_map and field_map.get('phone') and field_map.get('phone').placeholder else "Contact Number")) }}
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label required">Home Address</label>
-                        {{ form.address(class="form-control", placeholder="Complete Address") }}
+                        <label class="form-label required">{{ (field_map.get('address').label if field_map and field_map.get('address') else "Home Address") }}</label>
+                        {{ form.address(class="form-control", placeholder=(field_map.get('address').placeholder if field_map and field_map.get('address') and field_map.get('address').placeholder else "Complete Address")) }}
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label required">Class Applying For</label>
-                        {{ form.class_applying(class="form-control", placeholder="e.g. Class 6") }}
+                        <label class="form-label required">{{ (field_map.get('class_applying').label if field_map and field_map.get('class_applying') else "Class Applying For") }}</label>
+                        {{ form.class_applying(class="form-control", placeholder=(field_map.get('class_applying').placeholder if field_map and field_map.get('class_applying') and field_map.get('class_applying').placeholder else "e.g. Class 6")) }}
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label">Previous School (if any)</label>
-                        {{ form.previous_school(class="form-control", placeholder="Name of Previous School") }}
+                        <label class="form-label">{{ (field_map.get('previous_school').label if field_map and field_map.get('previous_school') else "Previous School (if any)") }}</label>
+                        {{ form.previous_school(class="form-control", placeholder=(field_map.get('previous_school').placeholder if field_map and field_map.get('previous_school') and field_map.get('previous_school').placeholder else "Name of Previous School")) }}
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label required">Date of Birth</label>
+                        <label class="form-label required">{{ (field_map.get('date_of_birth').label if field_map and field_map.get('date_of_birth') else "Date of Birth") }}</label>
                         {{ form.date_of_birth(class="form-control", type="date") }}
                     </div>
                     

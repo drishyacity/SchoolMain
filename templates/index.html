@@ -17,7 +17,7 @@
 .slider-container {
     position: relative;
     width: 100%;
-    height: auto;
+    height: 420px;
     overflow: hidden;
 }
 
@@ -154,13 +154,11 @@
         {% if home_sliders %}
             {% for slider in home_sliders %}
             <div class="slide">
-                <img src="{{ url_for('static', filename='uploads/' + slider.image_path) }}" alt="School Image {{ loop.index }}">
+                <img src="{{ slider.image_path }}" alt="School Image {{ loop.index }}">
             </div>
             {% endfor %}
         {% else %}
-            <div class="slide">
-                <img src="{{ url_for('static', filename='uploads/logo/img-20250425-wa0004.jpg') }}" alt="School Image 1">
-            </div>
+            <div class="slide"></div>
         {% endif %}
     </div>
     

@@ -34,7 +34,7 @@
                             <td>{{ news.date.strftime('%B %d, %Y') }}</td>
                             <td>
                                 {% if news.image_path %}
-                                <img src="{{ url_for('static', filename='uploads/' + news.image_path) }}" alt="{{ news.title }}" class="img-preview" onerror="this.onerror=null; this.src='{{ url_for('static', filename='uploads/placeholder.jpg') }}'; this.alt='Image not found';">
+                                <img src="{{ news.image_path }}" alt="{{ news.title }}" class="img-preview">
                                 {% else %}
                                 <span class="text-muted"><i>No image</i></span>
                                 {% endif %}

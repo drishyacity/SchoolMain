@@ -3,9 +3,7 @@
 
     <div class="logo">
         {% if settings and settings.school_logo_path %}
-            <img src="{{ url_for('static', filename='uploads/' + settings.school_logo_path) if 'uploads' not in settings.school_logo_path else url_for('static', filename=settings.school_logo_path) }}" alt="Logo" />
-        {% else %}
-            <img src="{{ url_for('static', filename='uploads/IMG-20250425-WA0004.jpg') }}" alt="Logo" />
+            <img src="{{ settings.school_logo_path }}" alt="Logo" />
         {% endif %}
         <h2>{{ settings.school_name if settings else 'SHREE GYAN BHARTI HIGH SCHOOL' }}</h2>
     </div>
@@ -22,8 +20,6 @@
                 <a id="login-btn">Login</a>
                 <div class="dropdown-content" id="dropdown-menu">
                     <a href="{{ url_for('admin_login') }}">Admin Login</a>
-                    <a href="#">Teacher Login</a>
-                    <a href="#">Student Login</a>
                 </div>
             </li>
         </ul>

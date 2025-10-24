@@ -99,9 +99,9 @@
             {% for news in news_items %}
             <div class="news-card">
                 {% if news.image_path %}
-                <img src="{{ url_for('static', filename='uploads/' + news.image_path) }}" alt="{{ news.title }}" class="news-img" onerror="this.onerror=null; this.src='{{ url_for('static', filename='uploads/placeholder.jpg') }}'; this.alt='Image not found';">
+                <img src="{{ news.image_path }}" alt="{{ news.title }}" class="news-img">
                 {% else %}
-                <img src="{{ url_for('static', filename='uploads/placeholder.jpg') }}" alt="{{ news.title }}" class="news-img">
+                <img src="/files/0" alt="{{ news.title }}" class="news-img" style="display:none;">
                 {% endif %}
                 <div class="news-content">
                     <div class="news-date">{{ news.date.strftime('%B %d, %Y') }}</div>

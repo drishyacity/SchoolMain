@@ -61,7 +61,7 @@
     </div>
 
     {% if news.image_path %}
-    <img src="{{ url_for('static', filename='uploads/' + news.image_path) }}" alt="{{ news.title }}" class="news-featured-img" onerror="this.onerror=null; this.src='{{ url_for('static', filename='uploads/placeholder.jpg') }}'; this.alt='Image not found';">
+    <img src="{{ news.image_path }}" alt="{{ news.title }}" class="news-featured-img">
     {% endif %}
 
     <div class="news-content">

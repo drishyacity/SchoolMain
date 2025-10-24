@@ -1,0 +1,36 @@
+{% extends 'admin/base.html' %}
+{% block title %}Achievements{% endblock %}
+{% block content %}
+<h1>Achievements</h1>
+<div class="mb-3">
+  <a href="{{ url_for('admin_add_achievement') }}" class="btn btn-primary">Add Achievement</a>
+  <a href="{{ url_for('admin_edit_achievements') }}" class="btn btn-secondary">Edit Page Intro</a>
+</div>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Order</th>
+      <th>Title</th>
+      <th>Category</th>
+      <th>Icon</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in items %}
+    <tr>
+      <td>{{ item.order }}</td>
+      <td>{{ item.title }}</td>
+      <td>{{ item.category }}</td>
+      <td>{% if item.icon_class %}<i class="{{ item.icon_class }}"></i>{% endif %}</td>
+      <td>
+        <a href="{{ url_for('admin_edit_achievement', id=item.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+        <form action="{{ url_for('admin_delete_achievement', id=item.id) }}" method="POST" style="display:inline-block" onsubmit="return confirm('Delete this achievement?')">
+          <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

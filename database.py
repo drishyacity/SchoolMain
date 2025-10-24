@@ -10,7 +10,7 @@ class Base(DeclarativeBase):
 db = SQLAlchemy(model_class=Base)
 
 # Database URL - using the provided PostgreSQL URL
-DATABASE_URL = "postgresql://postgres.lugpddujngbtrfouxeld:viraj1316mp@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres"
+DATABASE_URL = "postgresql://postgres:RcM6Fipm%2FN7Jy4t@db.fdwvijvptodpojjkfret.supabase.co:5432/postgres?sslmode=require"
 
 def init_app(app):
     # Configure the database with the provided PostgreSQL URL

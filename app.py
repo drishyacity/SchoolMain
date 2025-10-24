@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv, find_dotenv
 import io
 import json
 import logging
@@ -19,6 +20,9 @@ from database import db
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+
+# Load environment variables from .env (search up the directory tree)
+load_dotenv(find_dotenv())
 
 # Create the app
 app = Flask(__name__)
@@ -43,10 +47,31 @@ login_manager.login_view = 'admin_login'
 login_manager.login_message = 'Please log in to access the admin panel.'
 
 from models import User, News, Event, GalleryImage, Contact, AboutSection, AcademicProgram, SchoolSetting, \
-    Teacher, Facility, Syllabus, AdmissionForm, HomeSlider
+    Teacher, Facility, Syllabus, AdmissionForm, HomeSlider, StoredFile, AdmissionInfo, AchievementsPage, AchievementsItem, \
+    AdmissionEligibilityItem, AdmissionDocumentItem, AdmissionImportantDateItem, AdmissionFormField
 from forms import LoginForm, NewsForm, EventForm, GalleryUploadForm, ContactForm, AboutSectionForm, AcademicProgramForm, \
-    SchoolSettingsForm, UserForm, ProfileForm, TeacherForm, FacilityForm, SyllabusForm, AdmissionApplicationForm, HomeSliderForm, AdmissionResponseForm
-from utils import allowed_file, save_file
+    SchoolSettingsForm, UserForm, ProfileForm, TeacherForm, FacilityForm, SyllabusForm, AdmissionApplicationForm, HomeSliderForm, AdmissionResponseForm, AdmissionInfoForm, AchievementsForm, AchievementsItemForm, AdmissionFormFieldForm
+from utils import allowed_file, save_file, delete_storage_url
+
+def delete_db_path_if_needed(path_str):
+    if not path_str or not isinstance(path_str, str):
+        return
+    # Delete DB-stored file if using internal /files/<id>
+    if path_str.startswith('/files/'):
+        try:
+            file_id = int(path_str.rsplit('/', 1)[-1])
+            sf = StoredFile.query.get(file_id)
+            if sf:
+                db.session.delete(sf)
+                db.session.commit()
+        except Exception:
+            pass
+    # Delete Supabase storage object if URL points to public object
+    if '/storage/v1/object/public/' in path_str:
+        try:
+            delete_storage_url(path_str)
+        except Exception:
+            pass
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -56,6 +81,42 @@ def load_user(user_id):
 def init_db():
     with app.app_context():
         db.create_all()
+
+        # Lightweight migrations for admission_info new columns
+        try:
+            inspector = db.inspect(db.engine)
+            tables = inspector.get_table_names()
+            if 'admission_info' in tables:
+                cols = [c['name'] for c in inspector.get_columns('admission_info')]
+                from sqlalchemy import text as _sql_text
+                with db.engine.begin() as conn:
+                    if 'intro_text' not in cols:
+                        conn.execute(_sql_text("ALTER TABLE admission_info ADD COLUMN intro_text TEXT"))
+                    if 'important_dates_text' not in cols:
+                        conn.execute(_sql_text("ALTER TABLE admission_info ADD COLUMN important_dates_text TEXT"))
+            if 'admission_form_fields' in tables:
+                cols2 = [c['name'] for c in inspector.get_columns('admission_form_fields')]
+                from sqlalchemy import text as _sql_text2
+                with db.engine.begin() as conn2:
+                    if 'placeholder' not in cols2:
+                        conn2.execute(_sql_text2("ALTER TABLE admission_form_fields ADD COLUMN placeholder VARCHAR(255)"))
+            if 'school_settings' in tables:
+                cols3 = [c['name'] for c in inspector.get_columns('school_settings')]
+                from sqlalchemy import text as _sql_text3
+                with db.engine.begin() as conn3:
+                    if 'map_embed_html' not in cols3:
+                        conn3.execute(_sql_text3("ALTER TABLE school_settings ADD COLUMN map_embed_html TEXT"))
+            if 'teachers' in tables:
+                cols4 = [c['name'] for c in inspector.get_columns('teachers')]
+                from sqlalchemy import text as _sql_text4
+                with db.engine.begin() as conn4:
+                    if 'experience' not in cols4:
+                        conn4.execute(_sql_text4("ALTER TABLE teachers ADD COLUMN experience VARCHAR(100)"))
+                    if 'subject' not in cols4:
+                        conn4.execute(_sql_text4("ALTER TABLE teachers ADD COLUMN subject VARCHAR(100)"))
+        except Exception:
+            # Ignore migration errors so app can still start; admin page may fail until DB is aligned
+            pass
 
         # Create admin user if doesn't exist
         if not User.query.filter_by(username='admin').first():
@@ -86,13 +147,16 @@ def index():
     news_items = News.query.order_by(News.date.desc()).limit(3).all()
     events = Event.query.filter(Event.date >= datetime.now()).order_by(Event.date).limit(3).all()
     home_sliders = HomeSlider.query.filter_by(active=True).order_by(HomeSlider.order).all()
-    # Getting a list of available slider images in the static folder
-    image_paths = []
-    for file in os.listdir(app.config['UPLOAD_FOLDER']):
-        if file.startswith('IMG-') and file.endswith(('.jpg', '.jpeg', '.png', '.gif')):
-            image_paths.append(file)
+    # Use DB-backed image paths for sliders instead of local filesystem
+    images_list = [s.image_path for s in home_sliders if getattr(s, 'image_path', None)]
+    try:
+        logging.info(f"Home sliders count: {len(home_sliders)}")
+        for i, s in enumerate(home_sliders, start=1):
+            logging.info(f"Slider[{i}] id={getattr(s, 'id', None)} path={getattr(s, 'image_path', None)}")
+    except Exception:
+        pass
     return render_template('index.html', settings=settings, news_items=news_items, events=events,
-                           home_sliders=home_sliders, images_list=image_paths)
+                           home_sliders=home_sliders, images_list=images_list)
 
 @app.route('/about')
 def about():
@@ -109,84 +173,23 @@ def academics():
 @app.route('/teachers')
 def teachers():
     settings = SchoolSetting.query.first()
-    teachers_list = Teacher.query.order_by(Teacher.order).all()
+    teachers_list = Teacher.query.order_by(Teacher.order, Teacher.id).all()
 
-    # Debug: Print teacher image paths
-    for teacher in teachers_list:
-        print(f"Teacher: {teacher.name}, Image Path: {teacher.image_path}")
-        if teacher.image_path:
-            full_path = os.path.join(app.config['UPLOAD_FOLDER'], teacher.image_path)
-            print(f"Full path: {full_path}, Exists: {os.path.exists(full_path)}")
-            if os.path.exists(full_path):
-                file_size = os.path.getsize(full_path)
-                print(f"File size: {file_size} bytes")
-            else:
-                print("❌ File does not exist!")
-
-    return render_template('teachers.html', settings=settings, teachers=teachers_list)
-
-@app.route('/debug/images')
-def debug_images():
-    """Debug route to check all teacher images"""
-    teachers_list = Teacher.query.all()
-    debug_info = []
-
-    for teacher in teachers_list:
-        info = {
-            'name': teacher.name,
-            'image_path': teacher.image_path,
-            'exists': False,
-            'size': 0,
-            'full_path': ''
-        }
-
-        if teacher.image_path:
-            full_path = os.path.join(app.config['UPLOAD_FOLDER'], teacher.image_path)
-            info['full_path'] = full_path
-            info['exists'] = os.path.exists(full_path)
-            if info['exists']:
-                info['size'] = os.path.getsize(full_path)
-
-        debug_info.append(info)
-
-    return f"<pre>{json.dumps(debug_info, indent=2)}</pre>"
-
-@app.route('/test/image/<filename>')
-def test_image(filename):
-    """Test route to directly serve an image"""
-    try:
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        if os.path.exists(file_path):
-            return send_file(file_path)
+    # Robust categorization
+    leadership_titles = {'principal', 'director', 'chairman', 'vice principal', 'head of school'}
+    leadership = []
+    teaching = []
+    for t in teachers_list:
+        ttype = (t.position_type or '').strip().lower()
+        tpos = (t.position or '').strip().lower()
+        if ttype == 'leadership' or tpos in leadership_titles:
+            leadership.append(t)
         else:
-            return f"File not found: {file_path}", 404
-    except Exception as e:
-        return f"Error: {str(e)}", 500
+            teaching.append(t)
 
-@app.route('/test/upload', methods=['GET', 'POST'])
-def test_upload():
-    """Simple test upload route"""
-    if request.method == 'POST':
-        if 'file' not in request.files:
-            return 'No file uploaded', 400
+    return render_template('teachers.html', settings=settings, teachers=teachers_list, leadership=leadership, teaching=teaching)
 
-        file = request.files['file']
-        if file.filename == '':
-            return 'No file selected', 400
-
-        try:
-            from utils import save_file
-            filename = save_file(file, app.config['UPLOAD_FOLDER'])
-            return f'File uploaded successfully: {filename}<br><a href="/test/image/{filename}">View Image</a>'
-        except Exception as e:
-            return f'Upload failed: {str(e)}', 500
-
-    return '''
-    <form method="post" enctype="multipart/form-data">
-        <input type="file" name="file" accept="image/*" required>
-        <button type="submit">Upload Test Image</button>
-    </form>
-    '''
+ 
 
 @app.route('/facilities')
 def facilities():
@@ -203,6 +206,12 @@ def syllabus():
 @app.route('/admission', methods=['GET', 'POST'])
 def admission():
     settings = SchoolSetting.query.first()
+    admission_info = AdmissionInfo.query.first()
+    eligibility_items = AdmissionEligibilityItem.query.order_by(AdmissionEligibilityItem.order, AdmissionEligibilityItem.id).all()
+    document_items = AdmissionDocumentItem.query.order_by(AdmissionDocumentItem.order, AdmissionDocumentItem.id).all()
+    date_items = AdmissionImportantDateItem.query.order_by(AdmissionImportantDateItem.order, AdmissionImportantDateItem.id).all()
+    form_fields = AdmissionFormField.query.order_by(AdmissionFormField.order, AdmissionFormField.id).all()
+    field_map = {f.name: f for f in form_fields}
     form = AdmissionApplicationForm()
 
     if form.validate_on_submit():
@@ -223,7 +232,9 @@ def admission():
         flash('Your admission application has been submitted successfully!', 'success')
         return redirect(url_for('admission'))
 
-    return render_template('admission.html', settings=settings, form=form)
+    return render_template('admission.html', settings=settings, form=form, admission_info=admission_info,
+                           eligibility_items=eligibility_items, document_items=document_items, date_items=date_items,
+                           form_fields=form_fields, field_map=field_map)
 
 @app.route('/events')
 def events():
@@ -235,7 +246,9 @@ def events():
 @app.route('/achievements')
 def achievements():
     settings = SchoolSetting.query.first()
-    return render_template('achievements.html', settings=settings)
+    page = AchievementsPage.query.first()
+    items = AchievementsItem.query.order_by(AchievementsItem.category, AchievementsItem.order, AchievementsItem.created_at).all()
+    return render_template('achievements.html', settings=settings, page=page, items=items)
 
 @app.route('/gallery')
 @app.route('/gallery/page/<int:page>')
@@ -364,8 +377,10 @@ def admin_edit_news(id):
         if form.image.data:
             if allowed_file(form.image.data.filename, app.config['ALLOWED_EXTENSIONS']):
                 # Delete old image if exists and not the default
-                if news.image_path and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], news.image_path)):
-                    os.remove(os.path.join(app.config['UPLOAD_FOLDER'], news.image_path))
+                if news.image_path:
+                    delete_db_path_if_needed(news.image_path)
+                    if os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], news.image_path)):
+                        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], news.image_path))
 
                 news.image_path = save_file(form.image.data, app.config['UPLOAD_FOLDER'])
             else:
@@ -384,8 +399,10 @@ def admin_delete_news(id):
     news = News.query.get_or_404(id)
 
     # Delete image file if exists
-    if news.image_path and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], news.image_path)):
-        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], news.image_path))
+    if news.image_path:
+        delete_db_path_if_needed(news.image_path)
+        if os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], news.image_path)):
+            os.remove(os.path.join(app.config['UPLOAD_FOLDER'], news.image_path))
 
     db.session.delete(news)
     db.session.commit()
@@ -444,8 +461,10 @@ def admin_edit_event(id):
         if form.image.data:
             if allowed_file(form.image.data.filename, app.config['ALLOWED_EXTENSIONS']):
                 # Delete old image if exists
-                if event.image_path and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], event.image_path)):
-                    os.remove(os.path.join(app.config['UPLOAD_FOLDER'], event.image_path))
+                if event.image_path:
+                    delete_db_path_if_needed(event.image_path)
+                    if os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], event.image_path)):
+                        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], event.image_path))
 
                 event.image_path = save_file(form.image.data, app.config['UPLOAD_FOLDER'])
             else:
@@ -464,8 +483,10 @@ def admin_delete_event(id):
     event = Event.query.get_or_404(id)
 
     # Delete image file if exists
-    if event.image_path and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], event.image_path)):
-        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], event.image_path))
+    if event.image_path:
+        delete_db_path_if_needed(event.image_path)
+        if os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], event.image_path)):
+            os.remove(os.path.join(app.config['UPLOAD_FOLDER'], event.image_path))
 
     db.session.delete(event)
     db.session.commit()
@@ -680,12 +701,15 @@ def admin_settings():
         settings.school_address = form.school_address.data
         settings.school_phone = form.school_phone.data
         settings.school_email = form.school_email.data
+        settings.map_embed_html = form.map_embed_html.data
 
         if form.school_logo.data:
             if allowed_file(form.school_logo.data.filename, app.config['ALLOWED_EXTENSIONS']):
                 # Delete old logo if exists and not the default
-                if settings.school_logo_path and settings.school_logo_path != 'IMG-20250425-WA0004.jpg' and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], settings.school_logo_path)):
-                    os.remove(os.path.join(app.config['UPLOAD_FOLDER'], settings.school_logo_path))
+                if settings.school_logo_path and settings.school_logo_path != 'IMG-20250425-WA0004.jpg':
+                    delete_db_path_if_needed(settings.school_logo_path)
+                    if os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], settings.school_logo_path)):
+                        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], settings.school_logo_path))
 
                 settings.school_logo_path = save_file(form.school_logo.data, app.config['UPLOAD_FOLDER'])
             else:
@@ -695,7 +719,7 @@ def admin_settings():
         flash('School settings updated successfully!', 'success')
         return redirect(url_for('admin_settings'))
 
-    return render_template('admin/settings.html', form=form)
+    return render_template('admin/settings.html', form=form, settings=settings)
 
 # User Management
 @app.route('/admin/users')
@@ -795,7 +819,6 @@ def admin_profile():
 
         if form.new_password.data:
             from werkzeug.security import generate_password_hash, check_password_hash
-
             if not check_password_hash(current_user.password_hash, form.current_password.data):
                 flash('Current password is incorrect', 'danger')
                 return render_template('admin/profile.html', form=form)
@@ -807,6 +830,12 @@ def admin_profile():
         return redirect(url_for('admin_profile'))
 
     return render_template('admin/profile.html', form=form)
+
+# Serve stored files from database (single, module-level route)
+@app.route('/files/<int:file_id>')
+def serve_db_file(file_id: int):
+    sf = StoredFile.query.get_or_404(file_id)
+    return send_file(io.BytesIO(sf.data), mimetype=sf.mimetype, download_name=sf.filename)
 
 # Teacher Management
 @app.route('/admin/teachers')
@@ -830,6 +859,14 @@ def admin_add_teacher():
         title = "Add Teacher"
 
     if form.validate_on_submit():
+        # Conditional validation: qualification required for teaching staff
+        if form.position_type.data == 'teaching' and not (form.qualification.data and form.qualification.data.strip()):
+            form.qualification.errors = ['Qualification is required for Teaching Staff']
+            return render_template('admin/teacher_form.html', form=form, title=title)
+        # Position required for leadership
+        if form.position_type.data == 'leadership' and not (form.position.data and form.position.data.strip()):
+            form.position.errors = ['Position Title is required for Leadership']
+            return render_template('admin/teacher_form.html', form=form, title=title)
         image_path = None
         if form.image.data:
             if allowed_file(form.image.data.filename, app.config['ALLOWED_EXTENSIONS']):
@@ -854,7 +891,9 @@ def admin_add_teacher():
             name=form.name.data,
             position_type=form.position_type.data,
             position=form.position.data,
-            qualification=form.qualification.data,
+            qualification=(form.qualification.data or '').strip(),
+            experience=(form.experience.data or '').strip(),
+            subject=(form.subject.data or '').strip(),
             bio=form.bio.data,
             image_path=image_path,
             order=form.order.data
@@ -884,18 +923,26 @@ def admin_edit_teacher(id):
         title = "Edit Teacher"
 
     if form.validate_on_submit():
+        # Conditional validation: qualification required for teaching staff
+        if form.position_type.data == 'teaching' and not (form.qualification.data and form.qualification.data.strip()):
+            form.qualification.errors = ['Qualification is required for Teaching Staff']
+            return render_template('admin/teacher_form.html', form=form, title=title)
         teacher.name = form.name.data
         teacher.position_type = form.position_type.data
         teacher.position = form.position.data
-        teacher.qualification = form.qualification.data
+        teacher.qualification = (form.qualification.data or '').strip()
+        teacher.experience = (form.experience.data or '').strip()
+        teacher.subject = (form.subject.data or '').strip()
         teacher.bio = form.bio.data
         teacher.order = form.order.data
 
         if form.image.data:
             if allowed_file(form.image.data.filename, app.config['ALLOWED_EXTENSIONS']):
                 # Delete old image if exists
-                if teacher.image_path and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], teacher.image_path)):
-                    os.remove(os.path.join(app.config['UPLOAD_FOLDER'], teacher.image_path))
+                if teacher.image_path:
+                    delete_db_path_if_needed(teacher.image_path)
+                    if os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], teacher.image_path)):
+                        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], teacher.image_path))
 
                 # Get position type for proper cropping
                 position_type = form.position_type.data
@@ -934,8 +981,10 @@ def admin_delete_teacher(id):
     is_leadership = teacher.position_type == 'leadership' or teacher.position in ['Principal', 'Director', 'Chairman', 'Vice Principal', 'Head of School']
 
     # Delete image file if exists
-    if teacher.image_path and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], teacher.image_path)):
-        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], teacher.image_path))
+    if teacher.image_path:
+        delete_db_path_if_needed(teacher.image_path)
+        if os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], teacher.image_path)):
+            os.remove(os.path.join(app.config['UPLOAD_FOLDER'], teacher.image_path))
 
     db.session.delete(teacher)
     db.session.commit()
@@ -994,8 +1043,10 @@ def admin_edit_facility(id):
         if form.image.data:
             if allowed_file(form.image.data.filename, app.config['ALLOWED_EXTENSIONS']):
                 # Delete old image if exists
-                if facility.image_path and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], facility.image_path)):
-                    os.remove(os.path.join(app.config['UPLOAD_FOLDER'], facility.image_path))
+                if facility.image_path:
+                    delete_db_path_if_needed(facility.image_path)
+                    if os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], facility.image_path)):
+                        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], facility.image_path))
 
                 facility.image_path = save_file(form.image.data, app.config['UPLOAD_FOLDER'])
             else:
@@ -1014,8 +1065,10 @@ def admin_delete_facility(id):
     facility = Facility.query.get_or_404(id)
 
     # Delete image file if exists
-    if facility.image_path and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], facility.image_path)):
-        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], facility.image_path))
+    if facility.image_path:
+        delete_db_path_if_needed(facility.image_path)
+        if os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], facility.image_path)):
+            os.remove(os.path.join(app.config['UPLOAD_FOLDER'], facility.image_path))
 
     db.session.delete(facility)
     db.session.commit()
@@ -1071,8 +1124,10 @@ def admin_edit_syllabus(id):
         if form.file.data:
             if allowed_file(form.file.data.filename, ['pdf']):
                 # Delete old file if exists
-                if syllabus.file_path and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], syllabus.file_path)):
-                    os.remove(os.path.join(app.config['UPLOAD_FOLDER'], syllabus.file_path))
+                if syllabus.file_path:
+                    delete_db_path_if_needed(syllabus.file_path)
+                    if os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], syllabus.file_path)):
+                        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], syllabus.file_path))
 
                 syllabus.file_path = save_file(form.file.data, app.config['UPLOAD_FOLDER'])
             else:
@@ -1091,8 +1146,10 @@ def admin_delete_syllabus(id):
     syllabus = Syllabus.query.get_or_404(id)
 
     # Delete file if exists
-    if syllabus.file_path and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], syllabus.file_path)):
-        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], syllabus.file_path))
+    if syllabus.file_path:
+        delete_db_path_if_needed(syllabus.file_path)
+        if os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], syllabus.file_path)):
+            os.remove(os.path.join(app.config['UPLOAD_FOLDER'], syllabus.file_path))
 
     db.session.delete(syllabus)
     db.session.commit()
@@ -1128,6 +1185,355 @@ def admin_home_slider():
     sliders = HomeSlider.query.order_by(HomeSlider.order).all()
     return render_template('admin/home_slider_manage.html', sliders=sliders)
 
+# Admission Info Management
+@app.route('/admin/admission-info', methods=['GET', 'POST'])
+@login_required
+def admin_admission_info():
+    info = AdmissionInfo.query.first()
+    if not info:
+        info = AdmissionInfo()
+        db.session.add(info)
+        db.session.commit()
+    form = AdmissionInfoForm(obj=info)
+    eligibility_items = AdmissionEligibilityItem.query.order_by(AdmissionEligibilityItem.order, AdmissionEligibilityItem.id).all()
+    document_items = AdmissionDocumentItem.query.order_by(AdmissionDocumentItem.order, AdmissionDocumentItem.id).all()
+    date_items = AdmissionImportantDateItem.query.order_by(AdmissionImportantDateItem.order, AdmissionImportantDateItem.id).all()
+    if form.validate_on_submit():
+        info.intro_text = form.intro_text.data
+        info.eligibility_text = form.eligibility_text.data
+        info.documents_text = form.documents_text.data
+        info.important_dates_text = form.important_dates_text.data
+        info.form_embed_html = form.form_embed_html.data
+        db.session.commit()
+        flash('Admission information updated successfully!', 'success')
+        return redirect(url_for('admin_admission_info'))
+    # form fields for inline manage
+    form_fields = AdmissionFormField.query.order_by(AdmissionFormField.order, AdmissionFormField.id).all()
+    return render_template('admin/admission_info.html', form=form,
+                           eligibility_items=eligibility_items,
+                           document_items=document_items,
+                           date_items=date_items,
+                           form_fields=form_fields)
+
+# Combined add for Eligibility & Documents
+@app.route('/admin/admission/eligdoc/add', methods=['POST'])
+@login_required
+def admin_add_elig_or_doc_item():
+    item_type = request.form.get('item_type')
+    label = request.form.get('label')
+    detail = request.form.get('detail')
+    order = request.form.get('order') or 0
+    try:
+        order = int(order)
+    except Exception:
+        order = 0
+    if not label or not detail:
+        flash('Please provide label and detail.', 'danger')
+        return redirect(url_for('admin_admission_info'))
+    if item_type == 'document':
+        db.session.add(AdmissionDocumentItem(label=label, detail=detail, order=order))
+    else:
+        db.session.add(AdmissionEligibilityItem(label=label, detail=detail, order=order))
+    db.session.commit()
+    flash('Item added.', 'success')
+    return redirect(url_for('admin_admission_info'))
+
+# Admission Items: Eligibility
+@app.route('/admin/admission/eligibility/add', methods=['POST'])
+@login_required
+def admin_add_eligibility_item():
+    label = request.form.get('label')
+    detail = request.form.get('detail')
+    order = request.form.get('order') or 0
+    try:
+        order = int(order)
+    except Exception:
+        order = 0
+    if label and detail:
+        db.session.add(AdmissionEligibilityItem(label=label, detail=detail, order=order))
+        db.session.commit()
+        flash('Eligibility item added.', 'success')
+    else:
+        flash('Please provide label and detail.', 'danger')
+    return redirect(url_for('admin_admission_info'))
+
+@app.route('/admin/admission/eligibility/delete/<int:item_id>', methods=['POST'])
+@login_required
+def admin_delete_eligibility_item(item_id):
+    item = AdmissionEligibilityItem.query.get_or_404(item_id)
+    db.session.delete(item)
+    db.session.commit()
+    flash('Eligibility item deleted.', 'success')
+    return redirect(url_for('admin_admission_info'))
+
+@app.route('/admin/admission/eligibility/edit/<int:item_id>', methods=['GET', 'POST'])
+@login_required
+def admin_edit_eligibility_item(item_id):
+    item = AdmissionEligibilityItem.query.get_or_404(item_id)
+    if request.method == 'POST':
+        new_type = request.form.get('item_type') or 'eligibility'
+        label = request.form.get('label') or item.label
+        detail = request.form.get('detail') or item.detail
+        try:
+            new_order = int(request.form.get('order') or item.order or 0)
+        except Exception:
+            new_order = item.order or 0
+        if new_type == 'document':
+            # move to documents table
+            moved = AdmissionDocumentItem(label=label, detail=detail, order=new_order)
+            db.session.add(moved)
+            db.session.delete(item)
+        else:
+            item.label = label
+            item.detail = detail
+            item.order = new_order
+        db.session.commit()
+        flash('Item updated.', 'success')
+        return redirect(url_for('admin_admission_info'))
+    return render_template('admin/admission_item_form.html', title='Edit Eligibility Item', item=item, current_type='eligibility')
+
+# Admission Items: Documents
+@app.route('/admin/admission/documents/add', methods=['POST'])
+@login_required
+def admin_add_document_item():
+    label = request.form.get('label')
+    detail = request.form.get('detail')
+    order = request.form.get('order') or 0
+    try:
+        order = int(order)
+    except Exception:
+        order = 0
+    if label and detail:
+        db.session.add(AdmissionDocumentItem(label=label, detail=detail, order=order))
+        db.session.commit()
+        flash('Document item added.', 'success')
+    else:
+        flash('Please provide label and detail.', 'danger')
+    return redirect(url_for('admin_admission_info'))
+
+@app.route('/admin/admission/documents/delete/<int:item_id>', methods=['POST'])
+@login_required
+def admin_delete_document_item(item_id):
+    item = AdmissionDocumentItem.query.get_or_404(item_id)
+    db.session.delete(item)
+    db.session.commit()
+    flash('Document item deleted.', 'success')
+    return redirect(url_for('admin_admission_info'))
+
+@app.route('/admin/admission/documents/edit/<int:item_id>', methods=['GET', 'POST'])
+@login_required
+def admin_edit_document_item(item_id):
+    item = AdmissionDocumentItem.query.get_or_404(item_id)
+    if request.method == 'POST':
+        new_type = request.form.get('item_type') or 'document'
+        label = request.form.get('label') or item.label
+        detail = request.form.get('detail') or item.detail
+        try:
+            new_order = int(request.form.get('order') or item.order or 0)
+        except Exception:
+            new_order = item.order or 0
+        if new_type == 'eligibility':
+            moved = AdmissionEligibilityItem(label=label, detail=detail, order=new_order)
+            db.session.add(moved)
+            db.session.delete(item)
+        else:
+            item.label = label
+            item.detail = detail
+            item.order = new_order
+        db.session.commit()
+        flash('Item updated.', 'success')
+        return redirect(url_for('admin_admission_info'))
+    return render_template('admin/admission_item_form.html', title='Edit Document Item', item=item, current_type='document')
+
+# Admission Items: Important Dates
+@app.route('/admin/admission/dates/add', methods=['POST'])
+@login_required
+def admin_add_date_item():
+    label = request.form.get('label')
+    detail = request.form.get('detail')
+    order = request.form.get('order') or 0
+    try:
+        order = int(order)
+    except Exception:
+        order = 0
+    if label and detail:
+        db.session.add(AdmissionImportantDateItem(label=label, detail=detail, order=order))
+        db.session.commit()
+        flash('Important date added.', 'success')
+    else:
+        flash('Please provide label and detail.', 'danger')
+    return redirect(url_for('admin_admission_info'))
+
+@app.route('/admin/admission/dates/delete/<int:item_id>', methods=['POST'])
+@login_required
+def admin_delete_date_item(item_id):
+    item = AdmissionImportantDateItem.query.get_or_404(item_id)
+    db.session.delete(item)
+    db.session.commit()
+    flash('Important date deleted.', 'success')
+    return redirect(url_for('admin_admission_info'))
+
+@app.route('/admin/admission/dates/edit/<int:item_id>', methods=['GET', 'POST'])
+@login_required
+def admin_edit_date_item(item_id):
+    item = AdmissionImportantDateItem.query.get_or_404(item_id)
+    if request.method == 'POST':
+        item.label = request.form.get('label') or item.label
+        item.detail = request.form.get('detail') or item.detail
+        try:
+            item.order = int(request.form.get('order') or item.order or 0)
+        except Exception:
+            pass
+        db.session.commit()
+        flash('Important date updated.', 'success')
+        return redirect(url_for('admin_admission_info'))
+    return render_template('admin/admission_item_form.html', title='Edit Important Date', item=item)
+
+# Admission Form Fields Management
+@app.route('/admin/admission/form-fields')
+@login_required
+def admin_form_fields():
+    fields = AdmissionFormField.query.order_by(AdmissionFormField.order, AdmissionFormField.id).all()
+    return render_template('admin/form_fields_manage.html', fields=fields)
+
+@app.route('/admin/admission/form-fields/add', methods=['GET', 'POST'])
+@login_required
+def admin_add_form_field():
+    form = AdmissionFormFieldForm()
+    if form.validate_on_submit():
+        field = AdmissionFormField(
+            name=form.name.data.strip(),
+            label=form.label.data.strip(),
+            field_type=form.field_type.data,
+            required=(form.required.data == 'yes'),
+            placeholder=form.placeholder.data,
+            options=form.options.data,
+            order=form.order.data or 0
+        )
+        db.session.add(field)
+        db.session.commit()
+        flash('Form field added.', 'success')
+        return redirect(url_for('admin_admission_info'))
+    return render_template('admin/form_field_form.html', form=form, title='Add Form Field')
+
+@app.route('/admin/admission/form-fields/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def admin_edit_form_field(id):
+    field = AdmissionFormField.query.get_or_404(id)
+    form = AdmissionFormFieldForm(obj=field)
+    if form.validate_on_submit():
+        field.name = form.name.data.strip()
+        field.label = form.label.data.strip()
+        field.field_type = form.field_type.data
+        field.required = (form.required.data == 'yes')
+        field.placeholder = form.placeholder.data
+        field.options = form.options.data
+        field.order = form.order.data or 0
+        db.session.commit()
+        flash('Form field updated.', 'success')
+        return redirect(url_for('admin_form_fields'))
+    # prefill select for required
+    form.required.data = 'yes' if field.required else 'no'
+    return render_template('admin/form_field_form.html', form=form, title='Edit Form Field')
+
+@app.route('/admin/admission/form-fields/delete/<int:id>', methods=['POST'])
+@login_required
+def admin_delete_form_field(id):
+    field = AdmissionFormField.query.get_or_404(id)
+    db.session.delete(field)
+    db.session.commit()
+    flash('Form field deleted.', 'success')
+    return redirect(url_for('admin_form_fields'))
+
+# Quick add endpoint for inline form fields on admission info page
+@app.route('/admin/admission/form-fields/quick-add', methods=['POST'])
+@login_required
+def admin_quick_add_form_field():
+    name = (request.form.get('name') or '').strip()
+    label = (request.form.get('label') or '').strip()
+    field_type = request.form.get('field_type') or 'text'
+    required = request.form.get('required') == 'yes'
+    options = request.form.get('options')
+    placeholder = request.form.get('placeholder')
+    try:
+        order = int(request.form.get('order') or 0)
+    except Exception:
+        order = 0
+    if not name or not label:
+        flash('Name and Label are required.', 'danger')
+        return redirect(url_for('admin_admission_info'))
+    db.session.add(AdmissionFormField(name=name, label=label, field_type=field_type, required=required, options=options, order=order, placeholder=placeholder))
+    db.session.commit()
+    flash('Form field added.', 'success')
+    return redirect(url_for('admin_admission_info'))
+
+# Achievements Page Management
+@app.route('/admin/achievements/edit', methods=['GET', 'POST'])
+@login_required
+def admin_edit_achievements():
+    page = AchievementsPage.query.first()
+    if not page:
+        page = AchievementsPage()
+        db.session.add(page)
+        db.session.commit()
+    form = AchievementsForm(obj=page)
+    if form.validate_on_submit():
+        page.content_html = form.content_html.data
+        db.session.commit()
+        flash('Achievements page updated successfully!', 'success')
+        return redirect(url_for('admin_edit_achievements'))
+    return render_template('admin/achievements_form.html', form=form)
+
+# Achievements Items Management
+@app.route('/admin/achievements')
+@login_required
+def admin_achievements():
+    items = AchievementsItem.query.order_by(AchievementsItem.category, AchievementsItem.order, AchievementsItem.created_at).all()
+    return render_template('admin/achievements_manage.html', items=items)
+
+@app.route('/admin/achievements/add', methods=['GET', 'POST'])
+@login_required
+def admin_add_achievement():
+    form = AchievementsItemForm()
+    if form.validate_on_submit():
+        item = AchievementsItem(
+            title=form.title.data,
+            description=form.description.data,
+            category=form.category.data,
+            icon_class=form.icon_class.data,
+            order=form.order.data or 0
+        )
+        db.session.add(item)
+        db.session.commit()
+        flash('Achievement item added successfully!', 'success')
+        return redirect(url_for('admin_achievements'))
+    return render_template('admin/achievements_item_form.html', form=form, title='Add Achievement')
+
+@app.route('/admin/achievements/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def admin_edit_achievement(id):
+    item = AchievementsItem.query.get_or_404(id)
+    form = AchievementsItemForm(obj=item)
+    if form.validate_on_submit():
+        item.title = form.title.data
+        item.description = form.description.data
+        item.category = form.category.data
+        item.icon_class = form.icon_class.data
+        item.order = form.order.data or 0
+        db.session.commit()
+        flash('Achievement item updated successfully!', 'success')
+        return redirect(url_for('admin_achievements'))
+    return render_template('admin/achievements_item_form.html', form=form, title='Edit Achievement')
+
+@app.route('/admin/achievements/delete/<int:id>', methods=['POST'])
+@login_required
+def admin_delete_achievement(id):
+    item = AchievementsItem.query.get_or_404(id)
+    db.session.delete(item)
+    db.session.commit()
+    flash('Achievement item deleted successfully!', 'success')
+    return redirect(url_for('admin_achievements'))
+
 @app.route('/admin/home-slider/add', methods=['GET', 'POST'])
 @login_required
 def admin_add_home_slider():
@@ -1144,10 +1550,16 @@ def admin_add_home_slider():
             flash('Please select an image to upload', 'danger')
             return render_template('admin/home_slider_form.html', form=form, title="Add Slider Image")
 
+        # Determine next display order if not provided or 0
+        next_order = form.order.data
+        if not next_order or next_order == 0:
+            last = HomeSlider.query.order_by(HomeSlider.order.desc()).first()
+            next_order = (last.order + 1) if last and last.order else 1
+
         slider = HomeSlider(
             title=form.title.data,
             image_path=image_path,
-            order=form.order.data,
+            order=next_order,
             active=form.active.data
         )
         db.session.add(slider)
@@ -1171,8 +1583,10 @@ def admin_edit_home_slider(id):
         if form.image.data:
             if allowed_file(form.image.data.filename, app.config['ALLOWED_EXTENSIONS']):
                 # Delete old image if exists
-                if slider.image_path and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], slider.image_path)):
-                    os.remove(os.path.join(app.config['UPLOAD_FOLDER'], slider.image_path))
+                if slider.image_path:
+                    delete_db_path_if_needed(slider.image_path)
+                    if os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], slider.image_path)):
+                        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], slider.image_path))
 
                 slider.image_path = save_file(form.image.data, app.config['UPLOAD_FOLDER'])
             else:
@@ -1191,8 +1605,10 @@ def admin_delete_home_slider(id):
     slider = HomeSlider.query.get_or_404(id)
 
     # Delete image file if exists
-    if slider.image_path and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], slider.image_path)):
-        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], slider.image_path))
+    if slider.image_path:
+        delete_db_path_if_needed(slider.image_path)
+        if os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], slider.image_path)):
+            os.remove(os.path.join(app.config['UPLOAD_FOLDER'], slider.image_path))
 
     db.session.delete(slider)
     db.session.commit()

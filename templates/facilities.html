@@ -94,7 +94,7 @@
     {% if facilities %}
         {% for facility in facilities %}
             <div class="facility-item">
-                <div class="facility-image" style="background-image: url('{{ url_for('static', filename='uploads/' + facility.image_path) if facility.image_path else url_for('static', filename='img/facility-placeholder.jpg') }}');"></div>
+                <div class="facility-image" {% if facility.image_path %}style="background-image: url('{{ facility.image_path }}');"{% endif %}></div>
                 <div class="facility-info">
                     <h2 class="facility-title">{{ facility.title }}</h2>
                     <div class="facility-description">{{ facility.description }}</div>
