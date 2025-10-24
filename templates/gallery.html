@@ -3,80 +3,31 @@
 {% block title %}Gallery - {{ settings.school_name if settings else 'Shree Gyan Bharti High School' }}{% endblock %}
 
 {% block inline_css %}
+/* Sections */
+.hero { text-align:center; padding: 40px 0; font-weight: 700; font-size: 22px; }
+.section-heading { display:none; }
+
+/* Responsive gallery grids using CSS columns for masonry-like layout without cropping */
+.gallery-section { padding: 10px 16px 30px; }
+.gallery-grid { column-gap: 16px; }
+.gallery-grid img { width: 100%; height: auto; display: block; border-radius: 8px; margin: 0 0 16px; }
+.gallery-grid .gallery-item { break-inside: avoid; -webkit-column-break-inside: avoid; -moz-column-break-inside: avoid; }
+.gallery-separator { height: 1px; background: #e5e7eb; margin: 8px 0 20px; }
+
+/* Columns per breakpoint (adjust per category) */
+@media (min-width: 320px) { .gallery-grid { columns: 2; } }
+@media (min-width: 768px) { .gallery-grid { columns: 3; } }
+@media (min-width: 1024px) { .gallery-grid { columns: 4; } }
+
 /* Lightbox styles */
-.lightbox {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.9);
-    padding: 40px;
-}
-
-.lightbox-content {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-}
-
-.lightbox-img {
-    max-width: 90%;
-    max-height: 90%;
-    object-fit: contain;
-}
-
-.lightbox-caption {
-    position: absolute;
-    bottom: 60px;
-    width: 100%;
-    text-align: center;
-    color: white;
-    font-size: 1.2rem;
-    padding: 10px;
-}
-
-.close-lightbox {
-    position: absolute;
-    top: 20px;
-    right: 30px;
-    color: white;
-    font-size: 30px;
-    cursor: pointer;
-}
-
-.prev-btn, .next-btn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    color: white;
-    font-size: 30px;
-    cursor: pointer;
-    z-index: 1010;
-}
-
-.prev-btn {
-    left: 30px;
-}
-
-.next-btn {
-    right: 30px;
-}
-
-/* Loading indicator */
-.loading {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1020;
-    color: white;
-    font-size: 24px;
-}
+.lightbox { display:none; position:fixed; z-index:1000; inset:0; background:rgba(0,0,0,.9); padding:40px; }
+.lightbox-content { display:flex; justify-content:center; align-items:center; height:100%; }
+.lightbox-img { max-width:90%; max-height:90%; object-fit:contain; }
+.lightbox-caption { position:absolute; bottom:60px; width:100%; text-align:center; color:#fff; font-size:1.1rem; padding:10px; }
+.close-lightbox { position:absolute; top:20px; right:30px; color:#fff; font-size:30px; cursor:pointer; }
+.prev-btn, .next-btn { position:absolute; top:50%; transform:translateY(-50%); color:#fff; font-size:30px; cursor:pointer; z-index:1010; }
+.prev-btn { left:30px; } .next-btn { right:30px; }
+.loading { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:1020; color:#fff; font-size:24px; }
 {% endblock %}
 
 {% block content %}
@@ -84,58 +35,86 @@
     SCHOOL GALLERY
 </section>
 
-<section class="gallery-container">
-    {% if images.items %}
-        {% for image in images.items %}
-        <div class="gallery-item">
-            <img src="{{ url_for('get_gallery_image', image_id=image.id) }}"
-                 alt="{{ image.title }}"
-                 data-id="{{ loop.index0 }}"
-                 data-caption="{{ image.caption or image.title or '' }}"
-                 class="gallery-image"
-                 loading="lazy">
-            <div style="text-align: center; margin-top: 5px;">{{ image.title }}</div>
-        </div>
-        {% endfor %}
-
-        <!-- Pagination -->
-        <div class="pagination-container">
-            <div class="pagination">
-                {% if images.has_prev %}
-                    <a href="{{ url_for('gallery', page=images.prev_num) }}" class="page-link">&laquo; Previous</a>
-                {% else %}
-                    <span class="page-link disabled">&laquo; Previous</span>
-                {% endif %}
-
-                {% for page_num in images.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
-                    {% if page_num %}
-                        {% if page_num == images.page %}
-                            <span class="page-link active">{{ page_num }}</span>
-                        {% else %}
-                            <a href="{{ url_for('gallery', page=page_num) }}" class="page-link">{{ page_num }}</a>
-                        {% endif %}
-                    {% else %}
-                        <span class="page-link">...</span>
-                    {% endif %}
+<section class="gallery-section">
+    {% set ns = namespace(i=0) %}
+    {% if squares or three_four or portraits or landscapes %}
+        <div class="gallery-grid">
+            {% if squares %}
+                {% for image in squares %}
+                <div class="gallery-item">
+                    <img src="{{ url_for('get_gallery_image', image_id=image.id) }}"
+                         alt="{{ image.title }}"
+                         data-id="{{ ns.i }}"
+                         data-caption="{{ image.caption or image.title or '' }}"
+                         class="gallery-image"
+                         loading="lazy">
+                </div>
+                {% set ns.i = ns.i + 1 %}
                 {% endfor %}
+            {% endif %}
 
-                {% if images.has_next %}
-                    <a href="{{ url_for('gallery', page=images.next_num) }}" class="page-link">Next &raquo;</a>
-                {% else %}
-                    <span class="page-link disabled">Next &raquo;</span>
-                {% endif %}
-            </div>
-            <div class="page-info">
-                Showing page {{ images.page }} of {{ images.pages }} ({{ images.total }} images total)
-            </div>
+            {% if (squares and (three_four or portraits or landscapes)) %}
+                <div class="gallery-separator"></div>
+            {% endif %}
+
+            {% if three_four %}
+                {% for image in three_four %}
+                <div class="gallery-item">
+                    <img src="{{ url_for('get_gallery_image', image_id=image.id) }}"
+                         alt="{{ image.title }}"
+                         data-id="{{ ns.i }}"
+                         data-caption="{{ image.caption or image.title or '' }}"
+                         class="gallery-image"
+                         loading="lazy">
+                </div>
+                {% set ns.i = ns.i + 1 %}
+                {% endfor %}
+            {% endif %}
+
+            {% if (three_four and (portraits or landscapes)) or (not three_four and squares and (portraits or landscapes)) %}
+                <div class="gallery-separator"></div>
+            {% endif %}
+
+            {% if portraits %}
+                {% for image in portraits %}
+                <div class="gallery-item">
+                    <img src="{{ url_for('get_gallery_image', image_id=image.id) }}"
+                         alt="{{ image.title }}"
+                         data-id="{{ ns.i }}"
+                         data-caption="{{ image.caption or image.title or '' }}"
+                         class="gallery-image"
+                         loading="lazy">
+                </div>
+                {% set ns.i = ns.i + 1 %}
+                {% endfor %}
+            {% endif %}
+
+            {% if (portraits and landscapes) or ((not portraits) and (squares or three_four) and landscapes) %}
+                <div class="gallery-separator"></div>
+            {% endif %}
+
+            {% if landscapes %}
+                {% for image in landscapes %}
+                <div class="gallery-item">
+                    <img src="{{ url_for('get_gallery_image', image_id=image.id) }}"
+                         alt="{{ image.title }}"
+                         data-id="{{ ns.i }}"
+                         data-caption="{{ image.caption or image.title or '' }}"
+                         class="gallery-image"
+                         loading="lazy">
+                </div>
+                {% set ns.i = ns.i + 1 %}
+                {% endfor %}
+            {% endif %}
         </div>
     {% else %}
-        <!-- Default gallery items as placeholders -->
-        {% for i in range(1, 13) %}
-        <div class="gallery-item">
-            <img src="https://via.placeholder.com/300x200.png?text=School+Gallery+Image+{{ i }}" alt="Gallery Image {{ i }}" class="gallery-image" data-id="{{ i-1 }}">
+        <div class="gallery-grid">
+            {% for i in range(1, 13) %}
+            <div class="gallery-item">
+                <img src="https://via.placeholder.com/800x600.png?text=School+Gallery+Image+{{ i }}" alt="Gallery Image {{ i }}" class="gallery-image" data-id="{{ i-1 }}">
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
     {% endif %}
 </section>
 

@@ -114,6 +114,17 @@ def init_db():
                         conn4.execute(_sql_text4("ALTER TABLE teachers ADD COLUMN experience VARCHAR(100)"))
                     if 'subject' not in cols4:
                         conn4.execute(_sql_text4("ALTER TABLE teachers ADD COLUMN subject VARCHAR(100)"))
+            # Gallery migrations: add dimensions and ratio category
+            if 'gallery_images' in tables:
+                cols5 = [c['name'] for c in inspector.get_columns('gallery_images')]
+                from sqlalchemy import text as _sql_text5
+                with db.engine.begin() as conn5:
+                    if 'width' not in cols5:
+                        conn5.execute(_sql_text5("ALTER TABLE gallery_images ADD COLUMN width INTEGER"))
+                    if 'height' not in cols5:
+                        conn5.execute(_sql_text5("ALTER TABLE gallery_images ADD COLUMN height INTEGER"))
+                    if 'ratio_category' not in cols5:
+                        conn5.execute(_sql_text5("ALTER TABLE gallery_images ADD COLUMN ratio_category VARCHAR(20)"))
         except Exception:
             # Ignore migration errors so app can still start; admin page may fail until DB is aligned
             pass
@@ -175,17 +186,9 @@ def teachers():
     settings = SchoolSetting.query.first()
     teachers_list = Teacher.query.order_by(Teacher.order, Teacher.id).all()
 
-    # Robust categorization
-    leadership_titles = {'principal', 'director', 'chairman', 'vice principal', 'head of school'}
-    leadership = []
-    teaching = []
-    for t in teachers_list:
-        ttype = (t.position_type or '').strip().lower()
-        tpos = (t.position or '').strip().lower()
-        if ttype == 'leadership' or tpos in leadership_titles:
-            leadership.append(t)
-        else:
-            teaching.append(t)
+    # Strict categorization by position_type only
+    leadership = [t for t in teachers_list if ((t.position_type or '').strip().lower() == 'leadership')]
+    teaching = [t for t in teachers_list if ((t.position_type or '').strip().lower() == 'teaching')]
 
     return render_template('teachers.html', settings=settings, teachers=teachers_list, leadership=leadership, teaching=teaching)
 
@@ -251,12 +254,43 @@ def achievements():
     return render_template('achievements.html', settings=settings, page=page, items=items)
 
 @app.route('/gallery')
-@app.route('/gallery/page/<int:page>')
-def gallery(page=1):
+def gallery():
     settings = SchoolSetting.query.first()
-    per_page = 12  # Number of images per page
-    images = GalleryImage.query.order_by(GalleryImage.upload_date.desc()).paginate(page=page, per_page=per_page, error_out=False)
-    return render_template('gallery.html', settings=settings, images=images)
+    all_images = GalleryImage.query.order_by(GalleryImage.upload_date.desc()).all()
+
+    # Group by ratio_category; compute on the fly if missing
+    squares = []
+    three_four = []
+    portraits = []
+    landscapes = []
+
+    for img in all_images:
+        cat = getattr(img, 'ratio_category', None)
+        w = getattr(img, 'width', None)
+        h = getattr(img, 'height', None)
+        if not cat and w and h and h != 0:
+            ratio = w / float(h)
+            def approx(a, b, tol=0.05):
+                return abs(a - b) <= tol
+            if approx(ratio, 1.0):
+                cat = 'square'
+            elif approx(ratio, 3/4):
+                cat = 'three_four'
+            elif ratio < 1.0:
+                cat = 'portrait'
+            else:
+                cat = 'landscape'
+
+        if cat == 'square':
+            squares.append(img)
+        elif cat == 'three_four':
+            three_four.append(img)
+        elif cat == 'portrait':
+            portraits.append(img)
+        else:
+            landscapes.append(img)
+
+    return render_template('gallery.html', settings=settings, squares=squares, three_four=three_four, portraits=portraits, landscapes=landscapes)
 
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
@@ -531,6 +565,29 @@ def admin_upload_gallery():
                 # Get the MIME type
                 mimetype = file.content_type or 'image/jpeg'
 
+                # Compute dimensions and ratio category
+                width = None
+                height = None
+                ratio_category = None
+                try:
+                    from PIL import Image
+                    img = Image.open(io.BytesIO(file_data))
+                    width, height = img.size
+                    if width and height:
+                        ratio = width / float(height)
+                        def approx(a, b, tol=0.05):
+                            return abs(a - b) <= tol
+                        if approx(ratio, 1.0):
+                            ratio_category = 'square'
+                        elif approx(ratio, 3/4):
+                            ratio_category = 'three_four'
+                        elif ratio < 1.0:
+                            ratio_category = 'portrait'
+                        else:
+                            ratio_category = 'landscape'
+                except Exception as _e:
+                    ratio_category = None
+
                 # Create a new gallery image entry
                 gallery_image = GalleryImage(
                     title=form.title.data or "Uploaded Image",
@@ -538,7 +595,10 @@ def admin_upload_gallery():
                     image_data=file_data,
                     image_filename=file.filename,
                     image_mimetype=mimetype,
-                    upload_date=datetime.now()
+                    upload_date=datetime.now(),
+                    width=width,
+                    height=height,
+                    ratio_category=ratio_category
                 )
 
                 # Add to database
@@ -841,8 +901,19 @@ def serve_db_file(file_id: int):
 @app.route('/admin/teachers')
 @login_required
 def admin_teachers():
-    teachers_list = Teacher.query.order_by(Teacher.order).all()
-    return render_template('admin/teachers_manage.html', teachers=teachers_list)
+    teachers_list = Teacher.query.order_by(Teacher.order, Teacher.id).all()
+    leadership_keywords = ['principal', 'director', 'chairman', 'vice principal', 'vice-principal', 'head of school', 'headmaster', 'managing director', 'coordinator']
+    leadership = []
+    teaching = []
+    for t in teachers_list:
+        ttype = (t.position_type or '').strip().lower()
+        tpos = (t.position or '').strip().lower()
+        is_leader = (ttype == 'leadership') or any(kw in tpos for kw in leadership_keywords)
+        if is_leader:
+            leadership.append(t)
+        else:
+            teaching.append(t)
+    return render_template('admin/teachers_manage.html', teachers=teachers_list, leadership=leadership, teaching=teaching)
 
 @app.route('/admin/teachers/add', methods=['GET', 'POST'])
 @login_required

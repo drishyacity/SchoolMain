@@ -5,10 +5,11 @@ import logging
 import io
 from werkzeug.utils import secure_filename
 from datetime import datetime
-from PIL import Image
+from PIL import Image, ImageOps
 from database import db
 from models import StoredFile
 from supabase import create_client
+import requests
 
 def allowed_file(filename, allowed_extensions):
     """Check if the file has an allowed extension"""
@@ -69,6 +70,10 @@ def save_file(file, upload_folder, crop_data=None):
 
                     # Get zoom and position data if available
                     zoom = float(crop_info.get('zoom', 1.0))
+                    # Clamp zoom to a sane range to avoid degenerate crops
+                    if not (zoom > 0):
+                        zoom = 1.0
+                    zoom = max(1.0, min(zoom, 6.0))
                     pos_x = float(crop_info.get('posX', 0))
                     pos_y = float(crop_info.get('posY', 0))
 
@@ -76,60 +81,41 @@ def save_file(file, upload_folder, crop_data=None):
                 except Exception as e:
                     logging.error(f"Error parsing crop data: {str(e)}")
 
-            # If cropping data is provided, perform crop to target aspect; otherwise, keep original aspect.
-            if crop_data:
-                # Set target dimensions based on position type per requested layout
-                if position_type == 'leadership':
-                    target_width = 300
-                    target_height = 400
-                else:
-                    target_width = 400
-                    target_height = 400
+            # Simplified robust crop: always produce a 400x400 thumbnail using cover-fit
+            target_width = 400
+            target_height = 400
+            try:
+                img = ImageOps.fit(img, (target_width, target_height), Image.LANCZOS, centering=(0.5, 0.5))
+            except Exception as e:
+                logging.error(f"ImageOps.fit failed: {e}; falling back to basic resize and center-crop")
+                # Fallback: basic resize keeping aspect, then center crop
+                img.thumbnail((max(target_width, target_height)*2, max(target_width, target_height)*2), Image.LANCZOS)
+                w, h = img.size
+                left = max(0, (w - target_width)//2)
+                top = max(0, (h - target_height)//2)
+                img = img.crop((left, top, left+target_width, top+target_height))
 
-                # Apply cropping with user's zoom and position data
-                try:
-                    scaled_width = orig_width * zoom
-                    scaled_height = orig_height * zoom
-                    center_x = (scaled_width / 2) + pos_x
-                    center_y = (scaled_height / 2) + pos_y
-                    crop_left = center_x - (target_width / 2)
-                    crop_top = center_y - (target_height / 2)
-                    crop_right = crop_left + target_width
-                    crop_bottom = crop_top + target_height
-                    orig_crop_left = max(0, min(crop_left / zoom, orig_width))
-                    orig_crop_top = max(0, min(crop_top / zoom, orig_height))
-                    orig_crop_right = max(0, min(crop_right / zoom, orig_width))
-                    orig_crop_bottom = max(0, min(crop_bottom / zoom, orig_height))
-                    img = img.crop((orig_crop_left, orig_crop_top, orig_crop_right, orig_crop_bottom))
-                    logging.info(f"Image cropped from ({orig_crop_left}, {orig_crop_top}) to ({orig_crop_right}, {orig_crop_bottom})")
-                except Exception as crop_error:
-                    logging.error(f"Error in cropping: {str(crop_error)}, using center crop instead")
-                    left = max(0, (orig_width - target_width) // 2)
-                    top = max(0, (orig_height - target_height) // 2)
-                    right = min(orig_width, left + target_width)
-                    bottom = min(orig_height, top + target_height)
-                    img = img.crop((left, top, right, bottom))
-
-                # Resize to exact target dimensions only when cropping
-                img = img.resize((target_width, target_height), Image.LANCZOS)
-            else:
-                # No cropping requested: keep original aspect (already optionally downscaled)
-                logging.info("No crop_data provided; saving image without cropping and preserving aspect ratio")
-
-            # Save the processed image with proper format
-            # Convert to RGB if necessary (for JPEG)
-            if img.mode in ('RGBA', 'LA', 'P'):
-                # Convert to RGB for JPEG compatibility
-                rgb_img = Image.new('RGB', img.size, (255, 255, 255))
-                if img.mode == 'P':
-                    img = img.convert('RGBA')
-                rgb_img.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
-                img = rgb_img
-
-            # Save image to bytes
+            # Save the processed image with proper format while preserving background/transparency
             buf = io.BytesIO()
             # Choose format based on original extension
             save_format = 'JPEG' if filename.lower().endswith(('.jpg', '.jpeg')) else 'PNG'
+            if save_format == 'JPEG':
+                # JPEG does not support transparency; flatten only for JPEG
+                if img.mode in ('RGBA', 'LA', 'P'):
+                    if img.mode == 'P':
+                        img = img.convert('RGBA')
+                    bg = Image.new('RGB', img.size, (255, 255, 255))
+                    # Use alpha as mask if present
+                    alpha_src = img.split()[-1] if img.mode in ('RGBA', 'LA') else None
+                    bg.paste(img, mask=alpha_src)
+                    img = bg
+                elif img.mode != 'RGB':
+                    img = img.convert('RGB')
+            else:
+                # PNG supports transparency; keep as-is. Convert palette to RGBA to preserve alpha correctly.
+                if img.mode == 'P':
+                    img = img.convert('RGBA')
+
             img.save(buf, save_format, quality=95, optimize=True)
             file_bytes = buf.getvalue()
             logging.info(f"Image processed and buffered successfully ({target_width}x{target_height}), {len(file_bytes)} bytes")
@@ -169,14 +155,37 @@ def save_file(file, upload_folder, crop_data=None):
         }
     )
     public_url = client.storage.from_(bucket).get_public_url(object_path)
-    if isinstance(public_url, dict):
-        data = public_url.get('data') if hasattr(public_url, 'get') else None
-        if isinstance(data, dict) and 'publicUrl' in data:
-            return data['publicUrl']
-        # some versions may return {'publicUrl': '...'}
-        if 'publicUrl' in public_url:
-            return public_url['publicUrl']
-    return str(public_url)
+    # Normalize to string URL
+    url_str = None
+    try:
+        if isinstance(public_url, dict):
+            data = public_url.get('data') if hasattr(public_url, 'get') else None
+            if isinstance(data, dict) and 'publicUrl' in data:
+                url_str = data['publicUrl']
+            elif 'publicUrl' in public_url:
+                url_str = public_url['publicUrl']
+        if not url_str:
+            url_str = str(public_url)
+    except Exception:
+        url_str = str(public_url)
+
+    # Validate URL is reachable; fallback to DB storage if not
+    try:
+        resp = requests.head(url_str, timeout=5)
+        if resp.status_code >= 200 and resp.status_code < 400:
+            return url_str
+        # Try GET as some providers don't support HEAD
+        resp = requests.get(url_str, stream=True, timeout=8)
+        if resp.status_code >= 200 and resp.status_code < 400:
+            return url_str
+        logging.warning(f"Supabase public URL not reachable (status {resp.status_code}); falling back to DB storage")
+    except Exception as e:
+        logging.warning(f"Error validating public URL: {e}; falling back to DB storage")
+
+    stored = StoredFile(filename=unique_filename, mimetype=mimetype, data=file_bytes)
+    db.session.add(stored)
+    db.session.commit()
+    return f"/files/{stored.id}"
 
 def delete_storage_url(url: str):
     try:

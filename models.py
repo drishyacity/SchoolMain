@@ -66,6 +66,9 @@ class GalleryImage(db.Model):
     image_filename = Column(String(255), nullable=False)  # Store the original filename
     image_mimetype = Column(String(50), nullable=False)   # Store the MIME type
     upload_date = Column(DateTime, default=datetime.now)
+    width = Column(Integer, nullable=True)
+    height = Column(Integer, nullable=True)
+    ratio_category = Column(String(20), nullable=True)  # 'square', 'three_four', 'portrait', 'landscape'
 
     def __repr__(self):
         return f'<GalleryImage {self.id}>'
