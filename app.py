@@ -5,6 +5,9 @@ except Exception:
     load_dotenv = None
     find_dotenv = None
 import io
+import smtplib
+from email.mime.text import MIMEText
+from email.utils import formataddr
 import json
 import logging
 from datetime import datetime, timedelta
@@ -65,6 +68,39 @@ from models import User, News, Event, GalleryImage, Contact, AboutSection, Acade
 from forms import LoginForm, NewsForm, EventForm, GalleryUploadForm, ContactForm, AboutSectionForm, AcademicProgramForm, \
     SchoolSettingsForm, UserForm, ProfileForm, TeacherForm, FacilityForm, SyllabusForm, AdmissionApplicationForm, HomeSliderForm, AdmissionResponseForm, AdmissionInfoForm, AchievementsForm, AchievementsItemForm, AdmissionFormFieldForm
 from utils import allowed_file, save_file, delete_storage_url
+
+# Email (SMTP) configuration for Zoho
+MAIL_HOST = os.environ.get('SMTP_HOST', 'smtp.zoho.com')
+MAIL_PORT = int(os.environ.get('SMTP_PORT', '587'))
+MAIL_USER = os.environ.get('SMTP_USER', 'priyvart@zohomail.in')
+MAIL_PASS = os.environ.get('SMTP_PASS', '1316Mp@1')
+MAIL_FROM_NAME = os.environ.get('SMTP_FROM_NAME', 'School Website')
+MAIL_FROM = MAIL_USER
+OWNER_EMAIL = os.environ.get('OWNER_EMAIL', 'thevirajdeveloper@gmail.com')
+
+def send_email(to_email: str, subject: str, body: str, reply_to: str | None = None):
+    msg = MIMEText(body, 'plain', 'utf-8')
+    msg['Subject'] = subject
+    msg['From'] = formataddr((MAIL_FROM_NAME, MAIL_FROM))
+    msg['To'] = to_email
+    if reply_to:
+        msg['Reply-To'] = reply_to
+
+    with smtplib.SMTP(MAIL_HOST, MAIL_PORT, timeout=30) as server:
+        server.starttls()
+        server.login(MAIL_USER, MAIL_PASS)
+        server.sendmail(MAIL_FROM, [to_email], msg.as_string())
+
+def try_send_owner_and_user(owner_subj: str, owner_body: str, user_email: str, user_subj: str, user_body: str, reply_to: str | None = None) -> bool:
+    try:
+        # Send to site owner
+        send_email(OWNER_EMAIL, owner_subj, owner_body, reply_to=reply_to)
+        # Confirmation to user
+        send_email(user_email, user_subj, user_body, reply_to=reply_to)
+        return True
+    except Exception as e:
+        logger.error(f"Email send failed: {e}")
+        return False
 
 # Ensure tables exist and run lightweight migrations at import time (serverless-safe)
 try:
@@ -257,10 +293,39 @@ def admission():
     form = AdmissionApplicationForm()
 
     if form.validate_on_submit():
+        # Prepare emails first
+        user_email = form.email.data
+        owner_subject = "New Admission Application Received"
+        owner_body = (
+            f"A new admission application has been submitted.\n\n"
+            f"Student Name: {form.student_name.data}\n"
+            f"Parent/Guardian: {form.parent_name.data}\n"
+            f"Email: {user_email}\n"
+            f"Phone: {form.phone.data}\n"
+            f"Class Applying For: {form.class_applying.data}\n"
+            f"Previous School: {form.previous_school.data or '-'}\n"
+            f"Date of Birth: {form.date_of_birth.data}\n"
+            f"Address: {form.address.data}\n"
+        )
+        user_subject = "Your Admission Application Submission"
+        user_body = (
+            f"Dear {form.parent_name.data},\n\n"
+            f"Thank you for submitting the admission application for {form.student_name.data}."
+            f" We have received your details and will review them shortly.\n\n"
+            f"Regards,\n{(SchoolSetting.query.first().school_name if SchoolSetting.query.first() else 'School')}"
+        )
+
+        if not try_send_owner_and_user(owner_subject, owner_body, user_email, user_subject, user_body, reply_to=user_email):
+            flash('Unable to send confirmation email. Please check the email address and try again.', 'danger')
+            return render_template('admission.html', settings=settings, form=form, admission_info=admission_info,
+                                   eligibility_items=eligibility_items, document_items=document_items, date_items=date_items,
+                                   form_fields=form_fields, field_map=field_map)
+
+        # Only save to DB after emails succeed
         admission_application = AdmissionForm(
             student_name=form.student_name.data,
             parent_name=form.parent_name.data,
-            email=form.email.data,
+            email=user_email,
             phone=form.phone.data,
             address=form.address.data,
             class_applying=form.class_applying.data,
@@ -338,9 +403,32 @@ def contact():
     contact_info = Contact.query.first()
 
     if form.validate_on_submit():
+        # Prepare emails first
+        user_email = form.email.data
+        owner_subject = f"New Contact Message: {form.subject.data or 'No Subject'}"
+        owner_body = (
+            f"You have received a new contact message from the website.\n\n"
+            f"Name: {form.name.data}\n"
+            f"Email: {user_email}\n"
+            f"Phone: {form.phone.data or '-'}\n"
+            f"Subject: {form.subject.data or '-'}\n"
+            f"Message:\n{form.message.data}\n"
+        )
+        user_subject = "We received your message"
+        user_body = (
+            f"Dear {form.name.data},\n\n"
+            f"Thank you for contacting us. We have received your message and will get back to you soon.\n\n"
+            f"Regards,\n{(SchoolSetting.query.first().school_name if SchoolSetting.query.first() else 'School')}"
+        )
+
+        if not try_send_owner_and_user(owner_subject, owner_body, user_email, user_subject, user_body, reply_to=user_email):
+            flash('Invalid email or email sending failed. Please provide a valid email address.', 'danger')
+            return render_template('contact.html', settings=settings, form=form, contact_info=contact_info)
+
+        # Only save to DB after emails succeed
         new_contact = Contact(
             name=form.name.data,
-            email=form.email.data,
+            email=user_email,
             phone=form.phone.data,
             subject=form.subject.data,
             message=form.message.data
