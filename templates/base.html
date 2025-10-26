@@ -4,6 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Shree Gyan Bharti High School{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}A nurturing learning environment at Shree Gyan Bharti High School with academics, admissions, events, and more.{% endblock %}">
+    <meta name="robots" content="{% block meta_robots %}index,follow{% endblock %}">
+    {% if gsc_verification %}<meta name="google-site-verification" content="{{ gsc_verification }}">{% endif %}
+    <link rel="canonical" href="{{ absolute_url(request.path) }}">
+    <meta property="og:type" content="{% block meta_type %}website{% endblock %}">
+    <meta property="og:url" content="{{ absolute_url(request.path) }}">
+    <meta property="og:title" content="{% block og_title %}{% block page_title %}Shree Gyan Bharti High School{% endblock %}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{% block og_desc %}{{ self.meta_description() }}{% endblock %}{% endblock %}">
+    {% block og_image %}{% endblock %}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{% block twitter_title %}{{ self.page_title() }}{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}{{ self.meta_description() }}{% endblock %}">
+    {% block twitter_image %}{% endblock %}
+    <link rel="icon" href="{{ url_for('favicon') }}" sizes="any">
+    <link rel="icon" type="image/png" href="{{ url_for('favicon') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('favicon') }}">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <!-- Custom CSS -->
@@ -12,6 +28,27 @@
     <style>
         {% block inline_css %}{% endblock %}
     </style>
+    {% block structured_data %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "EducationalOrganization",
+      "name": "{{ (settings.school_name if settings is defined and settings) or 'Shree Gyan Bharti High School' }}",
+      "url": "{{ absolute_url('/') }}",
+      "address": "{{ (settings.school_address if settings is defined and settings) or '' }}",
+      "telephone": "{{ (settings.school_phone if settings is defined and settings) or '' }}"
+    }
+    </script>
+    {% endblock %}
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZNP5F1LYVD"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);} 
+      gtag('js', new Date());
+
+      gtag('config', 'G-ZNP5F1LYVD');
+    </script>
 </head>
 <body>
     {% include 'includes/header.html' %}

@@ -1,6 +1,14 @@
 {% extends 'base.html' %}
 
 {% block title %}{{ news.title }} - {{ settings.school_name if settings else 'Shree Gyan Bharti High School' }}{% endblock %}
+{% block page_title %}{{ news.title }} - {{ settings.school_name if settings else 'Shree Gyan Bharti High School' }}{% endblock %}
+{% block meta_description %}{{ (news.content|striptags)[:155] }}{% endblock %}
+{% block og_image %}
+{% if news.image_path %}
+<meta property="og:image" content="{{ absolute_url(news.image_path) }}">
+<meta name="twitter:image" content="{{ absolute_url(news.image_path) }}">
+{% endif %}
+{% endblock %}
 
 {% block inline_css %}
 .news-detail-header {

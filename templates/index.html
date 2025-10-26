@@ -1,6 +1,14 @@
 {% extends 'base.html' %}
 
 {% block title %}Home - {{ settings.school_name if settings else 'Shree Gyan Bharti High School' }}{% endblock %}
+{% block page_title %}Home - {{ settings.school_name if settings else 'Shree Gyan Bharti High School' }}{% endblock %}
+{% block meta_description %}Welcome to {{ settings.school_name if settings else 'Shree Gyan Bharti High School' }}. Explore admissions, academics, news, events, teachers, facilities, syllabus, and gallery.{% endblock %}
+{% block og_image %}
+{% if home_sliders and home_sliders|length > 0 and home_sliders[0].image_path %}
+<meta property="og:image" content="{{ absolute_url(home_sliders[0].image_path) }}">
+<meta name="twitter:image" content="{{ absolute_url(home_sliders[0].image_path) }}">
+{% endif %}
+{% endblock %}
 
 {% block inline_css %}
 /* Hero Section */
@@ -30,12 +38,17 @@
 .slide {
     min-width: 100%;
     height: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
 }
 
 .slide img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: fill;
 }
 
 .slider-nav {
@@ -185,53 +198,53 @@
 </section>
 
 <section class="cards">
-    <div class="card" onclick="window.location.href='{{ url_for("news") }}'">
+    <a class="card" href="{{ url_for('news') }}">
         <h3>LATEST NEWS</h3>
         <p>Stay updated with our school's latest announcements and achievements.</p>
-        <a href="{{ url_for('news') }}">READ MORE</a>
-    </div>
+        <span>READ MORE</span>
+    </a>
 
-    <div class="card" onclick="window.location.href='{{ url_for("events") }}'">
+    <a class="card" href="{{ url_for('events') }}">
         <h3>UPCOMING EVENTS</h3>
         <p>Check out our calendar for sports days, annual functions, and more.</p>
-        <a href="{{ url_for('events') }}">READ MORE</a>
-    </div>
+        <span>READ MORE</span>
+    </a>
     
-    <div class="card" onclick="window.location.href='{{ url_for("achievements") }}'">
+    <a class="card" href="{{ url_for('achievements') }}">
         <h3>OUR ACHIEVEMENTS</h3>
         <p>Celebrating our students' excellence in academics and extracurriculars.</p>
-        <a href="{{ url_for('achievements') }}">READ MORE</a>
-    </div>
+        <span>READ MORE</span>
+    </a>
 
-    <div class="card" onclick="window.location.href='{{ url_for("admission") }}'">
+    <a class="card" href="{{ url_for('admission') }}">
         <h3>ADMISSIONS</h3>
         <p>Learn about our admission process, requirements and important dates.</p>
-        <a href="{{ url_for('admission') }}">READ MORE</a>
-    </div>
+        <span>READ MORE</span>
+    </a>
 
-    <div class="card" onclick="window.location.href='{{ url_for("syllabus") }}'">
+    <a class="card" href="{{ url_for('syllabus') }}">
         <h3>SYLLABUS</h3>
         <p>Explore our comprehensive curriculum for all classes and subjects.</p>
-        <a href="{{ url_for('syllabus') }}">READ MORE</a>
-    </div>
+        <span>READ MORE</span>
+    </a>
 
-    <div class="card" onclick="window.location.href='{{ url_for("gallery") }}'">
+    <a class="card" href="{{ url_for('gallery') }}">
         <h3>GALLERY</h3>
         <p>Explore our school through photos of events, activities and facilities.</p>
-        <a href="{{ url_for('gallery') }}">READ MORE</a>
-    </div>
+        <span>READ MORE</span>
+    </a>
 
-    <div class="card" onclick="window.location.href='{{ url_for("teachers") }}'">
+    <a class="card" href="{{ url_for('teachers') }}">
         <h3>TEACHERS</h3>
         <p>Meet our dedicated faculty and learn about their qualifications.</p>
-        <a href="{{ url_for('teachers') }}">READ MORE</a>
-    </div>
+        <span>READ MORE</span>
+    </a>
 
-    <div class="card" onclick="window.location.href='{{ url_for("facilities") }}'">
+    <a class="card" href="{{ url_for('facilities') }}">
         <h3>FACILITIES</h3>
         <p>Discover our state-of-the-art infrastructure and learning resources.</p>
-        <a href="{{ url_for('facilities') }}">READ MORE</a>
-    </div>
+        <span>READ MORE</span>
+    </a>
 </section>
 
 <script>

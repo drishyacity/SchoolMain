@@ -16,7 +16,7 @@ def allowed_file(filename, allowed_extensions):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in allowed_extensions
 
-def save_file(file, upload_folder, crop_data=None):
+def save_file(file, upload_folder, crop_data=None, no_crop: bool = False):
     """
     Save an uploaded file and return the filename
     Process images with simple cropping if crop_data is provided
@@ -81,19 +81,32 @@ def save_file(file, upload_folder, crop_data=None):
                 except Exception as e:
                     logging.error(f"Error parsing crop data: {str(e)}")
 
-            # Simplified robust crop: always produce a 400x400 thumbnail using cover-fit
-            target_width = 400
-            target_height = 400
-            try:
-                img = ImageOps.fit(img, (target_width, target_height), Image.LANCZOS, centering=(0.5, 0.5))
-            except Exception as e:
-                logging.error(f"ImageOps.fit failed: {e}; falling back to basic resize and center-crop")
-                # Fallback: basic resize keeping aspect, then center crop
-                img.thumbnail((max(target_width, target_height)*2, max(target_width, target_height)*2), Image.LANCZOS)
-                w, h = img.size
-                left = max(0, (w - target_width)//2)
-                top = max(0, (h - target_height)//2)
-                img = img.crop((left, top, left+target_width, top+target_height))
+            if not no_crop:
+                # Simplified robust crop: always produce a 400x400 thumbnail using cover-fit
+                target_width = 400
+                target_height = 400
+                try:
+                    img = ImageOps.fit(img, (target_width, target_height), Image.LANCZOS, centering=(0.5, 0.5))
+                except Exception as e:
+                    logging.error(f"ImageOps.fit failed: {e}; falling back to basic resize and center-crop")
+                    # Fallback: basic resize keeping aspect, then center crop
+                    img.thumbnail((max(target_width, target_height)*2, max(target_width, target_height)*2), Image.LANCZOS)
+                    w, h = img.size
+                    left = max(0, (w - target_width)//2)
+                    top = max(0, (h - target_height)//2)
+                    img = img.crop((left, top, left+target_width, top+target_height))
+            else:
+                # No crop: keep aspect ratio; optionally downscale very large images further for web
+                try:
+                    max_display_width = 1920
+                    max_display_height = 1080
+                    w, h = img.size
+                    scale = min(max_display_width / float(w), max_display_height / float(h), 1.0)
+                    if scale < 1.0:
+                        new_size = (int(w * scale), int(h * scale))
+                        img = img.resize(new_size, Image.LANCZOS)
+                except Exception as e:
+                    logging.warning(f"No-crop resize failed: {e}; keeping original processed size {img.size}")
 
             # Save the processed image with proper format while preserving background/transparency
             buf = io.BytesIO()

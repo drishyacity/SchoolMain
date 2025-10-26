@@ -47,6 +47,7 @@ database.init_app(app)
 app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'uploads')
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif', 'svg'}
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max upload size
+app.config['BASE_URL'] = os.environ.get('BASE_URL', '').rstrip('/')
 
 # Do not create folders on serverless (read-only) environments like Vercel
 # Only create locally when not running on Vercel
@@ -226,6 +227,109 @@ def init_db():
             db.session.add(settings)
             db.session.commit()
 
+# URL helpers and SEO endpoints
+def _get_base_url():
+    if app.config.get('BASE_URL'):
+        return app.config['BASE_URL']
+    try:
+        return request.url_root[:-1]
+    except Exception:
+        return ''
+
+def absolute_url(path_or_url: str) -> str:
+    if not path_or_url:
+        return _get_base_url()
+    if path_or_url.startswith('http://') or path_or_url.startswith('https://'):
+        return path_or_url
+    if not path_or_url.startswith('/'):
+        path_or_url = '/' + path_or_url
+    base = _get_base_url()
+    return f"{base}{path_or_url}" if base else path_or_url
+
+@app.context_processor
+def inject_seo_helpers():
+    return {
+        'base_url': _get_base_url(),
+        'absolute_url': absolute_url,
+        'gsc_verification': os.environ.get('GOOGLE_SITE_VERIFICATION', ''),
+    }
+
+@app.route('/robots.txt')
+def robots_txt():
+    lines = [
+        "User-agent: *",
+        "Allow: /",
+        f"Sitemap: {absolute_url('/sitemap.xml')}"
+    ]
+    return "\n".join(lines), 200, {'Content-Type': 'text/plain; charset=utf-8'}
+
+@app.route('/favicon.ico')
+def favicon():
+    try:
+        path = os.path.join(app.root_path, 'generated-icon.png')
+        return send_file(path, mimetype='image/png')
+    except Exception:
+        abort(404)
+
+@app.route('/google407186ce9bec61a5.html')
+def google_site_verification():
+    return "google-site-verification: google407186ce9bec61a5.html", 200, {'Content-Type': 'text/plain; charset=utf-8'}
+
+@app.route('/sitemap.xml')
+def sitemap_xml():
+    try:
+        urls = []
+        now_iso = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+        static_paths = [
+            ('/', 'daily', '1.0', now_iso),
+            ('/about', 'monthly', '0.6', now_iso),
+            ('/academics', 'weekly', '0.7', now_iso),
+            ('/teachers', 'weekly', '0.6', now_iso),
+            ('/facilities', 'monthly', '0.5', now_iso),
+            ('/syllabus', 'monthly', '0.6', now_iso),
+            ('/admission', 'weekly', '0.8', now_iso),
+            ('/events', 'daily', '0.7', now_iso),
+            ('/gallery', 'weekly', '0.5', now_iso),
+            ('/contact', 'yearly', '0.5', now_iso),
+            ('/news', 'daily', '0.7', now_iso),
+        ]
+        for path, freq, prio, lm in static_paths:
+            urls.append((absolute_url(path), lm, freq, prio))
+
+        try:
+            news_items = News.query.order_by(News.date.desc()).all()
+            for n in news_items:
+                loc = absolute_url(url_for('news_detail', news_id=n.id))
+                lastmod = (n.date or datetime.utcnow()).strftime('%Y-%m-%dT%H:%M:%SZ')
+                urls.append((loc, lastmod, 'weekly', '0.6'))
+        except Exception:
+            pass
+
+        try:
+            upcoming = Event.query.order_by(Event.date.desc()).all()
+            for e in upcoming:
+                loc = absolute_url('/events')
+                lastmod = (e.date or datetime.utcnow()).strftime('%Y-%m-%dT%H:%M:%SZ')
+                urls.append((loc, lastmod, 'daily', '0.6'))
+        except Exception:
+            pass
+
+        parts = [
+            '<?xml version="1.0" encoding="UTF-8"?>',
+            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+        ]
+        for loc, lastmod, changefreq, priority in urls:
+            parts.append('<url>')
+            parts.append(f'<loc>{loc}</loc>')
+            parts.append(f'<lastmod>{lastmod}</lastmod>')
+            parts.append(f'<changefreq>{changefreq}</changefreq>')
+            parts.append(f'<priority>{priority}</priority>')
+            parts.append('</url>')
+        parts.append('</urlset>')
+        xml = "".join(parts)
+        return xml, 200, {'Content-Type': 'application/xml; charset=utf-8'}
+    except Exception:
+        abort(500)
 # Frontend routes
 @app.route('/')
 def index():
@@ -1762,7 +1866,7 @@ def admin_add_home_slider():
         image_path = None
         if form.image.data:
             if allowed_file(form.image.data.filename, app.config['ALLOWED_EXTENSIONS']):
-                image_path = save_file(form.image.data, app.config['UPLOAD_FOLDER'])
+                image_path = save_file(form.image.data, app.config['UPLOAD_FOLDER'], no_crop=True)
             else:
                 flash('Invalid file format. Allowed formats: png, jpg, jpeg, gif', 'danger')
                 return render_template('admin/home_slider_form.html', form=form, title="Add Slider Image")
@@ -1808,7 +1912,7 @@ def admin_edit_home_slider(id):
                     if os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], slider.image_path)):
                         os.remove(os.path.join(app.config['UPLOAD_FOLDER'], slider.image_path))
 
-                slider.image_path = save_file(form.image.data, app.config['UPLOAD_FOLDER'])
+                slider.image_path = save_file(form.image.data, app.config['UPLOAD_FOLDER'], no_crop=True)
             else:
                 flash('Invalid file format. Allowed formats: png, jpg, jpeg, gif', 'danger')
                 return render_template('admin/home_slider_form.html', form=form, title="Edit Slider Image")
