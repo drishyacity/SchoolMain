@@ -69,6 +69,7 @@ class GalleryImage(db.Model):
     width = Column(Integer, nullable=True)
     height = Column(Integer, nullable=True)
     ratio_category = Column(String(20), nullable=True)  # 'square', 'three_four', 'portrait', 'landscape'
+    display_order = Column(Integer, nullable=True)
 
     def __repr__(self):
         return f'<GalleryImage {self.id}>'
@@ -211,6 +212,7 @@ class SchoolSetting(db.Model):
     social_twitter_url = Column(String(255), nullable=True)
     social_instagram_url = Column(String(255), nullable=True)
     social_linkedin_url = Column(String(255), nullable=True)
+    gallery_category_order = Column(Text, nullable=True)  # comma-separated e.g. "square,three_four,portrait,landscape"
 
     def __repr__(self):
         return f'<SchoolSetting {self.school_name}>'

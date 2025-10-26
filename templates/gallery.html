@@ -12,7 +12,7 @@
 .gallery-grid { column-gap: 16px; }
 .gallery-grid img { width: 100%; height: auto; display: block; border-radius: 8px; margin: 0 0 16px; }
 .gallery-grid .gallery-item { break-inside: avoid; -webkit-column-break-inside: avoid; -moz-column-break-inside: avoid; }
-.gallery-separator { height: 1px; background: #e5e7eb; margin: 8px 0 20px; }
+.gallery-separator { height: 0; border-top: 2px solid #e5e7eb; margin: 16px 0 24px; column-span: all; -webkit-column-span: all; }
 
 /* Columns per breakpoint (adjust per category) */
 @media (min-width: 320px) { .gallery-grid { columns: 2; } }
@@ -37,76 +37,25 @@
 
 <section class="gallery-section">
     {% set ns = namespace(i=0) %}
-    {% if squares or three_four or portraits or landscapes %}
+    {% if groups %}
+        {% for group_name, images in groups %}
         <div class="gallery-grid">
-            {% if squares %}
-                {% for image in squares %}
-                <div class="gallery-item">
-                    <img src="{{ url_for('get_gallery_image', image_id=image.id) }}"
-                         alt="{{ image.title }}"
-                         data-id="{{ ns.i }}"
-                         data-caption="{{ image.caption or image.title or '' }}"
-                         class="gallery-image"
-                         loading="lazy">
-                </div>
-                {% set ns.i = ns.i + 1 %}
-                {% endfor %}
-            {% endif %}
-
-            {% if (squares and (three_four or portraits or landscapes)) %}
-                <div class="gallery-separator"></div>
-            {% endif %}
-
-            {% if three_four %}
-                {% for image in three_four %}
-                <div class="gallery-item">
-                    <img src="{{ url_for('get_gallery_image', image_id=image.id) }}"
-                         alt="{{ image.title }}"
-                         data-id="{{ ns.i }}"
-                         data-caption="{{ image.caption or image.title or '' }}"
-                         class="gallery-image"
-                         loading="lazy">
-                </div>
-                {% set ns.i = ns.i + 1 %}
-                {% endfor %}
-            {% endif %}
-
-            {% if (three_four and (portraits or landscapes)) or (not three_four and squares and (portraits or landscapes)) %}
-                <div class="gallery-separator"></div>
-            {% endif %}
-
-            {% if portraits %}
-                {% for image in portraits %}
-                <div class="gallery-item">
-                    <img src="{{ url_for('get_gallery_image', image_id=image.id) }}"
-                         alt="{{ image.title }}"
-                         data-id="{{ ns.i }}"
-                         data-caption="{{ image.caption or image.title or '' }}"
-                         class="gallery-image"
-                         loading="lazy">
-                </div>
-                {% set ns.i = ns.i + 1 %}
-                {% endfor %}
-            {% endif %}
-
-            {% if (portraits and landscapes) or ((not portraits) and (squares or three_four) and landscapes) %}
-                <div class="gallery-separator"></div>
-            {% endif %}
-
-            {% if landscapes %}
-                {% for image in landscapes %}
-                <div class="gallery-item">
-                    <img src="{{ url_for('get_gallery_image', image_id=image.id) }}"
-                         alt="{{ image.title }}"
-                         data-id="{{ ns.i }}"
-                         data-caption="{{ image.caption or image.title or '' }}"
-                         class="gallery-image"
-                         loading="lazy">
-                </div>
-                {% set ns.i = ns.i + 1 %}
-                {% endfor %}
-            {% endif %}
+            {% for image in images %}
+            <div class="gallery-item">
+                <img src="{{ url_for('get_gallery_image', image_id=image.id) }}"
+                     alt="{{ image.title }}"
+                     data-id="{{ ns.i }}"
+                     data-caption="{{ image.caption or image.title or '' }}"
+                     class="gallery-image"
+                     loading="lazy">
+            </div>
+            {% set ns.i = ns.i + 1 %}
+            {% endfor %}
         </div>
+        {% if not loop.last %}
+        <hr class="gallery-separator">
+        {% endif %}
+        {% endfor %}
     {% else %}
         <div class="gallery-grid">
             {% for i in range(1, 13) %}

@@ -133,6 +133,8 @@
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     transition: transform 0.3s, box-shadow 0.3s;
     cursor: pointer;
+    text-decoration: none;
+    color: inherit;
 }
 
 .card:hover {
@@ -156,11 +158,19 @@
     margin-bottom: 10px;
 }
 
-.card a {
+.card:link,
+.card:visited,
+.card:hover,
+.card:active {
     text-decoration: none;
+    color: inherit;
+}
+
+.card span {
     color: #0c2d57;
     font-weight: bold;
     display: block;
+    text-decoration: none;
 }
 {% endblock %}
 

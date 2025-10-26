@@ -194,6 +194,8 @@ def init_db():
                         conn5.execute(_sql_text5("ALTER TABLE gallery_images ADD COLUMN height INTEGER"))
                     if 'ratio_category' not in cols5:
                         conn5.execute(_sql_text5("ALTER TABLE gallery_images ADD COLUMN ratio_category VARCHAR(20)"))
+                    if 'display_order' not in cols5:
+                        conn5.execute(_sql_text5("ALTER TABLE gallery_images ADD COLUMN display_order INTEGER"))
             # Contacts migration: add phone column
             if 'contacts' in tables:
                 cols6 = [c['name'] for c in inspector.get_columns('contacts')]
@@ -201,6 +203,13 @@ def init_db():
                 with db.engine.begin() as conn6:
                     if 'phone' not in cols6:
                         conn6.execute(_sql_text6("ALTER TABLE contacts ADD COLUMN phone VARCHAR(20)"))
+            # School settings migration: add gallery_category_order
+            if 'school_settings' in tables:
+                cols7 = [c['name'] for c in inspector.get_columns('school_settings')]
+                from sqlalchemy import text as _sql_text7
+                with db.engine.begin() as conn7:
+                    if 'gallery_category_order' not in cols7:
+                        conn7.execute(_sql_text7("ALTER TABLE school_settings ADD COLUMN gallery_category_order TEXT"))
         except Exception:
             # Ignore migration errors so app can still start; admin page may fail until DB is aligned
             pass
@@ -464,7 +473,7 @@ def achievements():
 @app.route('/gallery')
 def gallery():
     settings = SchoolSetting.query.first()
-    all_images = GalleryImage.query.order_by(GalleryImage.upload_date.desc()).all()
+    all_images = GalleryImage.query.order_by(db.func.coalesce(GalleryImage.display_order, 999999), GalleryImage.upload_date.desc()).all()
 
     # Group by ratio_category; compute on the fly if missing
     squares = []
@@ -498,7 +507,33 @@ def gallery():
         else:
             landscapes.append(img)
 
-    return render_template('gallery.html', settings=settings, squares=squares, three_four=three_four, portraits=portraits, landscapes=landscapes)
+    # Explicitly sort inside each category by display_order (NULLs last) then upload_date desc
+    def _sort_key(im):
+        return ((im.display_order is None, im.display_order or 999999), im.upload_date and -int(im.upload_date.timestamp()))
+    squares.sort(key=_sort_key)
+    three_four.sort(key=_sort_key)
+    portraits.sort(key=_sort_key)
+    landscapes.sort(key=_sort_key)
+
+    # Determine category order from settings or default
+    default_order = ['square', 'three_four', 'portrait', 'landscape']
+    raw_order = (settings.gallery_category_order.split(',') if (settings and settings.gallery_category_order) else default_order)
+    order_clean = [c.strip() for c in raw_order if c and c.strip() in {'square','three_four','portrait','landscape'}]
+    seen = set()
+    category_order = [c for c in order_clean if not (c in seen or seen.add(c))]  # de-dup while preserving order
+    for c in default_order:
+        if c not in category_order:
+            category_order.append(c)
+
+    buckets = {
+        'square': squares,
+        'three_four': three_four,
+        'portrait': portraits,
+        'landscape': landscapes,
+    }
+    groups = [(name, buckets.get(name, [])) for name in category_order if buckets.get(name) and len(buckets.get(name)) > 0]
+
+    return render_template('gallery.html', settings=settings, groups=groups)
 
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
@@ -774,12 +809,160 @@ def admin_delete_event(id):
 
 # Gallery Management
 @app.route('/admin/gallery')
-@app.route('/admin/gallery/page/<int:page>')
 @login_required
-def admin_gallery(page=1):
-    per_page = 16  # Number of images per page
-    images = GalleryImage.query.order_by(GalleryImage.upload_date.desc()).paginate(page=page, per_page=per_page, error_out=False)
-    return render_template('admin/gallery_manage.html', images=images)
+def admin_gallery():
+    settings = SchoolSetting.query.first()
+    all_images = GalleryImage.query.order_by(db.func.coalesce(GalleryImage.display_order, 999999), GalleryImage.upload_date.desc()).all()
+    # Bucket by category, compute if missing
+    buckets = { 'square': [], 'three_four': [], 'portrait': [], 'landscape': [] }
+    def _cat_for(img):
+        cat = getattr(img, 'ratio_category', None)
+        w = getattr(img, 'width', None)
+        h = getattr(img, 'height', None)
+        if not cat and w and h and h != 0:
+            ratio = w / float(h)
+            def approx(a, b, tol=0.05):
+                return abs(a - b) <= tol
+            if approx(ratio, 1.0):
+                return 'square'
+            elif approx(ratio, 3/4):
+                return 'three_four'
+            elif ratio < 1.0:
+                return 'portrait'
+            else:
+                return 'landscape'
+        return cat or 'landscape'
+    for img in all_images:
+        buckets[_cat_for(img)].append(img)
+    # Sort within buckets by display_order then upload_date desc
+    def _sort_key(im):
+        return ((im.display_order is None, im.display_order or 999999), im.upload_date and -int(im.upload_date.timestamp()))
+    for k in buckets:
+        buckets[k].sort(key=_sort_key)
+    # Order of categories
+    default_order = ['square', 'three_four', 'portrait', 'landscape']
+    raw = (settings.gallery_category_order.split(',') if (settings and settings.gallery_category_order) else default_order)
+    order_clean = [c.strip() for c in raw if c and c.strip() in {'square','three_four','portrait','landscape'}]
+    seen = set()
+    category_order = [c for c in order_clean if not (c in seen or seen.add(c))]
+    for c in default_order:
+        if c not in category_order:
+            category_order.append(c)
+    groups = [(name, buckets[name]) for name in category_order if buckets[name]]
+    return render_template('admin/gallery_manage.html', groups=groups, settings=settings)
+
+@app.route('/admin/gallery/reorder', methods=['POST'])
+@login_required
+def admin_reorder_gallery():
+    try:
+        data = request.get_json(silent=True) or {}
+        ordered_ids = data.get('ordered_ids') or []
+        if not isinstance(ordered_ids, list) or not all(isinstance(i, int) for i in ordered_ids):
+            return jsonify({"ok": False, "error": "ordered_ids must be a list of integers"}), 400
+        # Assign display_order sequentially starting at 1
+        order_val = 1
+        for img_id in ordered_ids:
+            img = GalleryImage.query.get(img_id)
+            if img:
+                img.display_order = order_val
+                order_val += 1
+        db.session.commit()
+        return jsonify({"ok": True, "updated": len(ordered_ids)})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+@app.route('/admin/gallery/reorder-category', methods=['POST'])
+@login_required
+def admin_reorder_gallery_category():
+    try:
+        data = request.get_json(silent=True) or {}
+        category = (data.get('category') or '').strip()
+        ordered_ids = data.get('ordered_ids') or []
+        allowed = {'square','three_four','portrait','landscape'}
+        if category not in allowed:
+            return jsonify({"ok": False, "error": "invalid category"}), 400
+        if not isinstance(ordered_ids, list) or not all(isinstance(i, int) for i in ordered_ids):
+            return jsonify({"ok": False, "error": "ordered_ids must be a list of integers"}), 400
+        # Build current buckets
+        settings = SchoolSetting.query.first()
+        all_images = GalleryImage.query.order_by(db.func.coalesce(GalleryImage.display_order, 999999), GalleryImage.upload_date.desc()).all()
+        buckets = { 'square': [], 'three_four': [], 'portrait': [], 'landscape': [] }
+        def _cat_for(img):
+            cat = getattr(img, 'ratio_category', None)
+            w = getattr(img, 'width', None)
+            h = getattr(img, 'height', None)
+            if not cat and w and h and h != 0:
+                ratio = w / float(h)
+                def approx(a, b, tol=0.05):
+                    return abs(a - b) <= tol
+                if approx(ratio, 1.0):
+                    return 'square'
+                elif approx(ratio, 3/4):
+                    return 'three_four'
+                elif ratio < 1.0:
+                    return 'portrait'
+                else:
+                    return 'landscape'
+            return cat or 'landscape'
+        for img in all_images:
+            buckets[_cat_for(img)].append(img)
+        # Replace target bucket order with provided order
+        id_to_img = {img.id: img for img in buckets[category]}
+        new_bucket = [id_to_img[i] for i in ordered_ids if i in id_to_img]
+        # Append any missing (e.g., not on current screen)
+        seen_ids = set(ordered_ids)
+        new_bucket += [img for img in buckets[category] if img.id not in seen_ids]
+        buckets[category] = new_bucket
+        # Determine category order
+        default_order = ['square', 'three_four', 'portrait', 'landscape']
+        raw = (settings.gallery_category_order.split(',') if (settings and settings.gallery_category_order) else default_order)
+        order_clean = [c.strip() for c in raw if c and c.strip() in allowed]
+        seen = set()
+        category_order = [c for c in order_clean if not (c in seen or seen.add(c))]
+        for c in default_order:
+            if c not in category_order:
+                category_order.append(c)
+        # Reassign global display_order by concatenating buckets
+        order_val = 1
+        for cat in category_order:
+            for img in buckets[cat]:
+                db.session.query(GalleryImage).filter_by(id=img.id).update({ 'display_order': order_val })
+                order_val += 1
+        db.session.commit()
+        return jsonify({"ok": True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+@app.route('/admin/gallery/category-order', methods=['POST'])
+@login_required
+def admin_set_gallery_category_order():
+    try:
+        raw = (request.form.get('order') or '').strip()
+        allowed = ['square', 'three_four', 'portrait', 'landscape']
+        parts = [p.strip() for p in raw.split(',') if p and p.strip()]
+        final = []
+        seen = set()
+        for p in parts:
+            if p in allowed and p not in seen:
+                final.append(p)
+                seen.add(p)
+        # append any missing at end in default order
+        for a in allowed:
+            if a not in seen:
+                final.append(a)
+        settings = SchoolSetting.query.first()
+        if not settings:
+            settings = SchoolSetting(school_name='School', school_address='', school_phone='', school_email='')
+            db.session.add(settings)
+        settings.gallery_category_order = ','.join(final)
+        db.session.commit()
+        flash('Gallery category order updated.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Failed to update category order: {e}', 'danger')
+    return redirect(url_for('admin_gallery'))
 
 @app.route('/admin/gallery/upload', methods=['GET', 'POST'])
 @login_required
